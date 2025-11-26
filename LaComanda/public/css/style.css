@@ -1,0 +1,15 @@
+
+        ::-webkit-scrollbar { display: none;}
+        body { font-family: 'Montserrat', sans-serif; }
+        .custom-brown { background-color: #362018; }
+        .custom-mint { background-color: #70A38F; }
+        .custom-beige { background-color: #F5EDE1; }
+        .text-brown { color: #362018; }
+        .text-mint { color: #70A38F; }
+        .text-beige { color: #F5EDE1; }
+        .hover-mint:hover { color: #70A38F; text-decoration: underline; }
+        .hover-mint-bg:hover { background-color: #5B8F7A; };
+
+        .dropdown-toggle::after {
+        display: none !important;
+        }
