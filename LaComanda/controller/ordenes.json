@@ -1,0 +1,16 @@
+[
+    {
+        "mesa": "1",
+        "items": "Espresso x1",
+        "numero": 1,
+        "estado": "pendiente",
+        "timestamp": 1764544828
+    },
+    {
+        "mesa": "2",
+        "items": "Bruschetta x1",
+        "numero": 2,
+        "estado": "pendiente",
+        "timestamp": 1764545141
+    }
+]

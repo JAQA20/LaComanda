@@ -13,8 +13,7 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../public/css/style.css">
-
+    <link rel="stylesheet" href="../public/css/style.css">
 
 
 </head>
@@ -30,144 +29,40 @@
     <div class="flex pt-16 min-h-screen">
 
         <!-- Sidebar - Orden Actual -->
-        <?php
-        include './layout/ordenActual.php';
-        ?>
+
         <!-- Content Area -->
         <main id="content-area" class="flex-1 p-6">
 
             <!-- Mesas View -->
             <div id="mesas-view" class="block">
-                <h1 class="text-brown text-3xl font-bold mb-8">Mesas disponibles</h1>
+                <h1 class="text-brown text-3xl font-bold mb-8">Admin</h1>
                 <div class="grid grid-cols-4 gap-6">
                     <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="1">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
+                                <i class="fas fa-user text-white text-xl"></i>
                             </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 1</h3>
-                            <p class="text-mint text-sm">Disponible</p>
+                            <h3 class="text-brown font-semibold text-lg">Usuarios</h3>
+                        </div>
+                    </div>
+                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="1">
+                        <div class="text-center">
+                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-chart-simple text-white text-xl"></i>
+                            </div>
+                            <h3 class="text-brown font-semibold text-lg">Reportes</h3>
                         </div>
                     </div>
 
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="2">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 2</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
+                </div>
 
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="3">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 3</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
 
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="4">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 4</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="5">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 5</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="5">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 6</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="7">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 7</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="8">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 8</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="9">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 9</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="10">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 10</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="11">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 11</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="12">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 12</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
+                <!-- Menu Views -->
+                <div id="menu-view" class="hidden">
+                    <h1 id="menu-title" class="text-brown text-3xl font-bold mb-8">Menú</h1>
+                    <div id="productos-grid" class="grid grid-cols-3 gap-6">
                     </div>
                 </div>
-            </div>
-
-            <!-- Menu Views -->
-            <div id="menu-view" class="hidden">
-                <h1 id="menu-title" class="text-brown text-3xl font-bold mb-8">Menú</h1>
-                <div id="productos-grid" class="grid grid-cols-3 gap-6">
-                </div>
-            </div>
 
         </main>
     </div>
@@ -176,7 +71,6 @@
     <?php
     include './layout/footer.php';
     ?>
-
 
     <script>
         let mesaActual = null;
@@ -542,73 +436,34 @@
             }
         }
 
-        async function enviarCocina() {
-
+        function enviarCocina() {
             if (!mesaActual) {
                 alert('Selecciona una mesa primero');
                 return;
             }
 
-            if (ordenActual.length === 0) {
-                alert('Agrega productos antes de enviar la orden');
-                return;
-            }
+            if (confirm(`¿Enviar orden de Mesa ${mesaActual} a cocina?`)) {
 
-            if (!confirm(`¿Enviar orden de Mesa ${mesaActual} a cocina?`)) {
-                return;
-            }
+                // Marcar la mesa como con orden y guardar
+                mesasConOrden[mesaActual] = true;
+                guardarEstadoMesas();
 
-            // Construir texto de productos para cocina
-            const listaProductos = ordenActual
-                .map(item => `${item.nombre} x${item.cantidad}`)
-                .join("\n");
+                alert('Orden enviada a cocina exitosamente');
 
-            // Crear estructura de la orden
-            const data = {
-                mesa: mesaActual,
-                items: listaProductos
-            };
-
-            try {
-                const respuesta = await fetch("../controller/guardar_orden.php", {
-
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await respuesta.json();
-
-                if (result.status === "OK") {
-
-                    // Marcar la mesa como con orden
-                    mesasConOrden[mesaActual] = true;
-                    guardarEstadoMesas();
-
-                    alert(`Orden enviada a cocina ✔\nOrden #${result.numero}`);
-
-                    // Reset total de orden
-                    ordenActual = [];
-                    mesaActual = null;
-
-                    const mesaActualSpan = document.getElementById('mesa-actual');
-                    if (mesaActualSpan) mesaActualSpan.textContent = 'No seleccionada';
-
-                    actualizarOrden();
-                    actualizarBotones();
-
-                    // Volver al index como tú lo necesitas
-                    window.location.href = "index.php";
+                // Limpiar estado de la orden actual
+                ordenActual = [];
+                mesaActual = null;
+                const mesaActualSpan = document.getElementById('mesa-actual');
+                if (mesaActualSpan) {
+                    mesaActualSpan.textContent = 'No seleccionada';
                 }
+                actualizarOrden();
+                actualizarBotones();
 
-            } catch (error) {
-                console.error("Error enviando orden:", error);
-                alert("Hubo un error al enviar la orden.");
+                // Volver a index (como tú necesitas)
+                window.location.href = "index.php";
             }
         }
-
 
         function actualizarNavbar(activeBtn) {
             const navbar = document.getElementById('navbar');
@@ -709,7 +564,7 @@
         });
 
         //document.getElementById('eliminar-orden').addEventListener('click', eliminarOrden);
-        document.getElementById('enviar-cocina').addEventListener('click', enviarCocina);
+        //document.getElementById('enviar-cocina').addEventListener('click', enviarCocina);
     </script>
 
 
