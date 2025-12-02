@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // DEBUG: confirmar ejecución
-file_put_contents(__DIR__ . "/debug.txt", "LLEGO\n", FILE_APPEND);
+//file_put_contents(__DIR__ . "/debug.txt", "LLEGO\n", FILE_APPEND);
 
 header("Content-Type: application/json; charset=utf-8");
 
@@ -26,7 +26,7 @@ if (!is_array($ordenes)) {
 
 // Recibir JSON del fetch()
 $input = file_get_contents("php://input");
-file_put_contents(__DIR__ . "/input_debug.txt", $input);
+//file_put_contents(__DIR__ . "/input_debug.txt", $input);
 
 $data = json_decode($input, true);
 
@@ -62,7 +62,7 @@ $data["timestamp"] = time();
 $ordenes[] = $data;
 
 // DEBUG antes de guardar
-file_put_contents(__DIR__ . "/save_debug.txt", "----\n" . json_encode($ordenes) . "\n", FILE_APPEND);
+//file_put_contents(__DIR__ . "/save_debug.txt", "----\n" . json_encode($ordenes) . "\n", FILE_APPEND);
 
 // Guardar archivo actualizado
 file_put_contents(

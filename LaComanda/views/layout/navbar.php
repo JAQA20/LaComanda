@@ -38,8 +38,8 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="../views/login.php">Log out</a></li>
-                    <li><a class="dropdown-item" href="#">Admin</a></li>
-                    <!--  <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+                    <!--  <li><a class="dropdown-item" href="#">Admin</a></li> -->
+                    <li><a class="dropdown-item" href="../views/cocina.php">Cocina</a></li>
 
                 </ul>
             </div>

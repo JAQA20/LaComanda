@@ -1,8 +1,13 @@
 <?php
+
 $archivo = __DIR__ . "/../controller/ordenes.json";
 $ordenes = file_exists($archivo)
     ? json_decode(file_get_contents($archivo), true)
     : [];
+
+if (!is_array($ordenes)) {
+    $ordenes = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -21,30 +26,7 @@ $ordenes = file_exists($archivo)
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        ::-webkit-scrollbar {
-            display: none;
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .custom-shadow {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .order-card {
-            transition: all 0.2s ease-in-out;
-        }
-
-        .order-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-    </style>
-
+    <link rel="stylesheet" href="..//public/css/cocina.css">
     <script>
         tailwind.config = {
             theme: {
@@ -62,12 +44,32 @@ $ordenes = file_exists($archivo)
             }
         }
     </script>
+
 </head>
 
 <body class="bg-white font-montserrat">
+
+    <nav class="w-full bg-brown-dark text-beige-light px-6 py-4 flex items-center justify-between shadow-md">
+        <div class="text-xl font-semibold tracking-wide">
+            <div class="flex items-center">
+                <img class="h-10 w-10 object-contain mr-3" src="../public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
+                <span class="text-beige text-xl font-semibold">Cafetería Toscana</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-6 text-beige-light">
+            <button class="hover:text-mint-green transition-colors">
+                <a href="../views/login.php">
+                    Salir
+                </a>
+
+            </button>
+        </div>
+    </nav>
+
     <div id="kitchen-main" class="flex h-screen">
 
-        <!-- PANEL IZQUIERDO (ENTREGADAS – por ahora estático) -->
+        <!-- PANEL IZQUIERDO (ENTREGADAS) -->
         <div id="delivered-orders-panel" class="w-[30%] bg-beige-light p-6 overflow-y-auto">
             <div id="delivered-header" class="mb-6">
                 <h2 class="text-2xl font-semibold text-brown-dark mb-2">Órdenes entregadas</h2>
@@ -75,7 +77,26 @@ $ordenes = file_exists($archivo)
             </div>
 
             <div id="delivered-list" class="space-y-4">
-                <!-- Contenido estático por ahora -->
+                <?php
+                // Filtrar solo entregadas y limitar a 20
+                $entregadas = array_filter($ordenes, fn($o) => isset($o['estado']) && $o['estado'] === 'entregada');
+                $entregadas = array_slice($entregadas, -20);
+
+                foreach ($entregadas as $orden):
+                ?>
+                    <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-brown-dark">
+                                Orden #<?php echo htmlspecialchars($orden["numero"]); ?>
+                            </span>
+                            <i class="fa-solid fa-check text-mint-green"></i>
+                        </div>
+                        <div class="text-xs text-brown-dark opacity-70">
+                            <div>Mesa <?php echo htmlspecialchars($orden["mesa"]); ?></div>
+                            <div><?php echo isset($orden["hora_entrega"]) ? $orden["hora_entrega"] : "--:--"; ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -89,7 +110,7 @@ $ordenes = file_exists($archivo)
             <div id="pending-orders-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
                 <?php foreach ($ordenes as $orden): ?>
-                    <?php if ($orden["estado"] === "pendiente"): ?>
+                    <?php if (isset($orden["estado"]) && $orden["estado"] === "pendiente"): ?>
 
                         <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-gray-100">
 
@@ -97,24 +118,12 @@ $ordenes = file_exists($archivo)
                             <div class="flex items-center justify-between mb-4">
                                 <div>
                                     <h3 class="text-xl font-semibold text-brown-dark">
-                                        Orden #<?php echo $orden["numero"]; ?>
+                                        Orden #<?php echo htmlspecialchars($orden["numero"]); ?>
                                     </h3>
-
                                     <p class="text-sm text-brown-dark opacity-70">
                                         Mesa <?php echo htmlspecialchars($orden["mesa"]); ?>
                                     </p>
                                 </div>
-
-                                <!-- Tiempo dinámico opcional 
-                                <div class="text-right">
-                                    <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">
-                                        <?php
-                                        $mins = floor((time() - $orden["timestamp"]) / 60);
-                                        echo $mins . " min";
-                                        ?>
-                                    </span>
-                                </div>
-                                -->
                             </div>
 
                             <!-- LISTA DE PRODUCTOS -->
@@ -123,13 +132,11 @@ $ordenes = file_exists($archivo)
 
                                 <div class="space-y-2">
                                     <?php
-                                    // Convertir el texto plano en líneas
                                     $lineas = explode("\n", trim($orden["items"]));
                                     foreach ($lineas as $linea):
                                         $linea = trim($linea);
                                         if ($linea === "") continue;
 
-                                        // Detectar formato “Producto x2”
                                         if (preg_match('/^(.*) x(\d+)$/', $linea, $match)) {
                                             $producto = $match[1];
                                             $cantidad = $match[2];
@@ -146,6 +153,15 @@ $ordenes = file_exists($archivo)
                                 </div>
                             </div>
 
+                            <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
+                            <form action="../controller/marcarEntrega.php" method="POST">
+                                <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>">
+                                <button
+                                    class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200" hidden>
+                                    Marcar como entregada
+                                </button>
+                            </form>
+
                         </div>
 
                     <?php endif; ?>
@@ -160,7 +176,7 @@ $ordenes = file_exists($archivo)
     <script>
         setInterval(() => {
             location.reload();
-        }, 5000);
+        }, 10000);
     </script>
 
 </body>

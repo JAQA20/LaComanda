@@ -90,7 +90,7 @@
                         </div>
                     </div>
 
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="5">
+                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="6">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-utensils text-white text-xl"></i>
@@ -499,20 +499,40 @@
             actualizarBotones();
         }
 
-        function entregarOrden(numeroMesa) {
-            if (!confirm(`¿Marcar la Mesa ${numeroMesa} como entregada?`)) return;
+        async function entregarOrden(numeroMesa) {
 
-            // Cambiar estado a disponible
-            mesasConOrden[numeroMesa] = false;
+            if (!confirm(`¿Marcar la orden de la Mesa ${numeroMesa} como ENTREGADA?`)) return;
 
-            // Guardar cambio en localStorage
-            guardarEstadoMesas();
+            try {
+                const respuesta = await fetch("../controller/entregarOrden.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `mesa=${numeroMesa}`
+                });
 
-            // Actualizar visualmente la mesa
-            actualizarEstadoMesa(numeroMesa);
+                const result = await respuesta.json();
 
-            alert(`La Mesa ${numeroMesa} ahora está disponible`);
+                if (result.status === "OK") {
+
+                    // Cambiar el estado local
+                    mesasConOrden[numeroMesa] = false;
+                    guardarEstadoMesas();
+                    actualizarEstadoMesa(numeroMesa);
+
+                    alert(`Orden de Mesa ${numeroMesa} marcada como ENTREGADA ✔`);
+
+                } else {
+                    alert("No se pudo entregar la orden");
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Error al entregar la orden");
+            }
         }
+
 
 
         function cambiarCantidad(index, cambio) {

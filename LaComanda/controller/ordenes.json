@@ -3,14 +3,39 @@
         "mesa": "1",
         "items": "Espresso x1",
         "numero": 1,
-        "estado": "pendiente",
-        "timestamp": 1764544828
+        "estado": "entregada",
+        "timestamp": 1764544828,
+        "hora_entrega": "17:51"
     },
     {
         "mesa": "2",
         "items": "Bruschetta x1",
         "numero": 2,
+        "estado": "entregada",
+        "timestamp": 1764545141,
+        "hora_entrega": "17:55"
+    },
+    {
+        "mesa": "1",
+        "items": "Espresso x1\nEnsalada César x1",
+        "numero": 3,
+        "estado": "entregada",
+        "timestamp": 1764696936,
+        "hora_entrega": "18:43"
+    },
+    {
+        "mesa": "9",
+        "items": "Cannoli Siciliano x1\nTé Helado x1",
+        "numero": 4,
+        "estado": "entregada",
+        "timestamp": 1764697466,
+        "hora_entrega": "18:46"
+    },
+    {
+        "mesa": "6",
+        "items": "Limonada x2\nBruschetta x1\nGelato Artesanal x4\nPanna Cotta x1",
+        "numero": 5,
         "estado": "pendiente",
-        "timestamp": 1764545141
+        "timestamp": 1764697668
     }
 ]
