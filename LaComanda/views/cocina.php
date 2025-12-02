@@ -176,7 +176,7 @@ if (!is_array($ordenes)) {
     <script>
         setInterval(() => {
             location.reload();
-        }, 10000);
+        }, 5000);
     </script>
 
 </body>

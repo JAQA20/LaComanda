@@ -17,7 +17,7 @@
     },
     {
         "mesa": "1",
-        "items": "Espresso x1\nEnsalada César x1",
+        "items": "Espresso x1\nEnsalada C\u00e9sar x1",
         "numero": 3,
         "estado": "entregada",
         "timestamp": 1764696936,
@@ -25,7 +25,7 @@
     },
     {
         "mesa": "9",
-        "items": "Cannoli Siciliano x1\nTé Helado x1",
+        "items": "Cannoli Siciliano x1\nT\u00e9 Helado x1",
         "numero": 4,
         "estado": "entregada",
         "timestamp": 1764697466,
@@ -35,7 +35,24 @@
         "mesa": "6",
         "items": "Limonada x2\nBruschetta x1\nGelato Artesanal x4\nPanna Cotta x1",
         "numero": 5,
-        "estado": "pendiente",
-        "timestamp": 1764697668
+        "estado": "entregada",
+        "timestamp": 1764697668,
+        "hora_entrega": "19:01"
+    },
+    {
+        "mesa": "11",
+        "items": "Cappuccino x1\nAffogato x2\nLimonada x2\nGelato x1",
+        "numero": 6,
+        "estado": "entregada",
+        "timestamp": 1764698842,
+        "hora_entrega": "19:07"
+    },
+    {
+        "mesa": "12",
+        "items": "Empanada de Carne x3\nAffogato x1\nCannoli Siciliano x1\nT\u00e9 Helado x2",
+        "numero": 7,
+        "estado": "entregada",
+        "timestamp": 1764698952,
+        "hora_entrega": "19:09"
     }
 ]
