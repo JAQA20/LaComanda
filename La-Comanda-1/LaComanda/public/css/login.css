@@ -1,0 +1,17 @@
+ ::-webkit-scrollbar { display: none;}
+        * { font-family: 'Montserrat', sans-serif; }
+        
+        .brand-brown { color: #362018; }
+        .brand-green { color: #70A38F; }
+        .brand-beige { color: #F5EDE1; }
+        .bg-brand-brown { background-color: #362018; }
+        .bg-brand-green { background-color: #70A38F; }
+        .bg-brand-beige { background-color: #F5EDE1; }
+        .hover-brand-green:hover { color: #70A38F; }
+        .hover-bg-brand-green:hover { background-color: #5B8F7A; }
+        
+        .coffee-pattern {
+            background-image: radial-gradient(circle at 20% 50%, rgba(112, 163, 143, 0.1) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 20%, rgba(54, 32, 24, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 40% 80%, rgba(112, 163, 143, 0.08) 0%, transparent 50%);
+        }
