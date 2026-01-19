@@ -11,6 +11,7 @@
             autoReplaceSvg: 'nest'
         };
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../public/css/style.css">
@@ -447,7 +448,12 @@
 
         function agregarProducto(nombre, precio) {
             if (!mesaActual) {
-                alert('Selecciona una mesa primero');
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Seleccione una mesa primero"
+
+                });
                 return;
             }
 
@@ -501,7 +507,19 @@
 
         async function entregarOrden(numeroMesa) {
 
-            if (!confirm(`¿Marcar la orden de la Mesa ${numeroMesa} como ENTREGADA?`)) return;
+
+            const {
+                isConfirmed
+            } = await Swal.fire({
+                title: `¿Marcar la orden de la Mesa ${numeroMesa} como ENTREGADA?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Sí, entregar",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            });
+
+            if (!isConfirmed) return;
 
             try {
                 const respuesta = await fetch("../controller/entregarOrden.php", {
@@ -509,7 +527,7 @@
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
                     },
-                    body: `mesa=${numeroMesa}`
+                    body: `mesa=${encodeURIComponent(numeroMesa)}`
                 });
 
                 const result = await respuesta.json();
@@ -521,17 +539,32 @@
                     guardarEstadoMesas();
                     actualizarEstadoMesa(numeroMesa);
 
-                    alert(`Orden de Mesa ${numeroMesa} marcada como ENTREGADA ✔`);
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        html: `<strong>Mesa ${numeroMesa}</strong><br>Orden marcada como ENTREGADA`,
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
 
                 } else {
-                    alert("No se pudo entregar la orden");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "No se pudo entregar la orden"
+                    });
                 }
 
             } catch (error) {
                 console.error(error);
-                alert("Error al entregar la orden");
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Error al entregar la orden",
+                });
             }
         }
+
 
 
 
@@ -555,43 +588,91 @@
         function eliminarOrden() {
             if (ordenActual.length === 0) return;
 
-            if (confirm('¿Estás seguro de eliminar toda la orden?')) {
-                ordenActual = [];
-                actualizarOrden();
-                actualizarBotones();
-            }
+            Swal.fire({
+                title: "¿Eliminar orden?",
+                text: "¿Estás seguro de eliminar toda la orden?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#8B0000",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ordenActual = [];
+                    actualizarOrden();
+                    actualizarBotones();
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Orden eliminada",
+                        text: "La orden fue eliminada correctamente",
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
+                }
+            });
         }
+
 
         async function enviarCocina() {
 
+            // 1) Validaciones
             if (!mesaActual) {
-                alert('Selecciona una mesa primero');
+                await Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Seleccione una mesa primero"
+                });
                 return;
             }
 
             if (ordenActual.length === 0) {
-                alert('Agrega productos antes de enviar la orden');
+                await Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Agrega productos antes de enviar la orden"
+                });
                 return;
             }
 
-            if (!confirm(`¿Enviar orden de Mesa ${mesaActual} a cocina?`)) {
-                return;
-            }
+            // 2) Confirmación (equivalente a confirm + return)
+            const {
+                isConfirmed
+            } = await Swal.fire({
+                title: `¿Enviar orden de la Mesa ${mesaActual} a cocina?`,
+                text: "Esta acción enviará la orden a cocina.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Enviar a cocina",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            });
 
-            // Construir texto de productos para cocina
+            if (!isConfirmed) return;
+
+            // 3) Construir texto de productos para cocina
             const listaProductos = ordenActual
                 .map(item => `${item.nombre} x${item.cantidad}`)
                 .join("\n");
 
-            // Crear estructura de la orden
+            // 4) Crear estructura de la orden
             const data = {
                 mesa: mesaActual,
                 items: listaProductos
             };
 
             try {
-                const respuesta = await fetch("../controller/guardar_orden.php", {
+                // 5) Loader mientras se envía
+                Swal.fire({
+                    title: "Enviando orden...",
+                    html: `Mesa <strong>${mesaActual}</strong>`,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => Swal.showLoading()
+                });
 
+                const respuesta = await fetch("../controller/guardar_orden.php", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -599,35 +680,62 @@
                     body: JSON.stringify(data)
                 });
 
+                // Si el servidor no responde OK HTTP, forzamos error
+                if (!respuesta.ok) {
+                    throw new Error(`HTTP ${respuesta.status}`);
+                }
+
                 const result = await respuesta.json();
 
                 if (result.status === "OK") {
 
-                    // Marcar la mesa como con orden
+                    // 6) Marcar la mesa como con orden
                     mesasConOrden[mesaActual] = true;
                     guardarEstadoMesas();
 
-                    alert(`Orden enviada a cocina ✔\nOrden #${result.numero}`);
+                    // Cerrar loader y mostrar éxito (IMPORTANTE: await)
+                    await Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        html: `Orden enviada a cocina para <strong>Mesa ${mesaActual}</strong> ✔`,
+                        showConfirmButton: false,
+                        timer: 2500,
+                        timerProgressBar: false
+                    });
 
-                    // Reset total de orden
+                    // 7) Reset total de orden
                     ordenActual = [];
                     mesaActual = null;
 
-                    const mesaActualSpan = document.getElementById('mesa-actual');
-                    if (mesaActualSpan) mesaActualSpan.textContent = 'No seleccionada';
+                    const mesaActualSpan = document.getElementById("mesa-actual");
+                    if (mesaActualSpan) mesaActualSpan.textContent = "No seleccionada";
 
                     actualizarOrden();
                     actualizarBotones();
 
-                    // Volver al index como tú lo necesitas
-                    window.location.href = "index.php";
+                    // 8) Redirección al final (para que no se corte el Swal)
+                    // window.location.href = "test.php";
+
+                } else {
+                    // Cerrar loader y mostrar error
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: result.message || "No se pudo enviar la orden a cocina"
+                    });
                 }
 
             } catch (error) {
                 console.error("Error enviando orden:", error);
-                alert("Hubo un error al enviar la orden.");
+
+                await Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Error al enviar la orden"
+                });
             }
         }
+
 
 
         function actualizarNavbar(activeBtn) {

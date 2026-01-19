@@ -160,7 +160,7 @@
     },
     {
         "mesa": "11",
-        "items": "Ensalada César x1",
+        "items": "Ensalada C\u00e9sar x1",
         "numero": 21,
         "estado": "entregada",
         "timestamp": 1767389529,
@@ -170,7 +170,56 @@
         "mesa": "1",
         "items": "Espresso x1",
         "numero": 22,
-        "estado": "pendiente",
-        "timestamp": 1767659004
+        "estado": "entregada",
+        "timestamp": 1767659004,
+        "hora_entrega": "21:15"
+    },
+    {
+        "mesa": "1",
+        "items": "Espresso x1",
+        "numero": 23,
+        "estado": "entregada",
+        "timestamp": 1768767492,
+        "hora_entrega": "21:18"
+    },
+    {
+        "mesa": "1",
+        "items": "Espresso x1",
+        "numero": 24,
+        "estado": "entregada",
+        "timestamp": 1768779383,
+        "hora_entrega": "00:37"
+    },
+    {
+        "mesa": "1",
+        "items": "Espresso x1",
+        "numero": 25,
+        "estado": "entregada",
+        "timestamp": 1768787170,
+        "hora_entrega": "02:46"
+    },
+    {
+        "mesa": "1",
+        "items": "Espresso x1",
+        "numero": 26,
+        "estado": "entregada",
+        "timestamp": 1768787506,
+        "hora_entrega": "02:52"
+    },
+    {
+        "mesa": "2",
+        "items": "Espresso x1",
+        "numero": 27,
+        "estado": "entregada",
+        "timestamp": 1768787554,
+        "hora_entrega": "02:52"
+    },
+    {
+        "mesa": "1",
+        "items": "Espresso x1",
+        "numero": 28,
+        "estado": "entregada",
+        "timestamp": 1768787594,
+        "hora_entrega": "02:53"
     }
 ]
