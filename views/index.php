@@ -1,3 +1,8 @@
+<pre>
+<?php print_r($_SESSION["user"]); ?>
+</pre>
+
+
 <!DOCTYPE html>
 <html>
 
@@ -38,6 +43,7 @@
         <main id="content-area" class="flex-1 p-6">
 
             <!-- Mesas View -->
+
             <div id="mesas-view" class="block">
                 <h1 class="text-brown text-3xl font-bold mb-8">Mesas disponibles</h1>
                 <div class="grid grid-cols-4 gap-6">

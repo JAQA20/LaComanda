@@ -38,7 +38,7 @@
                 </div>
 
                 <!-- Login Form -->
-                <form id="login-form" class="space-y-6">
+                <form id="login-form" class="space-y-6" method="POST">
 
                     <!-- Username Field -->
                     <div id="username-field" class="space-y-2">
