@@ -1,3 +1,10 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,15 +41,47 @@
             <button id="postres-btn" class="text-beige hover-mint font-medium transition-all duration-200">Postres</button>
             <button id="bebidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Bebidas Frías</button>
             <div class="dropdown">
-                <button class="btn  dropdown-toggl hover-mint" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn dropdown-toggle hover-mint" type="button" data-bs-toggle="dropdown">
                     <i class="fas fa-user text-white text-2xl"></i>
                 </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="../views/login.php">Log out</a></li>
-                    <!--  <li><a class="dropdown-item" href="#">Admin</a></li> -->
-                    <li><a class="dropdown-item" href="../views/cocina.php">Cocina</a></li>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+
+                    <!-- Nombre del usuario -->
+                    <li class="px-3 py-2 text-sm text-gray-700 font-semibold border-b">
+                        <?php if (isset($_SESSION["nombre"])): ?>
+                            <?= htmlspecialchars($_SESSION["nombre"] . " " . $_SESSION["apellido"]) ?>
+                        <?php else: ?>
+                            Usuario
+                        <?php endif; ?>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="../views/perfil.php">
+                            <i class="fas fa-id-badge me-2"></i> Mi perfil
+                        </a>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item text-danger" href="../controller/logoutController.php">
+                            <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
+                        </a>
+                    </li>
+
+                    <?php if (isset($_SESSION["rol_id"]) && $_SESSION["rol_id"] == 3): ?>
+                        <li>
+                            <a class="dropdown-item" href="../views/cocina.php">
+                                <i class="fas fa-fire me-2"></i> Cocina
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
                 </ul>
+
             </div>
         </div>
     </nav>

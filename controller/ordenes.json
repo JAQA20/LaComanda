@@ -6,5 +6,13 @@
         "estado": "entregada",
         "timestamp": 1769045037,
         "hora_entrega": "02:24"
+    },
+    {
+        "mesa": "1",
+        "items": "Espresso x1\nEmpanada de Carne x1",
+        "numero": 2,
+        "estado": "entregada",
+        "timestamp": 1769050484,
+        "hora_entrega": "02:10"
     }
 ]

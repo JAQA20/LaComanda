@@ -16,12 +16,13 @@ CREATE TABLE roles (
 );
 
 CREATE TABLE usuarios (
-  id INT AUTO_INCREMENT PRIMARY KEY, 
+  id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
-  apellido VARCHAR(100) NOT NULL,
+  apellido varchar(100) NOT NULL, 
   email VARCHAR(50) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   rol_id INT NOT NULL,
+  creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (rol_id) REFERENCES roles(id)
 );
 
@@ -76,15 +77,15 @@ INSERT INTO roles(nombre) VALUES ('admin'), ('mesero'), ('cocina');
 
 INSERT INTO usuarios(nombre, apellido, email, password, rol_id)
 VALUES
-('Admin', 'admin','admin@proyecto.com', 'Admin123!', 1);
-
-INSERT INTO usuarios(nombre, apellido, email, password, rol_id)
-VALUES
-('Mesero', 'mesero','mesero@proyecto.com', 'Mesero123!', 2);
+('Admin', 'admin', 'admin@proyecto.com', 'Admin123!', 1),
+('Mesero', 'mesero', 'mesero@proyecto.com', 'Mesero123!', 2),
+('Cocina', 'cocina', 'cocina@proyecto.com', 'Cocina123!', 3);
 
 INSERT INTO mesas(numero, estado) VALUES
 (1,'disponible'), (2,'disponible'), (3,'disponible'), (4,'disponible'),
-(5,'disponible'), (6,'disponible'), (7,'disponible'), (8,'disponible');
+(5,'disponible'), (6,'disponible'), (7,'disponible'), (8,'disponible'),
+(9,'disponible'), (10,'disponible'), (11,'disponible'), (12,'disponible');
+
 
 INSERT INTO categorias(nombre) VALUES
 ('Cafés'), ('Comidas'), ('Especialidades'), ('Postres'), ('Bebidas frías');
@@ -95,5 +96,8 @@ INSERT INTO productos(categoria_id, nombre, precio) VALUES
 (4,'Cheesecake', 2200.00),
 (5,'Iced Latte', 2000.00);
 
-select * from usuarios;
+select * from roles; 
+select * from usuarios; 
+
+
 
