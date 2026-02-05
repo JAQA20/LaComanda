@@ -50,27 +50,45 @@ CREATE TABLE productos (
 );
 
 -- ---------- Órdenes ----------
-CREATE TABLE ordenes (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  mesa_id INT NOT NULL,
-  usuario_id INT NULL,
-  estado ENUM('pendiente','en_preparacion','entregada','cancelada') NOT NULL DEFAULT 'pendiente',
-  creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (mesa_id) REFERENCES mesas(id),
-  FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-);
+-- CREATE TABLE ordenes (
+--   id INT AUTO_INCREMENT PRIMARY KEY,
+--   mesa_id INT NOT NULL,
+--   usuario_id INT NULL,
+--   estado ENUM('pendiente','en_preparacion','entregada','cancelada') NOT NULL DEFAULT 'pendiente',
+--   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   FOREIGN KEY (mesa_id) REFERENCES mesas(id),
+--   FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+-- );
 
-CREATE TABLE orden_items (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  orden_id INT NOT NULL,
-  producto_id INT NOT NULL,
-  cantidad INT NOT NULL,
-  precio_unitario DECIMAL(10,2) NOT NULL,
-  notas VARCHAR(255) NULL,
-  FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE,
-  FOREIGN KEY (producto_id) REFERENCES productos(id)
-);
+-- CREATE TABLE orden_items (
+--   id INT AUTO_INCREMENT PRIMARY KEY,
+--   orden_id INT NOT NULL,
+--   producto_id INT NOT NULL,
+--   cantidad INT NOT NULL,
+--   precio_unitario DECIMAL(10,2) NOT NULL,
+--   notas VARCHAR(255) NULL,
+--   FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE,
+--   FOREIGN KEY (producto_id) REFERENCES productos(id)
+-- );
+
+CREATE TABLE ordenes (
+    id_orden INT(11) PRIMARY KEY AUTO_INCREMENT, 
+    mesa_id INT(11) NOT NULL, id_estado INT(11) NOT NULL DEFAULT 1, 
+    total DECIMAL(10,2) NOT NULL DEFAULT 0, id_usuario INT(11), 
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, 
+    hora_entrega DATETIME);
+
+    
+CREATE TABLE detalle_orden (
+    id_detalle INT(11) PRIMARY KEY AUTO_INCREMENT, 
+    id_orden INT(11) NOT NULL, 
+    id_producto INT(11) NOT NULL, 
+    cantidad INT(11) NOT NULL, 
+    precio_unitario DECIMAL(10,2) NOT NULL);
+
+
+
 
 -- ---------- Datos iniciales ----------
 INSERT INTO roles(nombre) VALUES ('admin'), ('mesero'), ('cocina');

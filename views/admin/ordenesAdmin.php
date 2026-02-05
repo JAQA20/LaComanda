@@ -1,0 +1,134 @@
+<?php
+
+
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+require_once '../../model/Conexion.php';
+
+$ordenes = [];
+$total_ordenes = 0;
+$total_vendido = 0;
+$entregadas = 0;
+$pendientes = 0;
+
+try {
+    // Obtener de BD
+    $sql = "SELECT o.id AS id_orden, o.total, o.creado_en AS fecha, COALESCE(e.nombre, 'pendiente') as estado
+            FROM ordenes o
+            LEFT JOIN estados_orden e ON o.id_estado = e.id_estado
+            ORDER BY o.creado_en DESC LIMIT 100";
+
+    $stmt = $conexion->prepare($sql);
+    $stmt->execute();
+    $ordenes_bd = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($ordenes_bd)) {
+        $ordenes = $ordenes_bd;
+    }
+} catch (Exception $e) {
+    // Si BD no funciona, dejar $ordenes vacío
+}
+
+$total_ordenes = count($ordenes);
+$total_vendido = array_sum(array_column($ordenes, 'total'));
+$entregadas = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'entregad') !== false));
+$pendientes = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'pendiente') !== false));
+?>
+?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Órdenes - La Comanda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+
+<body class="bg-gray-100 font-montserrat">
+    <?php include './layout/navbar.php'; ?>
+
+    <div class="pt-20 p-8">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-4xl font-bold text-gray-800 mb-8">Historial de Órdenes</h1>
+
+            <!-- Estadísticas -->
+            <div class="grid grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-gray-600 text-sm mb-2">Total Órdenes</div>
+                    <div class="text-3xl font-bold text-gray-800"><?php echo $total_ordenes; ?></div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-gray-600 text-sm mb-2">Entregadas</div>
+                    <div class="text-3xl font-bold text-green-600"><?php echo $entregadas; ?></div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-gray-600 text-sm mb-2">Pendientes</div>
+                    <div class="text-3xl font-bold text-yellow-600"><?php echo $pendientes; ?></div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="text-gray-600 text-sm mb-2">Total Vendido</div>
+                    <div class="text-3xl font-bold text-blue-600">$<?php echo number_format($total_vendido, 2); ?></div>
+                </div>
+            </div>
+
+            <!-- Tabla de órdenes -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="px-6 py-3 text-left">ID Orden</th>
+                            <th class="px-6 py-3 text-left">Total</th>
+                            <th class="px-6 py-3 text-left">Estado</th>
+                            <th class="px-6 py-3 text-left">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (count($ordenes) > 0): ?>
+                            <?php foreach ($ordenes as $orden): ?>
+                                <tr class="border-b hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 font-semibold">#<?php echo htmlspecialchars($orden['id_orden']); ?></td>
+                                    <td class="px-6 py-4 font-semibold">$<?php echo number_format($orden['total'] ?? 0, 2); ?></td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 rounded-full text-white text-sm font-medium
+                                            <?php
+                                            $estado = strtolower($orden['estado'] ?? 'pendiente');
+                                            if (strpos($estado, 'entregad') !== false) echo 'bg-green-500';
+                                            elseif (strpos($estado, 'proceso') !== false) echo 'bg-blue-500';
+                                            elseif (strpos($estado, 'cancel') !== false) echo 'bg-red-500';
+                                            else echo 'bg-yellow-500';
+                                            ?>">
+                                            <?php echo ucfirst(str_replace('_', ' ', $orden['estado'] ?? 'pendiente')); ?>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-600">
+                                        <?php echo isset($orden['fecha']) ? date('d/m/Y H:i', strtotime($orden['fecha'])) : 'N/A'; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                    <p>No hay órdenes registradas</p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        setInterval(() => {
+            location.href = location.href.split('?')[0] + '?t=' + Date.now();
+        }, 5000);
+    </script>
+</body>
+
+</html>

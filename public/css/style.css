@@ -8,8 +8,13 @@
         .text-mint { color: #70A38F; }
         .text-beige { color: #F5EDE1; }
         .hover-mint:hover { color: #70A38F; text-decoration: underline; }
-        .hover-mint-bg:hover { background-color: #5B8F7A; };
+        .hover-mint-bg:hover { background-color: #5B8F7A; }
+        .mesa-seleccionada {border: 2px solid #70A38F !important;};
 
         .dropdown-toggle::after {
         display: none !important;
         }
+
+        
+        
+  

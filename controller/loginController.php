@@ -76,7 +76,7 @@ if (!empty($_POST["btnlogin"])) {
             // Redirección por rol
             switch ($_SESSION["rol_id"]) {
                 case 1: // Admin
-                    header("Location: ../views/admin.php");
+                    header("Location: ../views/admin/admin.php");
                     exit;
 
                 case 2: // Mesero
@@ -85,6 +85,8 @@ if (!empty($_POST["btnlogin"])) {
 
                 case 3: // Cocina
                     header("Location: ../views/cocina.php");
+                    // case 4: // Barista (agregar a bd)
+                    //     header("Location: ../views/barista.php");
                     exit;
 
                 default:

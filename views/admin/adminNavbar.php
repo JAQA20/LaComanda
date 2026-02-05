@@ -30,16 +30,23 @@ if (session_status() === PHP_SESSION_NONE) {
     <!-- Navbar -->
     <nav id="navbar" class="custom-brown fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 shadow-lg">
         <div class="flex items-center">
-            <img class="h-10 w-10 object-contain mr-3" src="../public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
+            <img class="h-10 w-10 object-contain mr-3" src="../../public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
             <span class="text-beige text-xl font-semibold">Cafetería Toscana</span>
         </div>
         <div class="flex space-x-8">
-            <button id="mesas-btn" class="text-beige hover-mint font-medium transition-all duration-200 border-b-2 border-mint">Mesas</button>
-            <button id="cafes-btn" class="text-beige hover-mint font-medium transition-all duration-200">Cafés</button>
-            <button id="comidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Comidas</button>
-            <button id="especialidades-btn" class="text-beige hover-mint font-medium transition-all duration-200">Especialidades</button>
-            <button id="postres-btn" class="text-beige hover-mint font-medium transition-all duration-200">Postres</button>
-            <button id="bebidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Bebidas Frías</button>
+            <button id="" class="text-beige hover-mint font-medium transition-all duration-200 border-b-2 border-mint">
+                <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200" href="./admin.php">Dashboard</a>
+            </button>
+            <button id="bebidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">
+                <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200" href="../index.php">Tomar ordenes</a>
+            </button>
+            <button id="cafes-btn" class="text-beige hover-mint font-medium transition-all duration-200">
+                <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200" href="./usuarios.php">Usuarios</a>
+            </button>
+            <button id="comidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Mesas</button>
+            <button id="especialidades-btn" class="text-beige hover-mint font-medium transition-all duration-200">Reportes</button>
+            <button id="postres-btn" class="text-beige hover-mint font-medium transition-all duration-200">Historial de ordenes</button>
+
             <div class="dropdown">
                 <button class="btn dropdown-toggle hover-mint" type="button" data-bs-toggle="dropdown">
                     <i class="fas fa-user text-white text-2xl"></i>
@@ -67,7 +74,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     </li>
 
                     <li>
-                        <a class="dropdown-item text-danger" href="../controller/logoutController.php">
+                        <a class="dropdown-item text-danger" href="../../controller/logoutController.php">
                             <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
                         </a>
                     </li>

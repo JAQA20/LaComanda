@@ -14,7 +14,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../public/css/style.css">
+    <!-- <link rel="stylesheet" href="../public/css/style.css"> -->
+
 
 
 
@@ -28,7 +29,7 @@
     ?>
 
     <!-- Main Content -->
-    <div class="flex pt-16 min-h-screen">
+    <div class="flex flex-row-reverse pt-16 min-h-screen">
 
         <!-- Sidebar - Orden Actual -->
         <?php
@@ -352,22 +353,25 @@
 
         function seleccionarMesa(numeroMesa) {
             mesaActual = numeroMesa;
-            const mesaActualSpan = document.getElementById('mesa-actual');
-            if (mesaActualSpan) {
-                mesaActualSpan.textContent = `Mesa ${numeroMesa}`;
-            }
 
+            const mesaActualSpan = document.getElementById('mesa-actual');
+            if (mesaActualSpan) mesaActualSpan.textContent = `Mesa ${numeroMesa}`;
+
+            // 1) Quitar borde a todas
             document.querySelectorAll('.mesa-card').forEach(card => {
-                card.classList.remove('border-mint');
+                card.style.border = "4px solid transparent";
             });
 
-            const cardSeleccionada = document.querySelector(`[data-mesa="${numeroMesa}"]`);
+            // 2) Poner borde a la seleccionada
+            const cardSeleccionada = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
             if (cardSeleccionada) {
-                cardSeleccionada.classList.add('border-mint');
+                cardSeleccionada.style.border = "2px solid #70A38F";
             }
 
             actualizarBotones();
         }
+
+
 
         // Pinta la mesa como "Con orden" o "Disponible"
         function actualizarEstadoMesa(numeroMesa) {
@@ -618,7 +622,7 @@
 
         async function enviarCocina() {
 
-            // 1) Validaciones
+            //  Validaciones
             if (!mesaActual) {
                 await Swal.fire({
                     icon: "error",
@@ -637,7 +641,7 @@
                 return;
             }
 
-            // 2) Confirmación (equivalente a confirm + return)
+            // Confirmación (equivalente a confirm + return)
             const {
                 isConfirmed
             } = await Swal.fire({
@@ -652,19 +656,19 @@
 
             if (!isConfirmed) return;
 
-            // 3) Construir texto de productos para cocina
+            // Construir texto de productos para cocina
             const listaProductos = ordenActual
                 .map(item => `${item.nombre} x${item.cantidad}`)
                 .join("\n");
 
-            // 4) Crear estructura de la orden
+            //  Crear estructura de la orden
             const data = {
                 mesa: mesaActual,
                 items: listaProductos
             };
 
             try {
-                // 5) Loader mientras se envía
+                // Loader mientras se envía
                 Swal.fire({
                     title: "Enviando orden...",
                     html: `Mesa <strong>${mesaActual}</strong>`,
@@ -690,7 +694,7 @@
 
                 if (result.status === "OK") {
 
-                    // 6) Marcar la mesa como con orden
+                    //  Marcar la mesa como con orden
                     mesasConOrden[mesaActual] = true;
                     guardarEstadoMesas();
 
@@ -704,7 +708,7 @@
                         timerProgressBar: false
                     });
 
-                    // 7) Reset total de orden
+                    // Reset total de orden
                     ordenActual = [];
                     mesaActual = null;
 
@@ -714,8 +718,9 @@
                     actualizarOrden();
                     actualizarBotones();
 
-                    // 8) Redirección al final (para que no se corte el Swal)
-                    // window.location.href = "test.php";
+                    // Redirección al final (para que no se corte el Swal)
+                    //window.location.href = "test.php";
+                    window.location.href = "index.php";
 
                 } else {
                     // Cerrar loader y mostrar error

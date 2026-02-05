@@ -155,7 +155,7 @@ if (!is_array($ordenes)) {
 
                             <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
                             <form action="../controller/marcarEntrega.php" method="POST">
-                                <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>">
+                                <input type="" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>">
                                 <button
                                     class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200" hidden>
                                     Marcar como entregada
