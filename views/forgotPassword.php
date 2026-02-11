@@ -89,7 +89,7 @@ header("Expires: 0");
                     </div>
 
                     <div class="text-center text-sm">
-                        <a href="login.php" class="text-green-600 hover:underline font-medium">
+                        <a href="./login.php" class="text-green-600 hover:underline font-medium">
                             Volver al login
                         </a>
                     </div>
@@ -111,7 +111,7 @@ header("Expires: 0");
             btn.disabled = true;
 
             try {
-                const response = await fetch('../controller/forgot_password.php', {
+                const response = await fetch('../controller/forgot_passwordController.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -137,7 +137,7 @@ header("Expires: 0");
                             allowOutsideClick: false,
                             allowEscapeKey: false
                         }).then(() => {
-                            window.location.href = 'login.php';
+                            window.location.href = './login.php';
                         });
                     } else {
                         // Email no encontrado (por seguridad mostramos igual el mensaje genérico)
@@ -147,7 +147,7 @@ header("Expires: 0");
                             html: data.message + '<br><br><small style="color:#666;">Si tu email está registrado, podrás cambiar tu contraseña.</small>',
                             confirmButtonText: 'Aceptar'
                         }).then(() => {
-                            window.location.href = 'login.php';
+                            window.location.href = './login.php';
                         });
                     }
                 } else {

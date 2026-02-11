@@ -3,7 +3,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-require_once __DIR__ . "/../db/conexion.php";
+require_once __DIR__ . "../model/Conexion.php";
 
 $token = isset($_GET['token']) ? trim($_GET['token']) : (isset($_POST['token']) ? trim($_POST['token']) : null);
 $email = isset($_GET['email']) ? trim($_GET['email']) : (isset($_POST['email']) ? trim($_POST['email']) : null);
@@ -194,7 +194,7 @@ if ($token && $email && !$success) {
                         <p class="text-green-700 text-sm font-medium">✓ Contraseña actualizada correctamente</p>
                     </div>
 
-                    <a href="login.php"
+                    <a href="./login.php"
                         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none transition-all duration-200">
                         Ir al login
                     </a>
@@ -206,7 +206,7 @@ if ($token && $email && !$success) {
                         <p class="text-red-700 text-sm font-medium">✗ El enlace ha expirado. Solicita uno nuevo.</p>
                     </div>
 
-                    <a href="login.php"
+                    <a href="./login.php"
                         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none transition-all duration-200">
                         Volver al login
                     </a>
@@ -278,7 +278,7 @@ if ($token && $email && !$success) {
                         </div>
 
                         <div class="text-center text-sm">
-                            <a href="login.php" class="text-green-600 hover:underline font-medium">
+                            <a href="./login.php" class="text-green-600 hover:underline font-medium">
                                 Volver al login
                             </a>
                         </div>

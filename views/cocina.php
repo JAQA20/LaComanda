@@ -1,4 +1,8 @@
 <?php
+require_once "../middleware/auth.php";
+require_once "../middleware/roles.php";
+
+verificarRol([1, 3]); // Admin(1) y Cocina(3)
 
 $archivo = __DIR__ . "/../controller/ordenes.json";
 $ordenes = file_exists($archivo)
@@ -27,6 +31,7 @@ if (!is_array($ordenes)) {
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="..//public/css/cocina.css">
+    <a href="../middleware/"></a>
     <script>
         tailwind.config = {
             theme: {

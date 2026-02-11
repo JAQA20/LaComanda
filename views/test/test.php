@@ -1,11 +1,3 @@
-<?php
-require_once "../middleware/auth.php";
-require_once "../middleware/roles.php";
-
-verificarRol([1, 2]); // Admin(1) y Mesero(2)
-
-?>
-
 <!DOCTYPE html>
 <html>
 
@@ -23,6 +15,73 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- <link rel="stylesheet" href="../public/css/style.css"> -->
+    <style>
+        /* Mesa base */
+        .mesa {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+            border: 3px solid transparent;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .mesa:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Estados */
+        .mesa.disponible {
+            background: #22c55e;
+            color: white;
+        }
+
+        .mesa.con-orden {
+            background: #362018;
+            color: #F5EDE1;
+        }
+
+        .mesa.seleccionada {
+            border-color: #70A38F;
+        }
+
+        /* Etiqueta interna */
+        .mesa .label {
+            text-align: center;
+            line-height: 1.1;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .mesa .sub {
+            display: block;
+            font-weight: 500;
+            font-size: 11px;
+            opacity: .9;
+            margin-top: 2px;
+        }
+
+        /* Botón entregar mini */
+        .mesa .btn-entregar {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            background: #70A38F;
+            color: white;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+            white-space: nowrap;
+        }
+    </style>
 
 
 
@@ -51,127 +110,28 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
             <div id="mesas-view" class="block">
                 <h1 class="text-brown text-3xl font-bold mb-8">Mesas disponibles</h1>
-                <div class="grid grid-cols-4 gap-6">
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="1">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 1</h3>
-                            <p class="text-mint text-sm">Disponible</p>
+                <div class="bg-white rounded-2xl shadow-sm border p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-brown font-semibold">Croquis - Salón principal</p>
+                        <div class="flex gap-3 text-sm">
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-500"></span>Disponible</span>
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-[#362018]"></span>Con orden</span>
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded border-2 border-[#70A38F]"></span>Seleccionada</span>
                         </div>
                     </div>
 
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="2">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 2</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
+                    <!-- Área del croquis -->
+                    <div id="croquis"
+                        class="relative w-full max-w-5xl mx-auto aspect-[16/9] rounded-xl overflow-hidden border"
+                        style="background: linear-gradient(180deg,#f7f4ef,#efe7db);">
 
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="3">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 3</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
+                        <!-- “Elementos” decorativos opcionales -->
+                        <div class="absolute left-4 top-4 text-xs text-brown/60">Entrada</div>
 
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="4">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 4</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="5">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 5</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="6">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 6</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="7">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 7</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="8">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 8</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="9">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 9</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="10">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 10</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="11">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 11</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
-                    </div>
-
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="12">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-utensils text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Mesa 12</h3>
-                            <p class="text-mint text-sm">Disponible</p>
-                        </div>
+                        <!-- Mesas (se renderizan por JS) -->
                     </div>
                 </div>
+
             </div>
 
             <!-- Menu Views -->
@@ -366,17 +326,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             const mesaActualSpan = document.getElementById('mesa-actual');
             if (mesaActualSpan) mesaActualSpan.textContent = `Mesa ${numeroMesa}`;
 
-            // 1) Quitar borde a todas
-            document.querySelectorAll('.mesa-card').forEach(card => {
-                card.style.border = "4px solid transparent";
-            });
-
-            // 2) Poner borde a la seleccionada
-            const cardSeleccionada = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
-            if (cardSeleccionada) {
-                cardSeleccionada.style.border = "2px solid #70A38F";
-            }
-
+            marcarSeleccion(numeroMesa);
             actualizarBotones();
         }
 
@@ -384,34 +334,28 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
         // Pinta la mesa como "Con orden" o "Disponible"
         function actualizarEstadoMesa(numeroMesa) {
-            const card = document.querySelector(`[data-mesa="${numeroMesa}"]`);
+            const card = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
             if (!card) return;
 
-            const tieneOrden = mesasConOrden[numeroMesa];
+            const tieneOrden = !!mesasConOrden[numeroMesa];
 
-            if (tieneOrden) {
-                card.innerHTML = `
-            <div class="text-center">
-                <div class="w-16 h-16 custom-brown rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-utensils text-beige text-xl"></i>
-                </div>
-                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-                <p class="text-brown text-sm">Con orden</p>
-                <button class="btn-entregar w-full py-2 custom-mint text-white rounded-lg hover-mint-bg font-medium">Entregar orden</button>
-            </div>
-        `;
-            } else {
-                card.innerHTML = `
-            <div class="text-center">
-                <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-utensils text-white text-xl"></i>
-                </div>
-                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-                <p class="text-mint text-sm">Disponible</p>
-            </div>
-        `;
+            card.classList.remove("disponible", "con-orden");
+            card.classList.add(tieneOrden ? "con-orden" : "disponible");
+
+            card.innerHTML = `
+    <div class="label">
+      Mesa ${numeroMesa}
+      <span class="sub">${tieneOrden ? "Con orden" : "Disponible"}</span>
+    </div>
+    ${tieneOrden ? `<button class="btn-entregar">Entregar orden</button>` : ``}
+  `;
+
+            // Si esta mesa es la actual, mantené borde
+            if (String(mesaActual) === String(numeroMesa)) {
+                card.classList.add("seleccionada");
             }
         }
+
 
         function mostrarProductos(categoria) {
             const menuView = document.getElementById('menu-view');
@@ -762,6 +706,175 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             });
             activeBtn.classList.add('border-b-2', 'border-mint');
         }
+        // 1) Definición del “plano”: posición y tamaño por mesa (x,y,w,h en % del croquis)
+        let planoMesas = []; // se llena con DB
+        const zonaActual = "main";
+
+        async function cargarLayout() {
+            const res = await fetch(`../controller/mesas_layout_get.php?zona=${encodeURIComponent(zonaActual)}`);
+            const json = await res.json();
+            if (json.status !== "OK") throw new Error("No layout");
+            planoMesas = json.data;
+        }
+
+
+        // 2) Renderiza las mesas dentro del croquis
+        async function renderCroquis() {
+            const croquis = document.getElementById("croquis");
+            if (!croquis) return;
+
+            // carga layout desde DB (una vez)
+            if (!planoMesas.length) await cargarLayout();
+
+            croquis.innerHTML = `<div class="absolute left-4 top-4 text-xs text-brown/60">Entrada</div>`;
+
+            planoMesas.forEach(m => {
+                const div = document.createElement("div");
+                div.className = "mesa mesa-card";
+                div.dataset.mesa = String(m.id);
+
+                div.style.left = `${m.x}%`;
+                div.style.top = `${m.y}%`;
+                div.style.width = `${m.w}%`;
+                div.style.height = `${m.h}%`;
+
+                croquis.appendChild(div);
+                actualizarEstadoMesa(m.id);
+            });
+
+            if (mesaActual) marcarSeleccion(mesaActual);
+        }
+        let drag = {
+            active: false,
+            id: null,
+            startX: 0,
+            startY: 0,
+            origX: 0,
+            origY: 0
+        };
+
+        function percentFromPixel(px, totalPx) {
+            return (px / totalPx) * 100;
+        }
+
+        function clamp(v, min, max) {
+            return Math.max(min, Math.min(max, v));
+        }
+
+        async function guardarMesaEnDB(id) {
+            const mesa = planoMesas.find(m => String(m.id) === String(id));
+            if (!mesa) return;
+
+            const res = await fetch("../controller/save_mesa_layoutController.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: mesa.id,
+                    x: mesa.x,
+                    y: mesa.y,
+                    w: mesa.w,
+                    h: mesa.h,
+                    zona: zonaActual
+                })
+            });
+
+            const json = await res.json();
+            if (json.status !== "OK") throw new Error(json.message || "No guardó");
+        }
+
+        // Inicia drag
+        function onPointerDownMesa(e, card) {
+            // si presiona botón entregar, no drag
+            if (e.target.closest(".btn-entregar")) return;
+
+            e.preventDefault();
+
+            const id = card.dataset.mesa;
+            const croquis = document.getElementById("croquis");
+            const rect = croquis.getBoundingClientRect();
+
+            const mesa = planoMesas.find(m => String(m.id) === String(id));
+            if (!mesa) return;
+
+            drag.active = true;
+            drag.id = id;
+            drag.startX = (e.touches ? e.touches[0].clientX : e.clientX);
+            drag.startY = (e.touches ? e.touches[0].clientY : e.clientY);
+            drag.origX = mesa.x;
+            drag.origY = mesa.y;
+
+            marcarSeleccion(id);
+            seleccionarMesa(id);
+        }
+
+        // Mueve
+        function onPointerMove(e) {
+            if (!drag.active) return;
+
+            const croquis = document.getElementById("croquis");
+            const rect = croquis.getBoundingClientRect();
+
+            const clientX = (e.touches ? e.touches[0].clientX : e.clientX);
+            const clientY = (e.touches ? e.touches[0].clientY : e.clientY);
+
+            const dx = clientX - drag.startX;
+            const dy = clientY - drag.startY;
+
+            const dxPct = percentFromPixel(dx, rect.width);
+            const dyPct = percentFromPixel(dy, rect.height);
+
+            const mesa = planoMesas.find(m => String(m.id) === String(drag.id));
+            if (!mesa) return;
+
+            // límites para que no se salga (considerando w/h)
+            const maxX = 100 - mesa.w;
+            const maxY = 100 - mesa.h;
+
+            mesa.x = clamp(drag.origX + dxPct, 0, maxX);
+            mesa.y = clamp(drag.origY + dyPct, 0, maxY);
+
+            // aplica visual inmediato
+            const card = document.querySelector(`.mesa-card[data-mesa="${drag.id}"]`);
+            if (card) {
+                card.style.left = `${mesa.x}%`;
+                card.style.top = `${mesa.y}%`;
+            }
+        }
+
+        // Suelta + guarda
+        async function onPointerUp() {
+            if (!drag.active) return;
+            const id = drag.id;
+
+            drag.active = false;
+            drag.id = null;
+
+            try {
+                await guardarMesaEnDB(id);
+                // opcional: toast
+                // console.log("guardado");
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "No se pudo guardar la posición"
+                });
+            }
+        }
+
+
+
+
+        // 3) Marca visualmente la seleccionada 
+        function marcarSeleccion(numeroMesa) {
+            document.querySelectorAll('.mesa-card').forEach(card => card.classList.remove('seleccionada'));
+            const cardSeleccionada = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
+            if (cardSeleccionada) cardSeleccionada.classList.add('seleccionada');
+        }
+
 
         // Cuando todo el DOM esté cargado
         document.addEventListener('DOMContentLoaded', () => {
@@ -810,46 +923,70 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                 });
             }
 
-            // Click en mesas (cada tarjeta)
-            document.querySelectorAll('.mesa-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const mesa = card.getAttribute('data-mesa');
-                    if (!mesa) return;
-                    seleccionarMesa(mesa);
-                });
+            // Render inicial del croquis
+            renderCroquis();
+
+            // Click en mesas (delegado)
+            document.getElementById("croquis")?.addEventListener("click", (e) => {
+                const card = e.target.closest(".mesa-card");
+                if (!card) return;
+                const mesa = card.getAttribute("data-mesa");
+                if (!mesa) return;
+
+                // Si clickeó el botón entregar, NO seleccionar, solo entregar
+                if (e.target.closest(".btn-entregar")) {
+                    entregarOrden(mesa);
+                    return;
+                }
+
+                seleccionarMesa(mesa);
             });
 
-            // Botones del sidebar
+            // Botones sidebar
             const eliminarBtn = document.getElementById('eliminar-orden');
             const enviarBtn = document.getElementById('enviar-cocina');
             if (eliminarBtn) eliminarBtn.addEventListener('click', eliminarOrden);
             if (enviarBtn) enviarBtn.addEventListener('click', enviarCocina);
 
-            // Aplicar estado de mesas guardado
+            // Pintar estados guardados
             Object.keys(mesasConOrden).forEach(numMesa => {
-                if (mesasConOrden[numMesa]) {
-                    actualizarEstadoMesa(numMesa);
-                }
-            });
-            // Delegación — detecta clicks en botones de entregar orden
-            document.addEventListener('click', function(e) {
-
-                const boton = e.target.closest('.btn-entregar');
-                const card = e.target.closest('.mesa-card');
-
-                // Si no hizo click dentro de una mesa, salir
-                if (!boton || !card) return;
-
-                // Obtener número de mesa
-                const mesa = card.getAttribute('data-mesa');
-
-                if (!mesa) return;
-
-                // Ejecutar acción
-                entregarOrden(mesa);
+                if (mesasConOrden[numMesa]) actualizarEstadoMesa(numMesa);
             });
 
+            actualizarOrden();
+            actualizarBotones();
         });
+
+        // Botones del sidebar
+        const eliminarBtn = document.getElementById('eliminar-orden');
+        const enviarBtn = document.getElementById('enviar-cocina');
+        if (eliminarBtn) eliminarBtn.addEventListener('click', eliminarOrden);
+        if (enviarBtn) enviarBtn.addEventListener('click', enviarCocina);
+
+        // Aplicar estado de mesas guardado
+        Object.keys(mesasConOrden).forEach(numMesa => {
+            if (mesasConOrden[numMesa]) {
+                actualizarEstadoMesa(numMesa);
+            }
+        });
+        // Delegación — detecta clicks en botones de entregar orden
+        document.addEventListener('click', function(e) {
+
+            const boton = e.target.closest('.btn-entregar');
+            const card = e.target.closest('.mesa-card');
+
+            // Si no hizo click dentro de una mesa, salir
+            if (!boton || !card) return;
+
+            // Obtener número de mesa
+            const mesa = card.getAttribute('data-mesa');
+
+            if (!mesa) return;
+
+            // Ejecutar acción
+            entregarOrden(mesa);
+        });
+
 
         //document.getElementById('eliminar-orden').addEventListener('click', eliminarOrden);
         document.getElementById('enviar-cocina').addEventListener('click', enviarCocina);

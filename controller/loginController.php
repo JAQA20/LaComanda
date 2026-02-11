@@ -1,31 +1,6 @@
 <?php
 session_start();
 
-//validacion basica de login 
-
-// if (!empty($_POST["btnlogin"])) {
-//     if (!empty($_POST["email"]) and !empty($_POST["password"])) {
-//         $email = $_POST["email"];
-//         //$password = md5($_POST["password"]); // md5 to enctrypt pwds
-//         $password = md5($_POST["password"]);
-//         echo $email;
-//         echo $password;
-//         $sql = $conexion->query("select * from usuarios where email='$email' and password='$password' limit 1");
-//         if ($data = $sql->fetch_object()) {
-//             $_SESSION["nombre"] = $data->nombre;
-//             $_SESSION["apellido"] = $data->apellido;
-//             header("location:../views/index.php");
-//             exit;
-//         } else {
-//             echo "<div class='alert alert-danger'> Incorrect email or password </div>";
-//         }
-//     } else {
-//         echo "<div class='alert alert-danger'> Please enter an email and password </div>";
-//     }
-// }
-
-//--------------------------------------------------------------------------------------------
-
 //controller con manejo de roles y seguridad mejorada
 
 if (!empty($_POST["btnlogin"])) {
@@ -62,7 +37,7 @@ if (!empty($_POST["btnlogin"])) {
     if ($user = $result->fetch_assoc()) {
 
         // Verificar password (si se usa password_hash en BD)
-        //if (password_verify($password, $user["password"])) 
+        // if (password_verify($password, $user["password"])) {
         if ($password === $user["password"]) { // comparación simple, no segura
 
 
@@ -85,8 +60,9 @@ if (!empty($_POST["btnlogin"])) {
 
                 case 3: // Cocina
                     header("Location: ../views/cocina.php");
-                    // case 4: // Barista (agregar a bd)
-                    //     header("Location: ../views/barista.php");
+                    exit;
+                case 4: // Barista 
+                    header("Location: ../views/barista.php");
                     exit;
 
                 default:

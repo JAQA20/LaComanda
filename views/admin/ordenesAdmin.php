@@ -1,5 +1,8 @@
 <?php
+require_once __DIR__ . "/../../middleware/auth.php";
+require_once __DIR__ . "/../../middleware/roles.php";
 
+verificarRol([1]); // solo Admin
 
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
@@ -51,7 +54,9 @@ $pendientes = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estad
 </head>
 
 <body class="bg-gray-100 font-montserrat">
-    <?php include './layout/navbar.php'; ?>
+    <?php
+    include './adminNavbar.php';
+    ?>
 
     <div class="pt-20 p-8">
         <div class="max-w-7xl mx-auto">

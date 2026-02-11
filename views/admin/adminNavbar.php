@@ -2,69 +2,100 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+require_once __DIR__ . "/../../middleware/auth.php";
+require_once __DIR__ . "/../../middleware/roles.php";
+
+verificarRol([1]); // solo Admin
+$rutaActual = $_SERVER["REQUEST_URI"];
 ?>
 
 
-<!DOCTYPE html>
-<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         window.FontAwesomeConfig = {
             autoReplaceSvg: 'nest'
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Fuente -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <!-- <link rel="stylesheet" href="../../public/css/style.css"> -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <title>Navbar</title>
+
+    <!-- CSS principal -->
+    <link rel="stylesheet" href="/LaComanda/public/css/style.css">
+
+
 </head>
 
 <body>
-    <!-- Navbar -->
+    <?php
+    $rutaActual = $_SERVER["REQUEST_URI"];
+
+    function isActive($ruta, $rutaActual)
+    {
+        return str_contains($rutaActual, $ruta)
+            ? "border-b-2 border-mint"
+            : "";
+    }
+    ?>
+
     <nav id="navbar" class="custom-brown fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 shadow-lg">
         <div class="flex items-center">
-            <img class="h-10 w-10 object-contain mr-3" src="../../public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
+            <img class="h-10 w-10 object-contain mr-3"
+                src="/LaComanda/public/img/logotipo2.PNG"
+                alt="Cafetería Toscana" />
             <span class="text-beige text-xl font-semibold">Cafetería Toscana</span>
         </div>
-        <div class="flex space-x-8">
-            <button id="" class="text-beige hover-mint font-medium transition-all duration-200 border-b-2 border-mint">
-                <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200" href="./admin.php">Dashboard</a>
-            </button>
-            <button id="bebidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">
-                <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200" href="../index.php">Tomar ordenes</a>
-            </button>
-            <button id="cafes-btn" class="text-beige hover-mint font-medium transition-all duration-200">
-                <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200" href="./usuarios.php">Usuarios</a>
-            </button>
-            <button id="comidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Mesas</button>
-            <button id="especialidades-btn" class="text-beige hover-mint font-medium transition-all duration-200">Reportes</button>
-            <button id="postres-btn" class="text-beige hover-mint font-medium transition-all duration-200">Historial de ordenes</button>
+
+        <div class="flex space-x-8 items-center">
+            <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/admin.php', $rutaActual) ?>"
+                href="/LaComanda/views/admin/admin.php">
+                Dashboard
+            </a>
+
+            <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/index.php', $rutaActual) ?>"
+                href="/LaComanda/views/index.php">
+                Tomar ordenes
+            </a>
+
+            <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/usuarios.php', $rutaActual) || isActive('/controller/', $rutaActual) ? 'border-b-2 border-mint' : '' ?>"
+                href="/LaComanda/views/admin/usuarios.php">
+                Usuarios
+            </a>
+
+            <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/ordenesAdmin.php', $rutaActual) ?>"
+                href="/LaComanda/views/admin/ordenesAdmin.php">
+                Historial de ordenes
+            </a>
 
             <div class="dropdown">
-                <button class="btn dropdown-toggle hover-mint" type="button" data-bs-toggle="dropdown">
+                <button class="btn dropdown-toggle hover-mint" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-user text-white text-2xl"></i>
                 </button>
 
                 <ul class="dropdown-menu dropdown-menu-end">
-
-                    <!-- Nombre del usuario -->
                     <li class="px-3 py-2 text-sm text-gray-700 font-semibold border-b">
                         <?php if (isset($_SESSION["nombre"])): ?>
-                            <?= htmlspecialchars($_SESSION["nombre"] . " " . $_SESSION["apellido"]) ?>
+                            <?= htmlspecialchars($_SESSION["nombre"] . " " . ($_SESSION["apellido"] ?? "")) ?>
                         <?php else: ?>
                             Usuario
                         <?php endif; ?>
                     </li>
 
                     <li>
-                        <a class="dropdown-item" href="../views/perfil.php">
+                        <a class="dropdown-item" href="/LaComanda/views/perfil.php">
                             <i class="fas fa-id-badge me-2"></i> Mi perfil
                         </a>
                     </li>
@@ -74,21 +105,11 @@ if (session_status() === PHP_SESSION_NONE) {
                     </li>
 
                     <li>
-                        <a class="dropdown-item text-danger" href="../../controller/logoutController.php">
+                        <a class="dropdown-item text-danger" href="/LaComanda/controller/logoutController.php">
                             <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
                         </a>
                     </li>
-
-                    <?php if (isset($_SESSION["rol_id"]) && $_SESSION["rol_id"] == 3): ?>
-                        <li>
-                            <a class="dropdown-item" href="../views/cocina.php">
-                                <i class="fas fa-fire me-2"></i> Cocina
-                            </a>
-                        </li>
-                    <?php endif; ?>
-
                 </ul>
-
             </div>
         </div>
     </nav>

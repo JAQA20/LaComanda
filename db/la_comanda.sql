@@ -117,5 +117,30 @@ INSERT INTO productos(categoria_id, nombre, precio) VALUES
 select * from roles; 
 select * from usuarios; 
 
+-- ---------- mesas_layout ----------
+CREATE TABLE mesas_layout (
+  id INT PRIMARY KEY,                  -- id de mesa (1..12)
+  x DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
+  y DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
+  w DECIMAL(6,2) NOT NULL DEFAULT 10,   -- porcentaje 0..100
+  h DECIMAL(6,2) NOT NULL DEFAULT 12,   -- porcentaje 0..100
+  zona VARCHAR(50) NOT NULL DEFAULT 'main',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Seed (ejemplo para 12 mesas)
+INSERT INTO mesas_layout (id,x,y,w,h,zona) VALUES
+(1, 28,18,10,12,'main'),
+(2, 45,18,10,12,'main'),
+(3, 62,16,16,14,'main'),
+(4, 28,38,10,12,'main'),
+(5, 45,38,10,12,'main'),
+(6, 62,36,18,14,'main'),
+(7, 28,58,10,12,'main'),
+(8, 45,58,10,12,'main'),
+(9, 14,78,20,14,'main'),
+(10,38,78,14,14,'main'),
+(11,56,78,14,14,'main'),
+(12,74,76,22,16,'main');
 
 

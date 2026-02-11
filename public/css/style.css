@@ -15,6 +15,61 @@
         display: none !important;
         }
 
+        /* Croquis de mesas */
+       
+  /* Mesa base */
+  .mesa {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border: 3px solid transparent;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .mesa:hover { transform: translateY(-2px); }
+
+  /* Estados */
+  .mesa.disponible { background: #22c55e; color: white; }
+  .mesa.con-orden { background: #362018; color: #F5EDE1; }
+  .mesa.seleccionada { border-color: #70A38F; }
+
+  /* Etiqueta interna */
+  .mesa .label {
+    text-align: center;
+    line-height: 1.1;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .mesa .sub {
+    display: block;
+    font-weight: 500;
+    font-size: 11px;
+    opacity: .9;
+    margin-top: 2px;
+  }
+
+  /* Botón entregar mini */
+  .mesa .btn-entregar {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    background: #70A38F;
+    color: white;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    white-space: nowrap;
+  }
+
+
         
         
   

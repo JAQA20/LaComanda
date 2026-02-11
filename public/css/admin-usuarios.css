@@ -1,0 +1,77 @@
+:root{
+  --brown:#362018;
+  --mint:#70A38F;
+  --beige:#F5EDE1;
+  --card:#ffffff;
+  --line:#e9ecef;
+}
+
+*{ font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+
+.bg-comanda{
+  background: var(--beige);
+}
+
+.text-brown{ color: var(--brown) !important; }
+
+.card-comanda{
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+
+.btn-mint{
+  background: var(--mint) !important;
+  border-color: var(--mint) !important;
+  color: #fff !important;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.btn-mint:hover{
+  filter: brightness(0.96);
+}
+
+.badge-role{
+  background: var(--brown) !important;
+  border: 1px solid rgba(112,163,143,.35);
+  color: var(--brown);
+  padding: .5rem .75rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.icon-btn{
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brown);
+}
+.icon-btn:hover{
+  background: #f8f9fa;
+}
+
+table.dataTable thead th{
+  font-size: 12px;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: #6c757d;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.table > :not(caption) > * > *{
+  border-color: var(--line);
+}
+
+/* Inputs DataTables */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select{
+  border-radius: 10px !important;
+}
+
+
+

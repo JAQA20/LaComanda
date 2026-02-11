@@ -1,4 +1,9 @@
 <?php
+require_once "../middleware/auth.php";
+require_once "../middleware/roles.php";
+
+verificarRol([1, 4]); // Admin(1) y Barista(4)
+
 // No cachear esta página
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");

@@ -34,12 +34,18 @@ if (session_status() === PHP_SESSION_NONE) {
             <span class="text-beige text-xl font-semibold">Cafetería Toscana</span>
         </div>
         <div class="flex space-x-8">
+
             <button id="mesas-btn" class="text-beige hover-mint font-medium transition-all duration-200 border-b-2 border-mint">Mesas</button>
             <button id="cafes-btn" class="text-beige hover-mint font-medium transition-all duration-200">Cafés</button>
             <button id="comidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Comidas</button>
             <button id="especialidades-btn" class="text-beige hover-mint font-medium transition-all duration-200">Especialidades</button>
             <button id="postres-btn" class="text-beige hover-mint font-medium transition-all duration-200">Postres</button>
             <button id="bebidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Bebidas Frías</button>
+            <?php if (isset($_SESSION["rol_id"]) && $_SESSION["rol_id"] == 1): ?>
+                <button class="text-beige hover-mint font-medium transition-all duration-200  border-mint">
+                    <a href="../views/admin/admin.php" class="text-decoration-none text-beige hover-mint font-medium transition-all duration-200 border-mint">Admin</a>
+                </button>
+            <?php endif; ?>
             <div class="dropdown">
                 <button class="btn dropdown-toggle hover-mint" type="button" data-bs-toggle="dropdown">
                     <i class="fas fa-user text-white text-2xl"></i>

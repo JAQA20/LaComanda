@@ -20,9 +20,32 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <div class="flex gap-3">
             <a href="./index.php" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Ir al inicio</a>
-            <a href="../controller/logout.php" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-800 font-semibold">Cerrar sesión</a>
+            <a href="../controller/logoutController.php" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-800 font-semibold">Cerrar sesión</a>
         </div>
     </div>
 </body>
 
 </html>
+
+<!-- <!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso denegado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-red-50 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+        <h1 class="text-2xl font-bold text-red-600">🚫 Acceso denegado</h1>
+        <p class="mt-4 text-gray-600">
+            No tienes permisos para acceder a esta sección.
+        </p>
+        <a href="dashboard.php" class="mt-6 inline-block bg-red-600 text-white px-6 py-2 rounded-lg">
+            Volver
+        </a>
+    </div>
+</body>
+
+</html> -->
