@@ -19,7 +19,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <p class="text-gray-600 mb-6">No tienes permisos para acceder a esta sección.</p>
 
         <div class="flex gap-3">
-            <a href="./index.php" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Ir al inicio</a>
+            <!-- <a href="./index.php" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Ir al inicio</a> -->
             <a href="../controller/logoutController.php" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-800 font-semibold">Cerrar sesión</a>
         </div>
     </div>

@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 function verificarRol(array $rolesPermitidos = [])
 {
     if (!isset($_SESSION["rol_id"])) {
-        header("Location: /LaComanda/login.php");
+        header("Location: /LaComanda/views/login.php");
         exit;
     }
 

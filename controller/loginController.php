@@ -37,8 +37,8 @@ if (!empty($_POST["btnlogin"])) {
     if ($user = $result->fetch_assoc()) {
 
         // Verificar password (si se usa password_hash en BD)
-        // if (password_verify($password, $user["password"])) {
-        if ($password === $user["password"]) { // comparación simple, no segura
+        if (password_verify($password, $user["password"])) {
+            // if ($password === $user["password"]) { // comparación simple, no segura
 
 
             // Guardar sesión

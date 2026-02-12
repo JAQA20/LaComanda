@@ -1,5 +1,5 @@
 <?php
-require 'db/conexion.php';
+require 'LaComanda/model/Conexion.php';
 
 $stmt = $conexion->prepare('SELECT id, password FROM usuarios WHERE email = ?');
 $stmt->execute(['admin@lacomanda.com']);

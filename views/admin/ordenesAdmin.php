@@ -9,6 +9,13 @@ header("Pragma: no-cache");
 header("Expires: 0");
 
 require_once '../../model/Conexion.php';
+//Para mostrar erroes de mysqli
+// mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+//Para debug
+// var_dump(get_class($conexion));
+// exit;
+
 
 $ordenes = [];
 $total_ordenes = 0;
@@ -17,28 +24,42 @@ $entregadas = 0;
 $pendientes = 0;
 
 try {
-    // Obtener de BD
-    $sql = "SELECT o.id AS id_orden, o.total, o.creado_en AS fecha, COALESCE(e.nombre, 'pendiente') as estado
-            FROM ordenes o
-            LEFT JOIN estados_orden e ON o.id_estado = e.id_estado
-            ORDER BY o.creado_en DESC LIMIT 100";
+
+    $sql = "SELECT 
+                id_orden,
+                total,
+                timestamp AS fecha,
+                id_estado
+            FROM ordenes
+            ORDER BY timestamp DESC
+            LIMIT 100";
 
     $stmt = $conexion->prepare($sql);
     $stmt->execute();
-    $ordenes_bd = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (!empty($ordenes_bd)) {
-        $ordenes = $ordenes_bd;
-    }
-} catch (Exception $e) {
-    // Si BD no funciona, dejar $ordenes vacío
+    $result = $stmt->get_result();
+    $ordenes = $result->fetch_all(MYSQLI_ASSOC);
+} catch (Throwable $e) {
+    echo "<pre style='color:red'>";
+    echo "ERROR SQL / MYSQLI:\n";
+    echo $e->getMessage();
+    echo "</pre>";
+    exit;
 }
+
+//Para debug (ayuda a ver la estructura de datos que se obtiene de la BD)
+// echo "<pre>";
+// print_r($ordenes);
+// echo "</pre>";
+// exit;
+
+
 
 $total_ordenes = count($ordenes);
 $total_vendido = array_sum(array_column($ordenes, 'total'));
 $entregadas = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'entregad') !== false));
 $pendientes = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'pendiente') !== false));
-?>
+
 ?>
 
 <!DOCTYPE html>
@@ -129,11 +150,11 @@ $pendientes = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estad
         </div>
     </div>
 
-    <script>
+    <!-- <script>
         setInterval(() => {
             location.href = location.href.split('?')[0] + '?t=' + Date.now();
         }, 5000);
-    </script>
+    </script> -->
 </body>
 
 </html>

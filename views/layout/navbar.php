@@ -41,11 +41,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <button id="especialidades-btn" class="text-beige hover-mint font-medium transition-all duration-200">Especialidades</button>
             <button id="postres-btn" class="text-beige hover-mint font-medium transition-all duration-200">Postres</button>
             <button id="bebidas-btn" class="text-beige hover-mint font-medium transition-all duration-200">Bebidas Frías</button>
-            <?php if (isset($_SESSION["rol_id"]) && $_SESSION["rol_id"] == 1): ?>
-                <button class="text-beige hover-mint font-medium transition-all duration-200  border-mint">
-                    <a href="../views/admin/admin.php" class="text-decoration-none text-beige hover-mint font-medium transition-all duration-200 border-mint">Admin</a>
-                </button>
-            <?php endif; ?>
+
             <div class="dropdown">
                 <button class="btn dropdown-toggle hover-mint" type="button" data-bs-toggle="dropdown">
                     <i class="fas fa-user text-white text-2xl"></i>
@@ -63,9 +59,11 @@ if (session_status() === PHP_SESSION_NONE) {
                     </li>
 
                     <li>
-                        <a class="dropdown-item" href="../views/perfil.php">
-                            <i class="fas fa-id-badge me-2"></i> Mi perfil
-                        </a>
+                        <?php if (isset($_SESSION["rol_id"]) && $_SESSION["rol_id"] == 1): ?>
+                            <button class="text-beige hover-mint font-medium transition-all duration-200  border-mint">
+                                <a href="../views/admin/admin.php" class="text-decoration-none text-beige hover-mint font-medium transition-all duration-200 border-mint">Admin</a>
+                            </button>
+                        <?php endif; ?>
                     </li>
 
                     <li>

@@ -75,6 +75,11 @@ $rutaActual = $_SERVER["REQUEST_URI"];
                 Usuarios
             </a>
 
+            <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('#', $rutaActual) || isActive('/controller/', $rutaActual) ? 'border-b-2 border-mint' : '' ?>"
+                href="">
+                Productos
+            </a>
+
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/ordenesAdmin.php', $rutaActual) ?>"
                 href="/LaComanda/views/admin/ordenesAdmin.php">
                 Historial de ordenes
