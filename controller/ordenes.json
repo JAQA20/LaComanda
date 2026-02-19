@@ -115,14 +115,31 @@
         "mesa": "12",
         "items": "Affogato x1",
         "numero": 15,
-        "estado": "pendiente",
-        "timestamp": 1770855969
+        "estado": "entregada",
+        "timestamp": 1770855969,
+        "hora_entrega": "22:39"
     },
     {
-        "mesa": "2",
-        "items": "Bruschetta x4",
+        "mesa": "1",
+        "items": "Americano x1",
         "numero": 16,
+        "estado": "entregada",
+        "timestamp": 1771465347,
+        "hora_entrega": "03:17"
+    },
+    {
+        "mesa": "6",
+        "items": "caca x1",
+        "numero": 17,
+        "estado": "entregada",
+        "timestamp": 1771467515,
+        "hora_entrega": "03:19"
+    },
+    {
+        "mesa": "1",
+        "items": "Americano x1",
+        "numero": 18,
         "estado": "pendiente",
-        "timestamp": 1770857384
+        "timestamp": 1771471411
     }
 ]

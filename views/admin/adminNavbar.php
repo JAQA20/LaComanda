@@ -75,8 +75,8 @@ $rutaActual = $_SERVER["REQUEST_URI"];
                 Usuarios
             </a>
 
-            <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('#', $rutaActual) || isActive('/controller/', $rutaActual) ? 'border-b-2 border-mint' : '' ?>"
-                href="">
+            <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/productos.php', $rutaActual) || isActive('/controller/', $rutaActual) ? 'border-b-2 border-mint' : '' ?>"
+                href="/LaComanda/views/admin/productos.php">
                 Productos
             </a>
 

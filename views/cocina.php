@@ -117,7 +117,7 @@ if (!is_array($ordenes)) {
                 <?php foreach ($ordenes as $orden): ?>
                     <?php if (isset($orden["estado"]) && $orden["estado"] === "pendiente"): ?>
 
-                        <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-gray-100">
+                        <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
 
                             <!-- Encabezado -->
                             <div class="flex items-center justify-between mb-4">
@@ -158,15 +158,16 @@ if (!is_array($ordenes)) {
                                 </div>
                             </div>
 
-                            <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
-                            <form action="../controller/marcarEntrega.php" method="POST">
-                                <input type="" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>">
-                                <button
-                                    class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200" hidden>
-                                    Marcar como entregada
-                                </button>
-                            </form>
-
+                            <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
+                                <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
+                                <form action="../controller/marcarEntrega.php" method="POST">
+                                    <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>"></input>
+                                    <button
+                                        class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
+                                        Marcar como entregada
+                                    </button>
+                                </form>
+                            <?php endif; ?>
                         </div>
 
                     <?php endif; ?>

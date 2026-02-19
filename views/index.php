@@ -22,7 +22,10 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- <link rel="stylesheet" href="../public/css/style.css"> -->
+    <!-- <link rel="stylesheet" href="LaComanda/public/css/styles.css"> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
 
@@ -198,164 +201,6 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
         // Mesas que tienen orden, persistidas en localStorage
         let mesasConOrden = JSON.parse(localStorage.getItem('mesasConOrden') || '{}');
 
-        const productos = {
-            cafes: [{
-                    nombre: 'Espresso',
-                    precio: 2500,
-                    icono: 'fa-coffee'
-                },
-                {
-                    nombre: 'Americano',
-                    precio: 3000,
-                    icono: 'fa-coffee'
-                },
-                {
-                    nombre: 'Latte',
-                    precio: 4500,
-                    icono: 'fa-coffee'
-                },
-                {
-                    nombre: 'Cappuccino',
-                    precio: 4000,
-                    icono: 'fa-coffee'
-                },
-                {
-                    nombre: 'Flat White',
-                    precio: 5000,
-                    icono: 'fa-coffee'
-                },
-                {
-                    nombre: 'Mocha',
-                    precio: 5500,
-                    icono: 'fa-coffee'
-                }
-            ],
-            comidas: [{
-                    nombre: 'Empanada de Carne',
-                    precio: 3500,
-                    icono: 'fa-bread-slice'
-                },
-                {
-                    nombre: 'Bruschetta',
-                    precio: 6500,
-                    icono: 'fa-bread-slice'
-                },
-                {
-                    nombre: 'Panini Italiano',
-                    precio: 8500,
-                    icono: 'fa-hamburger'
-                },
-                {
-                    nombre: 'Ensalada César',
-                    precio: 7500,
-                    icono: 'fa-leaf'
-                },
-                {
-                    nombre: 'Croissant Jamón y Queso',
-                    precio: 5500,
-                    icono: 'fa-bread-slice'
-                },
-                {
-                    nombre: 'Tostadas Integrales',
-                    precio: 4500,
-                    icono: 'fa-bread-slice'
-                }
-            ],
-            especialidades: [{
-                    nombre: 'Tiramisú Latte',
-                    precio: 6500,
-                    icono: 'fa-star'
-                },
-                {
-                    nombre: 'Affogato',
-                    precio: 5500,
-                    icono: 'fa-ice-cream'
-                },
-                {
-                    nombre: 'Irish Coffee',
-                    precio: 7000,
-                    icono: 'fa-glass-whiskey'
-                },
-                {
-                    nombre: 'Cannoli Siciliano',
-                    precio: 4500,
-                    icono: 'fa-cookie'
-                },
-                {
-                    nombre: 'Gelato Artesanal',
-                    precio: 5000,
-                    icono: 'fa-ice-cream'
-                },
-                {
-                    nombre: 'Espresso Romano',
-                    precio: 6000,
-                    icono: 'fa-lemon'
-                }
-            ],
-            postres: [{
-                    nombre: 'Tiramisú',
-                    precio: 6500,
-                    icono: 'fa-cake'
-                },
-                {
-                    nombre: 'Panna Cotta',
-                    precio: 5500,
-                    icono: 'fa-birthday-cake'
-                },
-                {
-                    nombre: 'Cannoli',
-                    precio: 4500,
-                    icono: 'fa-cookie'
-                },
-                {
-                    nombre: 'Brownie',
-                    precio: 4000,
-                    icono: 'fa-cookie-bite'
-                },
-                {
-                    nombre: 'Cheesecake',
-                    precio: 6000,
-                    icono: 'fa-cake'
-                },
-                {
-                    nombre: 'Gelato',
-                    precio: 3500,
-                    icono: 'fa-ice-cream'
-                }
-            ],
-            bebidas: [{
-                    nombre: 'Limonada',
-                    precio: 3500,
-                    icono: 'fa-lemon'
-                },
-                {
-                    nombre: 'Té Helado',
-                    precio: 3000,
-                    icono: 'fa-glass-water'
-                },
-                {
-                    nombre: 'Smoothie Frutal',
-                    precio: 5500,
-                    icono: 'fa-blender'
-                },
-                {
-                    nombre: 'Agua Saborizada',
-                    precio: 2500,
-                    icono: 'fa-bottle-water'
-                },
-                {
-                    nombre: 'Jugo Natural',
-                    precio: 4000,
-                    icono: 'fa-apple-alt'
-                },
-                {
-                    nombre: 'Frappé',
-                    precio: 5000,
-                    icono: 'fa-snowflake'
-                }
-            ]
-        };
-
         function guardarEstadoMesas() {
             localStorage.setItem('mesasConOrden', JSON.stringify(mesasConOrden));
         }
@@ -413,7 +258,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             }
         }
 
-        function mostrarProductos(categoria) {
+        async function mostrarProductos(slug, nombreCategoria = "Menú") {
             const menuView = document.getElementById('menu-view');
             const mesasView = document.getElementById('mesas-view');
             const productosGrid = document.getElementById('productos-grid');
@@ -421,36 +266,97 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
             if (!menuView || !mesasView || !productosGrid || !menuTitle) return;
 
+            // Cambiar vista
             mesasView.classList.add('hidden');
             menuView.classList.remove('hidden');
+            menuTitle.textContent = nombreCategoria;
 
-            const titulos = {
-                cafes: 'Cafés',
-                comidas: 'Comidas',
-                especialidades: 'Especialidades',
-                postres: 'Postres',
-                bebidas: 'Bebidas Frías'
-            };
+            // Loader
+            productosGrid.innerHTML = `
+    <div class="col-span-3 text-center text-gray-500 py-10">
+      <i class="fas fa-circle-notch fa-spin text-2xl mb-3"></i>
+      <p>Cargando productos...</p>
+    </div>
+  `;
 
-            menuTitle.textContent = titulos[categoria] || 'Menú';
+            try {
+                const resp = await fetch(`../controller/listarProductosController.php?categoria=${encodeURIComponent(slug)}`);
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
 
-            productosGrid.innerHTML = productos[categoria].map(producto => `
+                const json = await resp.json();
+                if (json.status !== "OK") throw new Error(json.message || "Error API");
+
+                const items = json.data || [];
+
+                // ✅ Placeholder si no hay productos
+                if (!items.length) {
+                    renderPlaceholderSinProductos(nombreCategoria);
+                    return;
+                }
+
+                // Render cards
+                productosGrid.innerHTML = items.map(p => {
+                    const nombre = p.nombre ?? "";
+                    const precio = Number(p.precio ?? 0);
+                    const icono = p.icono ?? "fa-box";
+
+                    // ✅ evita romper el onclick si hay comillas
+                    const nombreSafe = nombre.replace(/'/g, "\\'");
+
+                    return `
         <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
-            <div class="text-center">
-                <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas ${producto.icono} text-white text-xl"></i>
-                </div>
-                <h3 class="text-brown font-semibold text-lg mb-2">${producto.nombre}</h3>
-                <p class="text-mint font-bold text-xl mb-4">$${producto.precio.toLocaleString()}</p>
-                <button onclick="agregarProducto('${producto.nombre}', ${producto.precio})" 
-                        class="w-full custom-mint text-white py-2 rounded-lg hover-mint-bg transition-all duration-200 flex items-center justify-center">
-                    <i class="fas fa-plus mr-2"></i>
-                    Agregar
-                </button>
+          <div class="text-center">
+            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas ${icono} text-white text-xl"></i>
             </div>
+            <h3 class="text-brown font-semibold text-lg mb-2">${nombre}</h3>
+            <p class="text-mint font-bold text-xl mb-4">₡${precio.toLocaleString()}</p>
+            <button onclick="agregarProducto('${nombreSafe}', ${precio})"
+                    class="w-full custom-mint text-white py-2 rounded-lg hover-mint-bg transition-all duration-200 flex items-center justify-center">
+              <i class="fas fa-plus mr-2"></i>
+              Agregar
+            </button>
+          </div>
         </div>
-    `).join('');
+      `;
+                }).join("");
+
+            } catch (e) {
+                console.error(e);
+                productosGrid.innerHTML = `
+      <div class="col-span-3 bg-white rounded-xl p-8 shadow-sm border border-red-100">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-triangle-exclamation text-white text-xl"></i>
+          </div>
+          <h3 class="text-brown font-semibold text-xl mb-2">No se pudieron cargar los productos</h3>
+          <p class="text-gray-500">Intenta nuevamente.</p>
+        </div>
+      </div>
+    `;
+            }
         }
+
+        function renderPlaceholderSinProductos(nombreCategoria = "esta categoría") {
+            const productosGrid = document.getElementById('productos-grid');
+            if (!productosGrid) return;
+
+            productosGrid.innerHTML = `
+    <div class="col-span-3 bg-white rounded-xl p-10 shadow-sm border border-gray-100">
+      <div class="text-center">
+        <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-box-open text-white text-2xl"></i>
+        </div>
+        <h3 class="text-brown font-semibold text-2xl mb-2">No hay productos registrados</h3>
+        <p class="text-gray-500">
+          Aún no existen productos para <strong>${nombreCategoria}</strong>.
+        </p>
+      </div>
+    </div>
+  `;
+        }
+
+
 
         function mostrarMesas() {
             const menuView = document.getElementById('menu-view');
@@ -503,7 +409,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                 <div class="flex-1">
                     <p class="text-brown font-medium">${item.nombre}</p>
-                    <p class="text-mint text-sm">$${item.precio.toLocaleString()} c/u</p>
+                    <p class="text-mint text-sm">₡${item.precio.toLocaleString()} c/u</p>
                 </div>
                 <div class="flex items-center space-x-2">
                     <button onclick="cambiarCantidad(${index}, -1)" class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-sm">-</button>
@@ -515,7 +421,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             }
 
             totalOrden = ordenActual.reduce((total, item) => total + (item.precio * item.cantidad), 0);
-            totalElement.textContent = `$${totalOrden.toLocaleString()}`;
+            totalElement.textContent = `₡${totalOrden.toLocaleString()}`;
             actualizarBotones();
         }
 
@@ -765,94 +671,92 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
         // Cuando todo el DOM esté cargado
         document.addEventListener('DOMContentLoaded', () => {
-            // Navbar
-            const mesasBtn = document.getElementById('mesas-btn');
-            const cafesBtn = document.getElementById('cafes-btn');
-            const comidasBtn = document.getElementById('comidas-btn');
-            const especialidadesBtn = document.getElementById('especialidades-btn');
-            const postresBtn = document.getElementById('postres-btn');
-            const bebidasBtn = document.getElementById('bebidas-btn');
 
-            if (mesasBtn) {
-                mesasBtn.addEventListener('click', () => {
-                    mostrarMesas();
-                    actualizarNavbar(mesasBtn);
-                });
-            }
-            if (cafesBtn) {
-                cafesBtn.addEventListener('click', () => {
-                    mostrarProductos('cafes');
-                    actualizarNavbar(cafesBtn);
-                });
-            }
-            if (comidasBtn) {
-                comidasBtn.addEventListener('click', () => {
-                    mostrarProductos('comidas');
-                    actualizarNavbar(comidasBtn);
-                });
-            }
-            if (especialidadesBtn) {
-                especialidadesBtn.addEventListener('click', () => {
-                    mostrarProductos('especialidades');
-                    actualizarNavbar(especialidadesBtn);
-                });
-            }
-            if (postresBtn) {
-                postresBtn.addEventListener('click', () => {
-                    mostrarProductos('postres');
-                    actualizarNavbar(postresBtn);
-                });
-            }
-            if (bebidasBtn) {
-                bebidasBtn.addEventListener('click', () => {
-                    mostrarProductos('bebidas');
-                    actualizarNavbar(bebidasBtn);
-                });
-            }
+            /* ==========================
+               NAVBAR – CATEGORÍAS
+               ========================== */
 
-            // Click en mesas (cada tarjeta)
-            document.querySelectorAll('.mesa-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const mesa = card.getAttribute('data-mesa');
-                    if (!mesa) return;
-                    seleccionarMesa(mesa);
+            // Todos los botones del navbar que representan categorías
+            document.querySelectorAll('#navbar button[data-slug]').forEach(btn => {
+
+                btn.addEventListener('click', async () => {
+                    const slug = btn.getAttribute('data-slug');
+                    const nombre = btn.textContent.trim();
+
+                    // Si es mesas, vuelve a la vista mesas
+                    if (slug === "mesas") {
+                        mostrarMesas();
+                    } else {
+                        await mostrarProductos(slug, nombre);
+                    }
+
+                    // 🔥 Mover el subrayado blanco
+                    actualizarNavbar(btn);
                 });
+
             });
 
-            // Botones del sidebar
+            // 🔥 Dejar "Mesas" activo al cargar la página
+            const mesasBtn = document.querySelector('#navbar button[data-slug="mesas"]');
+            if (mesasBtn) actualizarNavbar(mesasBtn);
+
+
+            /* ==========================
+               MESAS – CLICK (delegado)
+               ========================== */
+
+            document.addEventListener('click', (e) => {
+                const card = e.target.closest('.mesa-card');
+                if (!card) return;
+
+                // Si presiona "Entregar orden", no seleccionar mesa
+                if (e.target.closest('.btn-entregar')) return;
+
+                const mesa = card.getAttribute('data-mesa');
+                if (!mesa) return;
+
+                seleccionarMesa(mesa);
+            });
+
+
+            /* ==========================
+               BOTONES DEL SIDEBAR
+               ========================== */
+
             const eliminarBtn = document.getElementById('eliminar-orden');
             const enviarBtn = document.getElementById('enviar-cocina');
+
             if (eliminarBtn) eliminarBtn.addEventListener('click', eliminarOrden);
             if (enviarBtn) enviarBtn.addEventListener('click', enviarCocina);
 
-            // Aplicar estado de mesas guardado
+
+            /* ==========================
+               ESTADO DE MESAS (localStorage)
+               ========================== */
+
             Object.keys(mesasConOrden).forEach(numMesa => {
                 if (mesasConOrden[numMesa]) {
                     actualizarEstadoMesa(numMesa);
                 }
             });
-            // Delegación — detecta clicks en botones de entregar orden
-            document.addEventListener('click', function(e) {
 
+
+            /* ==========================
+               ENTREGAR ORDEN (delegado)
+               ========================== */
+
+            document.addEventListener('click', (e) => {
                 const boton = e.target.closest('.btn-entregar');
                 const card = e.target.closest('.mesa-card');
-
-                // Si no hizo click dentro de una mesa, salir
                 if (!boton || !card) return;
 
-                // Obtener número de mesa
                 const mesa = card.getAttribute('data-mesa');
-
                 if (!mesa) return;
 
-                // Ejecutar acción
                 entregarOrden(mesa);
             });
 
         });
-
-        //document.getElementById('eliminar-orden').addEventListener('click', eliminarOrden);
-        document.getElementById('enviar-cocina').addEventListener('click', enviarCocina);
     </script>
 
 
