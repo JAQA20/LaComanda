@@ -36,18 +36,28 @@ CREATE TABLE mesas (
 -- ---------- Catálogo ----------
 CREATE TABLE categorias (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(80) NOT NULL UNIQUE,
-  activo TINYINT(1) NOT NULL DEFAULT 1
+  nombre VARCHAR(60) NOT NULL UNIQUE,
+  slug VARCHAR(100) UNIQUE,
+  icono VARCHAR(60) NOT NULL DEFAULT 'fa-tags',
+  orden INT NOT NULL DEFAULT 1,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE productos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   categoria_id INT NOT NULL,
   nombre VARCHAR(120) NOT NULL,
-  precio DECIMAL(10,2) NOT NULL,
+  precio INT NOT NULL,
+  icono VARCHAR(60) NOT NULL DEFAULT 'fa-mug-hot',
   activo TINYINT(1) NOT NULL DEFAULT 1,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
+
+INSERT INTO productos(categoria_id, nombre, precio, activo)
+VALUES
+(2, 'Americano', 5000, 1);
 
 -- ---------- Órdenes ----------
 -- CREATE TABLE ordenes (
@@ -91,7 +101,7 @@ CREATE TABLE detalle_orden (
 
 
 -- ---------- Datos iniciales ----------
-INSERT INTO roles(nombre) VALUES ('admin'), ('mesero'), ('cocina');
+INSERT INTO roles(nombre) VALUES ('admin'), ('mesero'), ('cocina'), ('barista');
 
 INSERT INTO usuarios(nombre, apellido, email, password, rol_id)
 VALUES
@@ -105,42 +115,74 @@ INSERT INTO mesas(numero, estado) VALUES
 (9,'disponible'), (10,'disponible'), (11,'disponible'), (12,'disponible');
 
 
-INSERT INTO categorias(nombre) VALUES
-('Cafés'), ('Comidas'), ('Especialidades'), ('Postres'), ('Bebidas frías');
+-- INSERT INTO productos(categoria_id, nombre, precio) VALUES
+-- (1,'Espresso', 1200.00),
+-- (1,'Cappuccino', 1800.00),
+-- (4,'Cheesecake', 2200.00),
+-- (5,'Iced Latte', 2000.00);
 
-INSERT INTO productos(categoria_id, nombre, precio) VALUES
-(1,'Espresso', 1200.00),
-(1,'Cappuccino', 1800.00),
-(4,'Cheesecake', 2200.00),
-(5,'Iced Latte', 2000.00);
+INSERT INTO categorias(nombre, slug, icono, orden, activo) VALUES
+('Mesas', 'mesas', 'fa-table', 1, 1),
+('Cafés', 'cafes', 'fa-coffee', 2, 1),
+('Comidas', 'comidas', 'fa-hamburger', 3, 1),
+('Especialidades', 'especialidades', 'fa-star', 4, 1),
+('Postres', 'postres', 'fa-cake', 5, 1),
+('Bebidas Frías', 'bebidas', 'fa-glass-water', 6, 1);
 
-select * from roles; 
-select * from usuarios; 
 
 -- ---------- mesas_layout ----------
-CREATE TABLE mesas_layout (
-  id INT PRIMARY KEY,                  -- id de mesa (1..12)
-  x DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
-  y DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
-  w DECIMAL(6,2) NOT NULL DEFAULT 10,   -- porcentaje 0..100
-  h DECIMAL(6,2) NOT NULL DEFAULT 12,   -- porcentaje 0..100
-  zona VARCHAR(50) NOT NULL DEFAULT 'main',
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- CREATE TABLE mesas_layout (
+--   id INT PRIMARY KEY,                  -- id de mesa (1..12)
+--   x DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
+--   y DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
+--   w DECIMAL(6,2) NOT NULL DEFAULT 10,   -- porcentaje 0..100
+--   h DECIMAL(6,2) NOT NULL DEFAULT 12,   -- porcentaje 0..100
+--   zona VARCHAR(50) NOT NULL DEFAULT 'main',
+--   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- );
 
--- Seed (ejemplo para 12 mesas)
-INSERT INTO mesas_layout (id,x,y,w,h,zona) VALUES
-(1, 28,18,10,12,'main'),
-(2, 45,18,10,12,'main'),
-(3, 62,16,16,14,'main'),
-(4, 28,38,10,12,'main'),
-(5, 45,38,10,12,'main'),
-(6, 62,36,18,14,'main'),
-(7, 28,58,10,12,'main'),
-(8, 45,58,10,12,'main'),
-(9, 14,78,20,14,'main'),
-(10,38,78,14,14,'main'),
-(11,56,78,14,14,'main'),
-(12,74,76,22,16,'main');
+-- -- Seed (ejemplo para 12 mesas)
+-- INSERT INTO mesas_layout (id,x,y,w,h,zona) VALUES
+-- (1, 28,18,10,12,'main'),
+-- (2, 45,18,10,12,'main'),
+-- (3, 62,16,16,14,'main'),
+-- (4, 28,38,10,12,'main'),
+-- (5, 45,38,10,12,'main'),
+-- (6, 62,36,18,14,'main'),
+-- (7, 28,58,10,12,'main'),
+-- (8, 45,58,10,12,'main'),
+-- (9, 14,78,20,14,'main'),
+-- (10,38,78,14,14,'main'),
+-- (11,56,78,14,14,'main'),
+-- (12,74,76,22,16,'main');
+
+
+
+INSERT INTO usuarios (nombre, apellido, email, password, rol_id) VALUES
+-- Meseros
+('Carlos', 'Ramírez', 'carlos.ramirez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
+('Ana', 'Gómez', 'ana.gomez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
+('Luis', 'Fernández', 'luis.fernandez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
+('María', 'Vargas', 'maria.vargas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
+('José', 'Soto', 'jose.soto@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
+
+-- Cocina
+('Pedro', 'Mora', 'pedro.mora@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
+('Laura', 'Jiménez', 'laura.jimenez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
+('Andrés', 'Rojas', 'andres.rojas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
+('Paola', 'Castro', 'paola.castro@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
+
+-- Baristas
+('Daniel', 'Alvarado', 'daniel.alvarado@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
+('Sofía', 'Navarro', 'sofia.navarro@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
+('Kevin', 'Chaves', 'kevin.chaves@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
+('Valeria', 'Cordero', 'valeria.cordero@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
+
+-- Usuarios mixtos
+('Ricardo', 'Pérez', 'ricardo.perez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
+('Natalia', 'Salas', 'natalia.salas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
+('Esteban', 'León', 'esteban.leon@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
+('Mónica', 'Araya', 'monica.araya@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
+('Fernando', 'Solís', 'fernando.solis@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3);
 
 
