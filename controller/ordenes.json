@@ -11,7 +11,7 @@
         "mesa": "1",
         "items": "Espresso x1\nEmpanada de Carne x1",
         "numero": 2,
-        "estado": "entregada",
+        "estado": "pendiente",
         "timestamp": 1769050484,
         "hora_entrega": "02:10"
     }
