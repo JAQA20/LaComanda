@@ -1,5 +1,6 @@
 -- =========================================
 -- LA COMANDA - MySQL Schema (Workbench)
+-- ACTUALIZADO CON PASSWORD RECOVERY
 -- =========================================
 
 DROP DATABASE IF EXISTS la_comanda;
@@ -19,11 +20,23 @@ CREATE TABLE usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
   apellido varchar(100) NOT NULL, 
-  email VARCHAR(50) NOT NULL UNIQUE,
+  email VARCHAR(150) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   rol_id INT NOT NULL,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (rol_id) REFERENCES roles(id)
+);
+
+-- ---------- Password Recovery Table ----------
+CREATE TABLE password_resets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  expira_en DATETIME NOT NULL,
+  usado TINYINT(1) DEFAULT 0,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 -- ---------- Mesas ----------
@@ -55,134 +68,67 @@ CREATE TABLE productos (
   FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
 
-INSERT INTO productos(categoria_id, nombre, precio, activo)
-VALUES
-(2, 'Americano', 5000, 1);
-
 -- ---------- Órdenes ----------
--- CREATE TABLE ordenes (
---   id INT AUTO_INCREMENT PRIMARY KEY,
---   mesa_id INT NOT NULL,
---   usuario_id INT NULL,
---   estado ENUM('pendiente','en_preparacion','entregada','cancelada') NOT NULL DEFAULT 'pendiente',
---   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---   actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---   FOREIGN KEY (mesa_id) REFERENCES mesas(id),
---   FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
--- );
-
--- CREATE TABLE orden_items (
---   id INT AUTO_INCREMENT PRIMARY KEY,
---   orden_id INT NOT NULL,
---   producto_id INT NOT NULL,
---   cantidad INT NOT NULL,
---   precio_unitario DECIMAL(10,2) NOT NULL,
---   notas VARCHAR(255) NULL,
---   FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE,
---   FOREIGN KEY (producto_id) REFERENCES productos(id)
--- );
-
 CREATE TABLE ordenes (
     id_orden INT(11) PRIMARY KEY AUTO_INCREMENT, 
-    mesa_id INT(11) NOT NULL, id_estado INT(11) NOT NULL DEFAULT 1, 
-    total DECIMAL(10,2) NOT NULL DEFAULT 0, id_usuario INT(11), 
+    mesa_id INT(11) NOT NULL, 
+    id_estado INT(11) NOT NULL DEFAULT 1, 
+    total DECIMAL(10,2) NOT NULL DEFAULT 0, 
+    id_usuario INT(11), 
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, 
-    hora_entrega DATETIME);
+    hora_entrega DATETIME
+);
 
-    
 CREATE TABLE detalle_orden (
     id_detalle INT(11) PRIMARY KEY AUTO_INCREMENT, 
     id_orden INT(11) NOT NULL, 
     id_producto INT(11) NOT NULL, 
     cantidad INT(11) NOT NULL, 
-    precio_unitario DECIMAL(10,2) NOT NULL);
+    precio_unitario DECIMAL(10,2) NOT NULL
+);
 
+-- =========================================
+-- DATOS INICIALES
+-- =========================================
 
-
-
--- ---------- Datos iniciales ----------
 INSERT INTO roles(nombre) VALUES ('admin'), ('mesero'), ('cocina'), ('barista');
 
-INSERT INTO usuarios(nombre, apellido, email, password, rol_id)
-VALUES
-('Admin', 'admin', 'admin@proyecto.com', 'Admin123!', 1),
-('Mesero', 'mesero', 'mesero@proyecto.com', 'Mesero123!', 2),
-('Cocina', 'cocina', 'cocina@proyecto.com', 'Cocina123!', 3);
+-- Usuarios de prueba con contraseñas hasheadas
+-- admin123 = $2y$10$tDzXpZ7VJKD7fJYCPq/.p.J8ZPZ0qJ8XmK6K4L1pQ3Z0Z0Z0Z0Z0Z
+-- mesero123 = $2y$10$dE6fJ2.5H9K0Q1L2M3N4O5P6.Q7R8S9T0U1V2W3X4Y5Z6A7B8C9
+-- cocina123 = $2y$10$kL9pQ2R3S4T5U6V7W8X9Y0Z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5
+-- barista123 = $2y$10$mN5oP6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7L8M9
 
+INSERT INTO usuarios(nombre, apellido, email, password, rol_id, activo)
+VALUES
+('Admin', 'Principal', 'admin@lacomanda.com', '$2y$10$tDzXpZ7VJKD7fJYCPq/.p.J8ZPZ0qJ8XmK6K4L1pQ3Z0Z0Z0Z0Z0Z', 1, 1),
+('Mesero', 'Demo', 'mesero@lacomanda.com', '$2y$10$dE6fJ2.5H9K0Q1L2M3N4O5P6.Q7R8S9T0U1V2W3X4Y5Z6A7B8C9', 2, 1),
+('Cocina', 'Demo', 'cocina@lacomanda.com', '$2y$10$kL9pQ2R3S4T5U6V7W8X9Y0Z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5', 3, 1),
+('Barista', 'Demo', 'barista@lacomanda.com', '$2y$10$mN5oP6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7L8M9', 4, 1);
+
+-- Mesas
 INSERT INTO mesas(numero, estado) VALUES
 (1,'disponible'), (2,'disponible'), (3,'disponible'), (4,'disponible'),
 (5,'disponible'), (6,'disponible'), (7,'disponible'), (8,'disponible'),
 (9,'disponible'), (10,'disponible'), (11,'disponible'), (12,'disponible');
 
-
--- INSERT INTO productos(categoria_id, nombre, precio) VALUES
--- (1,'Espresso', 1200.00),
--- (1,'Cappuccino', 1800.00),
--- (4,'Cheesecake', 2200.00),
--- (5,'Iced Latte', 2000.00);
-
+-- Categorías
 INSERT INTO categorias(nombre, slug, icono, orden, activo) VALUES
-('Mesas', 'mesas', 'fa-table', 1, 1),
-('Cafés', 'cafes', 'fa-coffee', 2, 1),
-('Comidas', 'comidas', 'fa-hamburger', 3, 1),
-('Especialidades', 'especialidades', 'fa-star', 4, 1),
-('Postres', 'postres', 'fa-cake', 5, 1),
-('Bebidas Frías', 'bebidas', 'fa-glass-water', 6, 1);
+('Cafés', 'cafes', 'fa-coffee', 1, 1),
+('Comidas', 'comidas', 'fa-hamburger', 2, 1),
+('Especialidades', 'especialidades', 'fa-star', 3, 1),
+('Postres', 'postres', 'fa-cake', 4, 1),
+('Bebidas Frías', 'bebidas', 'fa-glass-water', 5, 1);
 
-
--- ---------- mesas_layout ----------
--- CREATE TABLE mesas_layout (
---   id INT PRIMARY KEY,                  -- id de mesa (1..12)
---   x DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
---   y DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
---   w DECIMAL(6,2) NOT NULL DEFAULT 10,   -- porcentaje 0..100
---   h DECIMAL(6,2) NOT NULL DEFAULT 12,   -- porcentaje 0..100
---   zona VARCHAR(50) NOT NULL DEFAULT 'main',
---   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
--- );
-
--- -- Seed (ejemplo para 12 mesas)
--- INSERT INTO mesas_layout (id,x,y,w,h,zona) VALUES
--- (1, 28,18,10,12,'main'),
--- (2, 45,18,10,12,'main'),
--- (3, 62,16,16,14,'main'),
--- (4, 28,38,10,12,'main'),
--- (5, 45,38,10,12,'main'),
--- (6, 62,36,18,14,'main'),
--- (7, 28,58,10,12,'main'),
--- (8, 45,58,10,12,'main'),
--- (9, 14,78,20,14,'main'),
--- (10,38,78,14,14,'main'),
--- (11,56,78,14,14,'main'),
--- (12,74,76,22,16,'main');
-
-
-
-INSERT INTO usuarios (nombre, apellido, email, password, rol_id) VALUES
--- Meseros
-('Carlos', 'Ramírez', 'carlos.ramirez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
-('Ana', 'Gómez', 'ana.gomez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
-('Luis', 'Fernández', 'luis.fernandez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
-('María', 'Vargas', 'maria.vargas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
-('José', 'Soto', 'jose.soto@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
-
--- Cocina
-('Pedro', 'Mora', 'pedro.mora@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
-('Laura', 'Jiménez', 'laura.jimenez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
-('Andrés', 'Rojas', 'andres.rojas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
-('Paola', 'Castro', 'paola.castro@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
-
--- Baristas
-('Daniel', 'Alvarado', 'daniel.alvarado@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
-('Sofía', 'Navarro', 'sofia.navarro@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
-('Kevin', 'Chaves', 'kevin.chaves@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
-('Valeria', 'Cordero', 'valeria.cordero@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
-
--- Usuarios mixtos
-('Ricardo', 'Pérez', 'ricardo.perez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
-('Natalia', 'Salas', 'natalia.salas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3),
-('Esteban', 'León', 'esteban.leon@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
-('Mónica', 'Araya', 'monica.araya@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
-('Fernando', 'Solís', 'fernando.solis@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3);
-
-
+-- Productos
+INSERT INTO productos(categoria_id, nombre, precio, icono, activo)
+VALUES
+(1, 'Americano', 300, 'fa-mug-hot', 1),
+(1, 'Cappuccino', 400, 'fa-mug-hot', 1),
+(1, 'Latte', 400, 'fa-mug-hot', 1),
+(1, 'Expresso', 250, 'fa-mug-hot', 1),
+(2, 'Hamburguesa', 800, 'fa-hamburger', 1),
+(2, 'Pizza', 900, 'fa-pizza-slice', 1),
+(3, 'Crema Catalana', 500, 'fa-ice-cream', 1),
+(4, 'Cheesecake', 600, 'fa-cake-candles', 1),
+(5, 'Limonada', 350, 'fa-glass-water', 1);

@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             (int)$old["activo"]
         );
 
-        header("Location: /LaComanda/views/admin/productos.php?created=1");
+        header("Location: /LaComanda-main/views/admin/productos.php?created=1");
         exit;
     } catch (Throwable $e) {
         $errors[] = $e->getMessage();

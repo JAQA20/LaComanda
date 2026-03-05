@@ -6,7 +6,7 @@ class Conexion
         $conexion = new mysqli(
             "127.0.0.1",
             "root",
-            "12345678",
+            "",
             "la_comanda",
             3306
         );
@@ -22,5 +22,5 @@ class Conexion
 
 //--------------------------------------------------------------------------------------------
 
-$conexion = new mysqli("127.0.0.1", "root", "12345678", "la_comanda", "3306");
+$conexion = new mysqli("127.0.0.1", "root", "", "la_comanda", "3306");
 $conexion->set_charset("utf8");

@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     try {
         Productos::actualizar($idPost, $categoria_id, $nombre, $precio, $icono, $activo);
-        header("Location: /LaComanda/views/admin/productos.php?updated=1");
+        header("Location: /LaComanda-main/views/admin/productos.php?updated=1");
         exit;
     } catch (Throwable $e) {
         $errors[] = $e->getMessage();

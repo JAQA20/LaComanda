@@ -26,7 +26,7 @@ $usuarios = Usuarios::listar();
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <!-- Estilos propios -->
-    <link rel="stylesheet" href="/LaComanda/public/css/admin-usuarios.css">
+    <link rel="stylesheet" href="/LaComanda-main/public/css/admin-usuarios.css">
 </head>
 
 <body class="bg-comanda">
@@ -111,7 +111,7 @@ $usuarios = Usuarios::listar();
                                         <td class="text-end">
                                             <!-- Editar -->
                                             <a class="btn btn-sm btn-light"
-                                                href="/LaComanda/controller/editarUsuarioController.php?id=<?= (int)$u['id'] ?>"
+                                                href="/LaComanda-main/controller/editarUsuarioController.php?id=<?= (int)$u['id'] ?>"
                                                 title="Editar">
                                                 <i class="fa-solid fa-pen"></i>
                                             </a>
@@ -120,7 +120,7 @@ $usuarios = Usuarios::listar();
                                             <?php if ((int)$u["id"] !== 1 && (int)$u["id"] !== 3): ?>
                                                 -<form class="d-inline form-eliminar-usuario"
                                                     method="POST"
-                                                    action="/LaComanda/controller/eliminarUsuarioController.php">
+                                                    action="/LaComanda-main/controller/eliminarUsuarioController.php">
                                                     <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
                                                     <button type="submit"
                                                         class="btn btn-sm btn-light text-danger"
@@ -162,7 +162,7 @@ $usuarios = Usuarios::listar();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Script propio -->
-    <script src="/LaComanda/public/js/admin-usuarios.js"></script>
+    <script src="/LaComanda-main/public/js/admin-usuarios.js"></script>
 
 
 </body>

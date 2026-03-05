@@ -37,7 +37,7 @@ verificarRol([1]); // solo Admin
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- ✅ Tu CSS principal (ABSOLUTO) -->
-    <link rel="stylesheet" href="/LaComanda/public/css/style.css">
+    <link rel="stylesheet" href="/LaComanda-main/public/css/style.css">
 
 
 

@@ -20,7 +20,7 @@ verificarRol([1]);
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <!-- ✅ SIEMPRE ABSOLUTO -->
-    <link rel="stylesheet" href="/LaComanda/public/css/admin-nuevo-usuario.css">
+    <link rel="stylesheet" href="/LaComanda-main/public/css/admin-nuevo-usuario.css">
 </head>
 
 <body class="bg-comanda">
@@ -36,7 +36,7 @@ verificarRol([1]);
                     <div class="text-muted small">Solo administradores pueden registrar usuarios</div>
                 </div>
 
-                <a href="/LaComanda/views/admin/usuarios.php" class="btn btn-outline-brown px-3 py-2">
+                <a href="/LaComanda-main/views/admin/usuarios.php" class="btn btn-outline-brown px-3 py-2">
                     <i class="fa-solid fa-arrow-left me-2"></i> Volver
                 </a>
             </div>
@@ -56,7 +56,7 @@ verificarRol([1]);
                 <div class="card-body p-4 p-md-5">
 
                     <!-- ✅ POST al controller -->
-                    <form method="POST" action="/LaComanda/controller/nuevoUsuarioController.php" class="row g-3" novalidate>
+                    <form method="POST" action="/LaComanda-main/controller/nuevoUsuarioController.php" class="row g-3" novalidate>
 
                         <div class="col-md-6">
                             <label class="form-label label-comanda">Nombre</label>
@@ -113,7 +113,7 @@ verificarRol([1]);
                         </div>
 
                         <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                            <a href="/LaComanda/views/admin/usuarios.php" class="btn btn-outline-brown px-4 py-2">
+                            <a href="/LaComanda-main/views/admin/usuarios.php" class="btn btn-outline-brown px-4 py-2">
                                 Cancelar
                             </a>
                             <button type="submit" class="btn btn-mint px-4 py-2">
@@ -134,7 +134,7 @@ verificarRol([1]);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
-    <script src="/LaComanda/public/js/togglePassword.js"></script>
+    <script src="/LaComanda-main/public/js/togglePassword.js"></script>
 </body>
 
 </html>

@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 function verificarRol(array $rolesPermitidos = [])
 {
     if (!isset($_SESSION["rol_id"])) {
-        header("Location: /LaComanda/views/login.php");
+        header("Location: /LaComanda-main/views/login.php");
         exit;
     }
 
@@ -18,7 +18,7 @@ function verificarRol(array $rolesPermitidos = [])
     if ($rol === 1) return;
 
     if (!in_array($rol, $rolesPermitidos, true)) {
-        header("Location: /LaComanda/views/accesoRestringido.php");
+        header("Location: /LaComanda-main/views/accesoRestringido.php");
         exit;
     }
 }

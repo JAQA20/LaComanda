@@ -34,7 +34,7 @@ $rutaActual = $_SERVER["REQUEST_URI"];
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS principal -->
-    <link rel="stylesheet" href="/LaComanda/public/css/style.css">
+    <link rel="stylesheet" href="/LaComanda-main/public/css/style.css">
 
 
 </head>
@@ -54,34 +54,34 @@ $rutaActual = $_SERVER["REQUEST_URI"];
     <nav id="navbar" class="custom-brown fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 shadow-lg">
         <div class="flex items-center">
             <img class="h-10 w-10 object-contain mr-3"
-                src="/LaComanda/public/img/logotipo2.PNG"
+                src="/LaComanda-main/public/img/logotipo2.PNG"
                 alt="Cafetería Toscana" />
             <span class="text-beige text-xl font-semibold">Cafetería Toscana</span>
         </div>
 
         <div class="flex space-x-8 items-center">
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/admin.php', $rutaActual) ?>"
-                href="/LaComanda/views/admin/admin.php">
+                href="/LaComanda-main/views/admin/admin.php">
                 Dashboard
             </a>
 
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/index.php', $rutaActual) ?>"
-                href="/LaComanda/views/index.php">
+                href="/LaComanda-main/views/index.php">
                 Tomar ordenes
             </a>
 
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/usuarios.php', $rutaActual) || isActive('/controller/', $rutaActual) ? 'border-b-2 border-mint' : '' ?>"
-                href="/LaComanda/views/admin/usuarios.php">
+                href="/LaComanda-main/views/admin/usuarios.php">
                 Usuarios
             </a>
 
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/productos.php', $rutaActual) || isActive('/controller/', $rutaActual) ? 'border-b-2 border-mint' : '' ?>"
-                href="/LaComanda/views/admin/productos.php">
+                href="/LaComanda-main/views/admin/productos.php">
                 Productos
             </a>
 
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/ordenesAdmin.php', $rutaActual) ?>"
-                href="/LaComanda/views/admin/ordenesAdmin.php">
+                href="/LaComanda-main/views/admin/ordenesAdmin.php">
                 Historial de ordenes
             </a>
 
@@ -100,7 +100,7 @@ $rutaActual = $_SERVER["REQUEST_URI"];
                     </li>
 
                     <li>
-                        <a class="dropdown-item" href="/LaComanda/views/perfil.php">
+                        <a class="dropdown-item" href="/LaComanda-main/views/perfil.php">
                             <i class="fas fa-id-badge me-2"></i> Mi perfil
                         </a>
                     </li>
@@ -110,7 +110,7 @@ $rutaActual = $_SERVER["REQUEST_URI"];
                     </li>
 
                     <li>
-                        <a class="dropdown-item text-danger" href="/LaComanda/controller/logoutController.php">
+                        <a class="dropdown-item text-danger" href="/LaComanda-main/controller/logoutController.php">
                             <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
                         </a>
                     </li>
