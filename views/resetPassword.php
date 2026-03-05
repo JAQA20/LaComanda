@@ -3,7 +3,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-require_once __DIR__ . "../model/Conexion.php";
+require_once __DIR__ . "/../model/Conexion.php";
 
 $token = isset($_GET['token']) ? trim($_GET['token']) : (isset($_POST['token']) ? trim($_POST['token']) : null);
 $email = isset($_GET['email']) ? trim($_GET['email']) : (isset($_POST['email']) ? trim($_POST['email']) : null);
@@ -41,10 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
                 // Validar que el token existe y no ha expirado
                 $stmt = $conexion->prepare("
                     SELECT usuario_id FROM password_resets 
-                    WHERE token = :token AND expira_en > NOW() AND usado = 0 LIMIT 1
+                    WHERE token = ? AND expira_en > NOW() AND usado = 0 LIMIT 1
                 ");
-                $stmt->execute([':token' => $token]);
-                $reset = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$stmt) {
+                    throw new Exception("Error prepare: " . $conexion->error);
+                }
+
+                $stmt->bind_param("s", $token);
+                if (!$stmt->execute()) {
+                    throw new Exception("Error execute: " . $stmt->error);
+                }
+
+                $result = $stmt->get_result();
+                $reset = $result->fetch_assoc();
 
                 if (!$reset) {
                     $error = "El enlace de recuperación ha expirado o no es válido";
@@ -52,10 +61,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
                     // Verificar que el usuario existe y está activo
                     $user_stmt = $conexion->prepare("
                         SELECT id, email, activo FROM usuarios 
-                        WHERE id = :usuario_id AND activo = 1 LIMIT 1
+                        WHERE id = ? AND activo = 1 LIMIT 1
                     ");
-                    $user_stmt->execute([':usuario_id' => $reset['usuario_id']]);
-                    $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
+                    if (!$user_stmt) {
+                        throw new Exception("Error prepare user: " . $conexion->error);
+                    }
+
+                    $user_stmt->bind_param("i", $reset['usuario_id']);
+                    if (!$user_stmt->execute()) {
+                        throw new Exception("Error execute user: " . $user_stmt->error);
+                    }
+
+                    $user_result = $user_stmt->get_result();
+                    $user = $user_result->fetch_assoc();
 
                     if (!$user) {
                         $error = "El usuario no existe o ha sido desactivado";
@@ -67,41 +85,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
                         $update_success = false;
                         $token_marked = false;
 
-                        try {
-                            // Actualizar contraseña (usar hash password)
-                            $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
+                        // Actualizar contraseña con hash
+                        $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
 
-                            $upd = $conexion->prepare("
-                                UPDATE usuarios SET password = :password WHERE id = :usuario_id
-                            ");
-                            $upd_result = $upd->execute([
-                                ':password' => $hashed_password,
-                                ':usuario_id' => $reset['usuario_id']
-                            ]);
-
-                            if ($upd_result) {
-                                $update_success = true;
-                            } else {
-                                $error = "Error al actualizar contraseña en BD";
-                            }
-                        } catch (Exception $upd_err) {
-                            $error = "Error UPDATE usuarios: " . $upd_err->getMessage();
+                        $upd = $conexion->prepare("
+                            UPDATE usuarios SET password = ? WHERE id = ?
+                        ");
+                        if (!$upd) {
+                            throw new Exception("Error prepare update: " . $conexion->error);
                         }
 
-                        // Marcar token como usado (solo si la contraseña se actualizó)
-                        if ($update_success) {
-                            try {
-                                $del = $conexion->prepare("UPDATE password_resets SET usado = 1 WHERE token = :token");
-                                $del_result = $del->execute([':token' => $token]);
-
-                                if ($del_result) {
-                                    $token_marked = true;
-                                }
-                            } catch (Exception $del_err) {
-                                // No es crítico si el token no se marca
-                                error_log("Error marking token: " . $del_err->getMessage());
-                            }
+                        $upd->bind_param("si", $hashed_password, $reset['usuario_id']);
+                        if (!$upd->execute()) {
+                            throw new Exception("Error execute update: " . $upd->error);
                         }
+
+                        // Marcar token como usado
+                        $token_update = $conexion->prepare("UPDATE password_resets SET usado = 1 WHERE token = ?");
+                        if ($token_update) {
+                            $token_update->bind_param("s", $token);
+                            $token_update->execute();
+                        }
+
+                        $update_success = true;
+                        $token_marked = true;
 
                         if ($update_success) {
                             $success = true;
@@ -121,11 +128,15 @@ if ($token && $email && !$success) {
     try {
         $stmt = $conexion->prepare("
             SELECT usuario_id FROM password_resets 
-            WHERE token = :token AND expira_en > NOW() AND usado = 0 LIMIT 1
+            WHERE token = ? AND expira_en > NOW() AND usado = 0 LIMIT 1
         ");
-        $stmt->execute([':token' => $token]);
-        $reset = $stmt->fetch(PDO::FETCH_ASSOC);
-        $token_valid = ($reset !== false);
+        if ($stmt) {
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $reset = $result->fetch_assoc();
+            $token_valid = ($reset !== null);
+        }
     } catch (Exception $e) {
         $token_valid = false;
     }
@@ -177,7 +188,7 @@ if ($token && $email && !$success) {
                 <!-- Card Header -->
                 <div id="card-header" class="text-center mb-8">
                     <div class="w-40 h-40 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <img class="h-40 w-40 rounded-full flex items-center" src="../public/img/logotipo1.PNG" alt="Logo" />
+                        <img class="h-40 w-40 rounded-full flex items-center" src="/LaComanda-main/public/img/logotipo1.PNG" alt="Logo" />
                     </div>
                     <h2 class="text-2xl font-bold brand-brown mb-2">
                         <?php echo $success ? "Contraseña actualizada" : "Recuperar Contraseña"; ?>
@@ -206,7 +217,7 @@ if ($token && $email && !$success) {
                         <p class="text-red-700 text-sm font-medium">✗ El enlace ha expirado. Solicita uno nuevo.</p>
                     </div>
 
-                    <a href="./login.php"
+                    <a href="/LaComanda-main/views/login.php"
                         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none transition-all duration-200">
                         Volver al login
                     </a>
@@ -278,7 +289,7 @@ if ($token && $email && !$success) {
                         </div>
 
                         <div class="text-center text-sm">
-                            <a href="./login.php" class="text-green-600 hover:underline font-medium">
+                            <a href="/LaComanda-main/views/login.php" class="text-green-600 hover:underline font-medium">
                                 Volver al login
                             </a>
                         </div>

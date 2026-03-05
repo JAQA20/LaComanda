@@ -15,7 +15,7 @@ $usuario = null;
 
 $id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 if ($id <= 0) {
-    header("Location: /LaComanda/views/admin/usuarios.php");
+    header("Location: /LaComanda-main/views/admin/usuarios.php");
     exit;
 }
 
@@ -24,7 +24,7 @@ try {
     $roles = Usuarios::listarRoles();
     $usuario = Usuarios::obtenerPorId($id);
     if (!$usuario) {
-        header("Location: /LaComanda/views/admin/usuarios.php");
+        header("Location: /LaComanda-main/views/admin/usuarios.php");
         exit;
     }
 } catch (Throwable $e) {
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         Usuarios::actualizar($id, $nombre, $apellido, $email, (int)$rol_id, $passToUpdate);
 
-        header("Location: /LaComanda/views/admin/usuarios.php");
+        header("Location: /LaComanda-main/views/admin/usuarios.php");
         exit;
     } catch (Throwable $e) {
         $errors[] = $e->getMessage();

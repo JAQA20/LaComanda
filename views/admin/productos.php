@@ -73,7 +73,7 @@ $productos = Productos::listar();
                     <div class="text-muted small">Gestión de productos del menú</div>
                 </div>
 
-                <a href="/LaComanda/controller/nuevoProductoController.php" class="btn btn-mint px-3 py-2">
+                <a href="/LaComanda-main/controller/nuevoProductoController.php" class="btn btn-mint px-3 py-2">
                     <i class="fa-solid fa-plus me-2"></i>
                     Agregar nuevo producto
                 </a>
@@ -128,14 +128,14 @@ $productos = Productos::listar();
 
                                         <td class="text-end">
                                             <a class="btn btn-sm btn-light"
-                                                href="/LaComanda/controller/editarProductoController.php?id=<?= (int)$p['id'] ?>"
+                                                href="/LaComanda-main/controller/editarProductoController.php?id=<?= (int)$p['id'] ?>"
                                                 title="Editar">
                                                 <i class="fa-solid fa-pen"></i>
                                             </a>
 
                                             <form class="d-inline form-eliminar-producto"
                                                 method="POST"
-                                                action="/LaComanda/controller/eliminarProductosController.php">
+                                                action="/LaComanda-main/controller/eliminarProductosController.php">
                                                 <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
                                                 <button type="submit"
                                                     class="btn btn-sm btn-light text-danger"
@@ -170,7 +170,7 @@ $productos = Productos::listar();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Script propio -->
-    <script src="/LaComanda/public/js/admin-productos.js"></script>
+    <script src="/LaComanda-main/public/js/admin-productos.js"></script>
 
 </body>
 

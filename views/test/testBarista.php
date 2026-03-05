@@ -1,5 +1,5 @@
 <?php
-require 'db/conexion.php';
+require __DIR__ . '/../../db/Conexion.php';
 
 $stmt = $conexion->prepare('SELECT id, password FROM usuarios WHERE email = ?');
 $stmt->execute(['barista@lacomanda.com']);

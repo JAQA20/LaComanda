@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+// obtener conexión de forma explícita (antes dependíamos del include de login.php)
+require_once __DIR__ . "/../model/Conexion.php";
+$conexion = Conexion::conectar();
+
 //controller con manejo de roles y seguridad mejorada
 
 if (!empty($_POST["btnlogin"])) {

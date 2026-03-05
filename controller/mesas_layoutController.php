@@ -1,6 +1,6 @@
  <?php
     header("Content-Type: application/json; charset=utf-8");
-    require_once "../model/MesaLayout.php";
+    require_once __DIR__ . "/../model/MesaLayout.php";
 
     $zona = $_GET["zona"] ?? "main";
 

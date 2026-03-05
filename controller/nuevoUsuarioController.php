@@ -50,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             (int)$old["rol_id"]
         );
 
-        header("Location: /LaComanda/views/admin/usuarios.php?created=1");
+        header("Location: /LaComanda-main/views/admin/usuarios.php?created=1");
         exit;
     } catch (Throwable $e) {
         $errors[] = $e->getMessage();

@@ -57,7 +57,7 @@ header("Expires: 0");
                 </div>
 
                 <!-- Forgot Form -->
-                <form id="forgot-form" class="space-y-6" method="POST" action="../controller/forgot_password.php">
+                <form id="forgot-form" class="space-y-6" method="POST" action="../controller/forgot_passwordController.php">
 
                     <!-- Email Field -->
                     <div id="email-field" class="space-y-2">
