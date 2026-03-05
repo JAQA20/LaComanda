@@ -1,11 +1,21 @@
 <?php
-//session_start();
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+session_start();
+
+if (isset($_SESSION["usuario_id"])) {
+    header("Location: ./index.php");
+    exit;
+}
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
 
 require_once __DIR__ . '/../model/conexion.php';
 require_once __DIR__ . '/../controller/loginController.php';
+
+
+
 ?>
+
+
 
 
 <!DOCTYPE html>
@@ -130,7 +140,7 @@ require_once __DIR__ . '/../controller/loginController.php';
                         -->
                         </div>
                         <div class="text-sm">
-                            <a href="#" class="font-medium text-brand-green hover:underline">
+                            <a href="./forgotPassword.php" class="font-medium text-brand-green hover:underline">
                                 ¿Olvidaste tu contraseña?
                             </a>
                         </div>
@@ -159,20 +169,21 @@ require_once __DIR__ . '/../controller/loginController.php';
 
     <script>
         //Mostrar contrasenia
-        document.getElementById('toggle-password').addEventListener('click', function() {
-            const passwordField = document.getElementById('password');
-            const icon = this.querySelector('i');
+        document.addEventListener("DOMContentLoaded", () => {
+            const btn = document.getElementById("togglePassword");
+            const input = document.getElementById("password");
 
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordField.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+            if (!btn || !input) return;
+
+            btn.addEventListener("click", () => {
+                const isPass = input.type === "password";
+                input.type = isPass ? "text" : "password";
+                btn.innerHTML = isPass ?
+                    '<i class="fa-solid fa-eye-slash"></i>' :
+                    '<i class="fa-solid fa-eye"></i>';
+            });
         });
+
 
         // Efectos de carga
         const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');

@@ -1,30 +1,9 @@
 <?php
 session_start();
 
-//validacion basica de login 
-
-// if (!empty($_POST["btnlogin"])) {
-//     if (!empty($_POST["email"]) and !empty($_POST["password"])) {
-//         $email = $_POST["email"];
-//         //$password = md5($_POST["password"]); // md5 to enctrypt pwds
-//         $password = md5($_POST["password"]);
-//         echo $email;
-//         echo $password;
-//         $sql = $conexion->query("select * from usuarios where email='$email' and password='$password' limit 1");
-//         if ($data = $sql->fetch_object()) {
-//             $_SESSION["nombre"] = $data->nombre;
-//             $_SESSION["apellido"] = $data->apellido;
-//             header("location:../views/index.php");
-//             exit;
-//         } else {
-//             echo "<div class='alert alert-danger'> Incorrect email or password </div>";
-//         }
-//     } else {
-//         echo "<div class='alert alert-danger'> Please enter an email and password </div>";
-//     }
-// }
-
-//--------------------------------------------------------------------------------------------
+// obtener conexión de forma explícita (antes dependíamos del include de login.php)
+require_once __DIR__ . "/../model/Conexion.php";
+$conexion = Conexion::conectar();
 
 //controller con manejo de roles y seguridad mejorada
 
@@ -62,8 +41,8 @@ if (!empty($_POST["btnlogin"])) {
     if ($user = $result->fetch_assoc()) {
 
         // Verificar password (si se usa password_hash en BD)
-        //if (password_verify($password, $user["password"])) 
-        if ($password === $user["password"]) { // comparación simple, no segura
+        if (password_verify($password, $user["password"])) { // Comparación segura con hash
+            // if ($password === $user["password"]) { // comparación simple, no segura
 
 
             // Guardar sesión
@@ -76,7 +55,7 @@ if (!empty($_POST["btnlogin"])) {
             // Redirección por rol
             switch ($_SESSION["rol_id"]) {
                 case 1: // Admin
-                    header("Location: ../views/admin.php");
+                    header("Location: ../views/admin/admin.php");
                     exit;
 
                 case 2: // Mesero
@@ -85,6 +64,9 @@ if (!empty($_POST["btnlogin"])) {
 
                 case 3: // Cocina
                     header("Location: ../views/cocina.php");
+                    exit;
+                case 4: // Barista 
+                    header("Location: ../views/barista.php");
                     exit;
 
                 default:

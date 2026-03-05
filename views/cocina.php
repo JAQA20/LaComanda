@@ -1,4 +1,8 @@
 <?php
+require_once "../middleware/auth.php";
+require_once "../middleware/roles.php";
+
+verificarRol([1, 3]); // Admin(1) y Cocina(3)
 
 $archivo = __DIR__ . "/../controller/ordenes.json";
 $ordenes = file_exists($archivo)
@@ -27,6 +31,7 @@ if (!is_array($ordenes)) {
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="..//public/css/cocina.css">
+    <a href="../middleware/"></a>
     <script>
         tailwind.config = {
             theme: {
@@ -112,7 +117,7 @@ if (!is_array($ordenes)) {
                 <?php foreach ($ordenes as $orden): ?>
                     <?php if (isset($orden["estado"]) && $orden["estado"] === "pendiente"): ?>
 
-                        <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-gray-100">
+                        <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
 
                             <!-- Encabezado -->
                             <div class="flex items-center justify-between mb-4">
@@ -153,15 +158,16 @@ if (!is_array($ordenes)) {
                                 </div>
                             </div>
 
-                            <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
-                            <form action="../controller/marcarEntrega.php" method="POST">
-                                <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>">
-                                <button
-                                    class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200" hidden>
-                                    Marcar como entregada
-                                </button>
-                            </form>
-
+                            <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
+                                <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
+                                <form action="../controller/marcarEntrega.php" method="POST">
+                                    <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>"></input>
+                                    <button
+                                        class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
+                                        Marcar como entregada
+                                    </button>
+                                </form>
+                            <?php endif; ?>
                         </div>
 
                     <?php endif; ?>

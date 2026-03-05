@@ -18,7 +18,7 @@
 </head>
 
 <body>
-    <aside id="sidebar" class="w-1/4 custom-beige p-6 border-r border-gray-200 shadow-sm">
+    <aside id="sidebar" class="w-1/4 custom-beige p-6 border-l border-gray-200 shadow-sm">
         <div class="bg-white rounded-xl p-6 shadow-sm">
             <h2 class="text-brown text-xl font-semibold mb-4 flex items-center">
                 <i class="fas fa-receipt mr-2"></i>

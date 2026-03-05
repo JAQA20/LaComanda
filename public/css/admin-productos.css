@@ -1,0 +1,52 @@
+
+.bg-comanda { background: #f6f0e6; }
+
+.text-brown { color: #4b2e2a; }
+
+.card-comanda {
+  border: 0;
+  border-radius: 16px;
+}
+
+.btn-mint {
+  background: #70A38F !important;
+  border-color: #70A38F !important;
+  color: #fff !important;
+}
+.btn-mint:hover {
+  filter: brightness(0.95);
+  color: #fff !important;
+}
+
+.btn-outline-brown {
+  border: 1px solid #4b2e2a;
+  color: #4b2e2a;
+}
+.btn-outline-brown:hover {
+  background: #4b2e2a;
+  color: #fff;
+}
+
+.icon-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(112, 163, 143, 0.15);
+  color: #4b2e2a;
+}
+
+.badge-category {
+  background: rgba(75, 46, 42);
+  color: #4b2e2a;
+  border: 1px solid rgba(75, 46, 42, 0.15);
+  font-weight: 600;
+}
+
+/* Inputs DataTables */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select{
+  border-radius: 10px !important;
+}
