@@ -1,7 +1,7 @@
 <?php
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 require_once __DIR__ . "/../../middleware/auth.php";
@@ -36,7 +36,7 @@ verificarRol([1]); // solo Admin
     <!-- Fuente -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- ✅ Tu CSS principal (ABSOLUTO) -->
+    <!-- âœ… Tu CSS principal (ABSOLUTO) -->
     <link rel="stylesheet" href="/LaComanda/public/css/style.css">
 
 
@@ -58,46 +58,38 @@ verificarRol([1]); // solo Admin
             <div id="mesas-view" class="block">
                 <h1 class="text-brown text-3xl font-bold mb-8">Admin-Dashboard</h1>
                 <div class="grid grid-cols-4 gap-6">
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <a href="./usuarios.php"><i class="fas fa-user text-white text-xl"></i></a>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Usuarios</h3>
-                        </div>
-                    </div>
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer">
-                        <div class="text-center">
-                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-chart-simple text-white text-xl"></i>
-                            </div>
-                            <h3 class="text-brown font-semibold text-lg">Reportes</h3>
-                        </div>
-                    </div>
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer">
+                    <a href="./usuarios.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-user text-white text-xl"></i>
                             </div>
                             <h3 class="text-brown font-semibold text-lg">Usuarios</h3>
                         </div>
-                    </div>
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer">
+                    </a>
+                    <a href="./productos.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-user text-white text-xl"></i>
+                                <i class="fas fa-box text-white text-xl"></i>
                             </div>
-                            <h3 class="text-brown font-semibold text-lg">Usuarios</h3>
+                            <h3 class="text-brown font-semibold text-lg">Productos</h3>
                         </div>
-                    </div>
-                    <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer">
+                    </a>
+                    <a href="./ordenesAdmin.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-user text-white text-xl"></i>
+                                <i class="fas fa-receipt text-white text-xl"></i>
                             </div>
-                            <h3 class="text-brown font-semibold text-lg">Usuarios</h3>
+                            <h3 class="text-brown font-semibold text-lg">Historial de órdenes</h3>
                         </div>
-                    </div>
+                    </a>
+                    <a href="../index.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
+                        <div class="text-center">
+                            <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-utensils text-white text-xl"></i>
+                            </div>
+                            <h3 class="text-brown font-semibold text-lg">Tomar órdenes</h3>
+                        </div>
+                    </a>
                 </div>
             </div>
         </main>
@@ -107,6 +99,7 @@ verificarRol([1]); // solo Admin
     <?php
     include '../layout/footer.php';
     ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

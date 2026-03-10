@@ -2,6 +2,9 @@
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
+
+// ini_set('display_errors', 1);
+// error_reporting(E_ALL);
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +60,7 @@ header("Expires: 0");
                 </div>
 
                 <!-- Forgot Form -->
-                <form id="forgot-form" class="space-y-6" method="POST" action="../controller/forgot_password.php">
+                <form id="forgot-form" class="space-y-6" method="POST" action="../controller/forgot_passwordController.php">
 
                     <!-- Email Field -->
                     <div id="email-field" class="space-y-2">
@@ -122,34 +125,14 @@ header("Expires: 0");
                 const data = await response.json();
 
                 if (data.status === 'OK') {
-                    if (data.found && data.reset_link) {
-                        // Mostrar enlace directo para cambiar contraseña
-                        const resetUrl = data.reset_link;
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Enlace de Recuperación',
-                            html: `<p>${data.message}</p>
-                                   <div style="margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 8px;">
-                                   <a href="${resetUrl}" class="btn" style="display: inline-block; background-color: #70A38F; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Cambiar Contraseña</a>
-                                   </div>
-                                   <p style="margin-top: 15px; font-size: 12px; color: #666;">O copia este enlace en tu navegador:<br><code style="word-break: break-all;">${resetUrl}</code></p>`,
-                            confirmButtonText: 'Aceptar',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false
-                        }).then(() => {
-                            window.location.href = './login.php';
-                        });
-                    } else {
-                        // Email no encontrado (por seguridad mostramos igual el mensaje genérico)
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Solicitud procesada',
-                            html: data.message + '<br><br><small style="color:#666;">Si tu email está registrado, podrás cambiar tu contraseña.</small>',
-                            confirmButtonText: 'Aceptar'
-                        }).then(() => {
-                            window.location.href = './login.php';
-                        });
-                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Solicitud procesada',
+                        html: data.message + '<br><br><small style="color:#666;">Revisa tu bandeja de entrada y spam.</small>',
+                        confirmButtonText: 'Aceptar'
+                    }).then(() => {
+                        window.location.href = './login.php';
+                    });
                 } else {
                     throw new Error(data.message || 'Error desconocido');
                 }

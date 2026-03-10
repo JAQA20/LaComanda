@@ -3,24 +3,51 @@ class Conexion
 {
     public static function conectar()
     {
-        $conexion = new mysqli(
-            "127.0.0.1",
-            "root",
-            "12345678",
-            "la_comanda",
-            3306
-        );
+        $host = getenv('DB_HOST') ?: '127.0.0.1';
+        $user = getenv('DB_USER') ?: 'root';
 
-        if ($conexion->connect_error) {
-            die("Error de conexión: " . $conexion->connect_error);
+        $password = getenv('DB_PASSWORD');
+        if ($password === false) {
+            $password = '12345678';
         }
 
-        $conexion->set_charset("utf8");
+        $database = getenv('DB_NAME') ?: 'la_comanda';
+        $port = (int)(getenv('DB_PORT') ?: 3306);
+
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT); // Anadimos para que mysqli lance excepciones en caso de error
+
+        $conexion = new mysqli($host, $user, $password, $database, $port);
+        $conexion->set_charset("utf8mb4");
+
         return $conexion;
     }
 }
+$conexion = Conexion::conectar();
 
-//--------------------------------------------------------------------------------------------
 
-$conexion = new mysqli("127.0.0.1", "root", "12345678", "la_comanda", "3306");
-$conexion->set_charset("utf8");
+
+// class Conexion
+// {
+//     public static function conectar()
+//     {
+//         $host = getenv('DB_HOST') ?: '127.0.0.1';
+//         $user = getenv('DB_USER') ?: 'root';
+//         $password = getenv('DB_PASSWORD');
+//         if ($password === false) {
+//             $password = '12345678';
+//         }
+//         $database = getenv('DB_NAME') ?: 'la_comanda';
+//         $port = (int)(getenv('DB_PORT') ?: 3306);
+
+//         $conexion = new mysqli($host, $user, $password, $database, $port);
+
+//         if ($conexion->connect_error) {
+//             die("Error de conexión: " . $conexion->connect_error); //Eliminamos el die() para evitar mostrar errores en producción, pero podríamos loguear el error aquí.
+//         }
+
+//         $conexion->set_charset("utf8");
+//         return $conexion;
+//     }
+// }
+
+// $conexion = Conexion::conectar();

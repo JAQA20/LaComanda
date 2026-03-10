@@ -15,7 +15,7 @@
         display: none !important;
         }
 
-        /* Croquis de mesas */
+     
        
   /* Mesa base */
   .mesa {
@@ -68,6 +68,24 @@
     box-shadow: 0 2px 8px rgba(0,0,0,.12);
     white-space: nowrap;
   }
+  
+
+        #orden-items::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #orden-items::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #orden-items::-webkit-scrollbar-thumb {
+            background: rgba(112, 163, 143, 0.35);
+            border-radius: 9999px;
+        }
+
+        #orden-items::-webkit-scrollbar-thumb:hover {
+            background: rgba(112, 163, 143, 0.55);
+        }
 
 
         

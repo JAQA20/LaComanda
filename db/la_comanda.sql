@@ -20,6 +20,7 @@ CREATE TABLE usuarios (
   nombre VARCHAR(100) NOT NULL,
   apellido varchar(100) NOT NULL, 
   email VARCHAR(50) NOT NULL UNIQUE,
+  activo INT NOT NULL DEFAULT 1,
   password VARCHAR(255) NOT NULL,
   rol_id INT NOT NULL,
   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -54,10 +55,6 @@ CREATE TABLE productos (
   creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
-
-INSERT INTO productos(categoria_id, nombre, precio, activo)
-VALUES
-(2, 'Americano', 5000, 1);
 
 -- ---------- Órdenes ----------
 -- CREATE TABLE ordenes (
@@ -105,21 +102,15 @@ INSERT INTO roles(nombre) VALUES ('admin'), ('mesero'), ('cocina'), ('barista');
 
 INSERT INTO usuarios(nombre, apellido, email, password, rol_id)
 VALUES
-('Admin', 'admin', 'admin@proyecto.com', 'Admin123!', 1),
+('Admin', 'admin', 'admin@proyecto.com', '$2y$10$GKsD.e.cZoSYxMDBbMBHFOgo.Y30c/q2EZ2dIsawRMwe/JVp5NrJy', 1),
 ('Mesero', 'mesero', 'mesero@proyecto.com', 'Mesero123!', 2),
-('Cocina', 'cocina', 'cocina@proyecto.com', 'Cocina123!', 3);
+('Cocina', 'cocina', 'cocina@proyecto.com', 'Cocina123!', 3),
+('Barista', 'barista','barista@lacomanda.com','Barista123!',4);
 
-INSERT INTO mesas(numero, estado) VALUES
+INSERT INTO mesas(numero, estado) VALUES 
 (1,'disponible'), (2,'disponible'), (3,'disponible'), (4,'disponible'),
 (5,'disponible'), (6,'disponible'), (7,'disponible'), (8,'disponible'),
 (9,'disponible'), (10,'disponible'), (11,'disponible'), (12,'disponible');
-
-
--- INSERT INTO productos(categoria_id, nombre, precio) VALUES
--- (1,'Espresso', 1200.00),
--- (1,'Cappuccino', 1800.00),
--- (4,'Cheesecake', 2200.00),
--- (5,'Iced Latte', 2000.00);
 
 INSERT INTO categorias(nombre, slug, icono, orden, activo) VALUES
 ('Mesas', 'mesas', 'fa-table', 1, 1),
@@ -128,35 +119,7 @@ INSERT INTO categorias(nombre, slug, icono, orden, activo) VALUES
 ('Especialidades', 'especialidades', 'fa-star', 4, 1),
 ('Postres', 'postres', 'fa-cake', 5, 1),
 ('Bebidas Frías', 'bebidas', 'fa-glass-water', 6, 1);
-
-
--- ---------- mesas_layout ----------
--- CREATE TABLE mesas_layout (
---   id INT PRIMARY KEY,                  -- id de mesa (1..12)
---   x DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
---   y DECIMAL(6,2) NOT NULL,              -- porcentaje 0..100
---   w DECIMAL(6,2) NOT NULL DEFAULT 10,   -- porcentaje 0..100
---   h DECIMAL(6,2) NOT NULL DEFAULT 12,   -- porcentaje 0..100
---   zona VARCHAR(50) NOT NULL DEFAULT 'main',
---   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
--- );
-
--- -- Seed (ejemplo para 12 mesas)
--- INSERT INTO mesas_layout (id,x,y,w,h,zona) VALUES
--- (1, 28,18,10,12,'main'),
--- (2, 45,18,10,12,'main'),
--- (3, 62,16,16,14,'main'),
--- (4, 28,38,10,12,'main'),
--- (5, 45,38,10,12,'main'),
--- (6, 62,36,18,14,'main'),
--- (7, 28,58,10,12,'main'),
--- (8, 45,58,10,12,'main'),
--- (9, 14,78,20,14,'main'),
--- (10,38,78,14,14,'main'),
--- (11,56,78,14,14,'main'),
--- (12,74,76,22,16,'main');
-
-
+-- ---------- FIN Datos iniciales ----------
 
 INSERT INTO usuarios (nombre, apellido, email, password, rol_id) VALUES
 -- Meseros
@@ -184,5 +147,90 @@ INSERT INTO usuarios (nombre, apellido, email, password, rol_id) VALUES
 ('Esteban', 'León', 'esteban.leon@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4),
 ('Mónica', 'Araya', 'monica.araya@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2),
 ('Fernando', 'Solís', 'fernando.solis@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3);
+
+INSERT INTO productos (categoria_id, nombre, precio, icono, activo)
+SELECT c.id, v.nombre, v.precio, v.icono, 1
+FROM categorias c
+JOIN (
+    SELECT 'cafes' AS slug, 'Espresso' AS nombre, 1800 AS precio, 'fa-mug-hot' AS icono
+    UNION ALL SELECT 'cafes', 'Capuccino', 2400, 'fa-mug-hot'
+    UNION ALL SELECT 'comidas', 'Sandwich de Pollo', 4200, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Panini Toscana', 4800, 'fa-bread-slice'
+    UNION ALL SELECT 'especialidades', 'Frappé Caramelo', 3200, 'fa-blender'
+    UNION ALL SELECT 'especialidades', 'Mocaccino Especial', 3500, 'fa-star'
+    UNION ALL SELECT 'postres', 'Cheesecake', 2800, 'fa-cake-candles'
+    UNION ALL SELECT 'postres', 'Brownie con Helado', 3000, 'fa-ice-cream'
+    UNION ALL SELECT 'bebidas', 'Iced Latte', 2900, 'fa-glass-water'
+    UNION ALL SELECT 'bebidas', 'Té Frío Durazno', 2500, 'fa-glass-water'
+) v ON v.slug = c.slug
+LEFT JOIN productos p ON p.categoria_id = c.id AND p.nombre = v.nombre
+WHERE p.id IS NULL;
+
+INSERT INTO productos (categoria_id, nombre, precio, icono, activo)
+SELECT c.id, v.nombre, v.precio, v.icono, 1
+FROM categorias c
+JOIN (
+    -- CAFES
+    SELECT 'cafes' AS slug, 'Espresso' AS nombre, 1800 AS precio, 'fa-mug-hot' AS icono
+    UNION ALL SELECT 'cafes', 'Capuccino', 2400, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Latte', 2600, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Americano', 2000, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Mocha', 2800, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Macchiato', 2500, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Café Negro', 1700, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Café con Leche', 2200, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Café Vainilla', 2900, 'fa-mug-hot'
+    UNION ALL SELECT 'cafes', 'Flat White', 2700, 'fa-mug-hot'
+
+    -- COMIDAS
+    UNION ALL SELECT 'comidas', 'Sandwich de Pollo', 4200, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Panini Toscana', 4800, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Croissant de Jamón y Queso', 3500, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Wrap de Pavo', 3900, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Bagel de Salmón', 5200, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Quiche Lorena', 4100, 'fa-cheese'
+    UNION ALL SELECT 'comidas', 'Empanada de Carne', 2200, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Empanada de Queso', 2100, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Tostada de Aguacate', 4300, 'fa-bread-slice'
+    UNION ALL SELECT 'comidas', 'Bowl de Yogurt y Frutas', 3600, 'fa-bowl-food'
+
+    -- ESPECIALIDADES
+    UNION ALL SELECT 'especialidades', 'Frappé Caramelo', 3200, 'fa-blender'
+    UNION ALL SELECT 'especialidades', 'Mocaccino Especial', 3500, 'fa-star'
+    UNION ALL SELECT 'especialidades', 'Chocolate Caliente Premium', 3000, 'fa-mug-hot'
+    UNION ALL SELECT 'especialidades', 'Latte Lavanda', 3400, 'fa-star'
+    UNION ALL SELECT 'especialidades', 'Café Bombón', 3100, 'fa-star'
+    UNION ALL SELECT 'especialidades', 'Frappé Mocha', 3300, 'fa-blender'
+    UNION ALL SELECT 'especialidades', 'Matcha Latte', 3600, 'fa-leaf'
+    UNION ALL SELECT 'especialidades', 'Golden Milk', 3400, 'fa-mug-hot'
+    UNION ALL SELECT 'especialidades', 'Taro Latte', 3700, 'fa-star'
+    UNION ALL SELECT 'especialidades', 'Affogato', 3900, 'fa-ice-cream'
+
+    -- POSTRES
+    UNION ALL SELECT 'postres', 'Cheesecake', 2800, 'fa-cake-candles'
+    UNION ALL SELECT 'postres', 'Brownie con Helado', 3000, 'fa-ice-cream'
+    UNION ALL SELECT 'postres', 'Tiramisú', 3200, 'fa-cake-candles'
+    UNION ALL SELECT 'postres', 'Croissant de Almendra', 2600, 'fa-bread-slice'
+    UNION ALL SELECT 'postres', 'Galleta de Chispas', 1800, 'fa-cookie'
+    UNION ALL SELECT 'postres', 'Queque de Zanahoria', 2700, 'fa-cake-candles'
+    UNION ALL SELECT 'postres', 'Muffin de Arándanos', 2300, 'fa-cake-candles'
+    UNION ALL SELECT 'postres', 'Pie de Limón', 2900, 'fa-cake-candles'
+    UNION ALL SELECT 'postres', 'Tres Leches', 3100, 'fa-cake-candles'
+    UNION ALL SELECT 'postres', 'Roll de Canela', 2500, 'fa-bread-slice'
+
+    -- BEBIDAS
+    UNION ALL SELECT 'bebidas', 'Iced Latte', 2900, 'fa-glass-water'
+    UNION ALL SELECT 'bebidas', 'Té Frío Durazno', 2500, 'fa-glass-water'
+    UNION ALL SELECT 'bebidas', 'Limonada Natural', 2200, 'fa-glass-water'
+    UNION ALL SELECT 'bebidas', 'Limonada con Hierbabuena', 2400, 'fa-glass-water'
+    UNION ALL SELECT 'bebidas', 'Smoothie de Fresa', 3300, 'fa-blender'
+    UNION ALL SELECT 'bebidas', 'Smoothie de Mango', 3300, 'fa-blender'
+    UNION ALL SELECT 'bebidas', 'Chocolate Frío', 2800, 'fa-glass-water'
+    UNION ALL SELECT 'bebidas', 'Milkshake Vainilla', 3500, 'fa-blender'
+    UNION ALL SELECT 'bebidas', 'Milkshake Chocolate', 3500, 'fa-blender'
+    UNION ALL SELECT 'bebidas', 'Agua Mineral', 1500, 'fa-bottle-water'
+) v ON v.slug = c.slug
+LEFT JOIN productos p ON p.categoria_id = c.id AND p.nombre = v.nombre
+WHERE p.id IS NULL;
 
 

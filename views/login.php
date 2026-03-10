@@ -11,12 +11,7 @@ if (isset($_SESSION["usuario_id"])) {
 require_once __DIR__ . '/../model/conexion.php';
 require_once __DIR__ . '/../controller/loginController.php';
 
-
-
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html>
@@ -37,22 +32,11 @@ require_once __DIR__ . '/../controller/loginController.php';
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../public/css/login.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
 
 <body class="bg-brand-beige min-h-screen">
-    <?php if (isset($_GET["error"])): ?>
-        <div class="bg-red-100 text-red-700 p-3 rounded-lg text-sm mb-4">
-            <?php
-            if ($_GET["error"] === "credenciales") {
-                echo "Usuario o contraseña incorrectos";
-            } elseif ($_GET["error"] === "campos") {
-                echo "Debe completar todos los campos";
-            }
-            ?>
-        </div>
-    <?php endif; ?>
-
 
 
     <!-- Main Login Container -->
@@ -74,9 +58,27 @@ require_once __DIR__ . '/../controller/loginController.php';
                     <h2 class="text-2xl font-bold brand-brown mb-2">Iniciar Sesión</h2>
                     <p class="text-gray-600 text-sm">Accede al sistema La Comanda</p>
                 </div>
-
-
-
+                <?php if (isset($_GET["error"])): ?>
+                    <div class="alert alert-danger fade show d-flex align-items-center rounded-4 border-0 shadow-sm mb-4 login-alert" role="alert">
+                        <i class="fas fa-circle-exclamation me-2"></i>
+                        <div>
+                            <?php
+                            if ($_GET["error"] === "credenciales") {
+                                echo "Usuario o contraseña incorrectos";
+                            } elseif ($_GET["error"] === "campos") {
+                                echo "Debe completar todos los campos";
+                            } elseif ($_GET["error"] === "rol") {
+                                echo "El rol del usuario no es válido";
+                            } elseif ($_GET["error"] === "inactivo") {
+                                echo "Tu cuenta está inactiva. Contacta al administrador";
+                            } else {
+                                echo "Ocurrió un error al iniciar sesión";
+                            }
+                            ?>
+                        </div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Login Form -->
                 <form id="login-form" class="space-y-6" method="POST" action="">
@@ -96,8 +98,7 @@ require_once __DIR__ . '/../controller/loginController.php';
                                 id="email"
                                 name="email"
                                 class="form-control block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-green focus:border-brand-green transition-colors duration-200 bg-gray-50 focus:bg-white"
-                                placeholder="Ingresa tu email"
-                                required>
+                                placeholder="Ingresa tu email">
                         </div>
                     </div>
 
@@ -115,29 +116,16 @@ require_once __DIR__ . '/../controller/loginController.php';
                                 id="password"
                                 name="password"
                                 class="form-control block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-green focus:border-brand-green transition-colors duration-200 bg-gray-50 focus:bg-white"
-                                placeholder="Ingresa tu contraseña"
-                                required>
+                                placeholder="Ingresa tu contraseña">
                             <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                 <!-- <i class="fas fa-eye text-gray-400 hover:text-gray-600 transition-colors duration-200"></i> -->
                             </button>
                         </div>
                     </div>
 
-                    <!-- Remember Me -->
-
                     <div id="remember-section" class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <!--
-                            <input 
-                                id="remember-me" 
-                                name="remember-me" 
-                                type="checkbox" 
-                                class="h-4 w-4 text-brand-green focus:ring-brand-green border-gray-300 rounded">
-                            
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">
-                                Recordarme
-                            </label>
-                        -->
+
                         </div>
                         <div class="text-sm">
                             <a href="./forgotPassword.php" class="font-medium text-brand-green hover:underline">
@@ -165,28 +153,30 @@ require_once __DIR__ . '/../controller/loginController.php';
     <!-- Footer -->
     <?php
     include './layout/footer.php';
+    include '../LaComanda/public/js/togglePassword.js';
+    ?>
     ?>
 
     <script>
         //Mostrar contrasenia
-        document.addEventListener("DOMContentLoaded", () => {
-            const btn = document.getElementById("togglePassword");
-            const input = document.getElementById("password");
+        // document.addEventListener("DOMContentLoaded", () => {
+        //     const btn = document.getElementById("togglePassword");
+        //     const input = document.getElementById("password");
 
-            if (!btn || !input) return;
+        //     if (!btn || !input) return;
 
-            btn.addEventListener("click", () => {
-                const isPass = input.type === "password";
-                input.type = isPass ? "text" : "password";
-                btn.innerHTML = isPass ?
-                    '<i class="fa-solid fa-eye-slash"></i>' :
-                    '<i class="fa-solid fa-eye"></i>';
-            });
-        });
+        //     btn.addEventListener("click", () => {
+        //         const isPass = input.type === "password";
+        //         input.type = isPass ? "text" : "password";
+        //         btn.innerHTML = isPass ?
+        //             '<i class="fa-solid fa-eye-slash"></i>' :
+        //             '<i class="fa-solid fa-eye"></i>';
+        //     });
+        // });
 
 
         // Efectos de carga
-        const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+        const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
         inputs.forEach(input => {
             input.addEventListener('focus', function() {
                 this.parentElement.classList.add('ring-2', 'ring-brand-green');
@@ -197,7 +187,7 @@ require_once __DIR__ . '/../controller/loginController.php';
             });
         });
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

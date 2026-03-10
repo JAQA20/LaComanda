@@ -139,7 +139,16 @@
         "mesa": "1",
         "items": "Americano x1",
         "numero": 18,
-        "estado": "pendiente",
-        "timestamp": 1771471411
+        "estado": "entregada",
+        "timestamp": 1771471411,
+        "hora_entrega": "02:22"
+    },
+    {
+        "mesa": "1",
+        "items": "Americano x1",
+        "numero": 19,
+        "estado": "entregada",
+        "timestamp": 1772675040,
+        "hora_entrega": "02:52"
     }
 ]

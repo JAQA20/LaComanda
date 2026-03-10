@@ -163,7 +163,7 @@ if (!is_array($ordenes)) {
                                 <form action="../controller/marcarEntrega.php" method="POST">
                                     <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>"></input>
                                     <button
-                                        class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
+                                        class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200 hidden">
                                         Marcar como entregada
                                     </button>
                                 </form>

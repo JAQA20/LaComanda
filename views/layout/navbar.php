@@ -18,12 +18,12 @@ $categorias = Categorias::listarActivas();
     <div class="flex space-x-8 items-center">
 
         <!-- Mesas fijo -->
-        <!-- <button type="button"
+        <button type="button"
             id="mesas-btn"
             data-slug="mesas"
             class="text-beige hover-mint font-medium transition-all duration-200 border-b-2 border-mint">
             Mesas
-        </button> -->
+        </button>
 
         <!-- Categorías desde BD -->
         <?php foreach ($categorias as $cat): ?>

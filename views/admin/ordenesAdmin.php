@@ -155,6 +155,7 @@ $pendientes = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estad
             location.href = location.href.split('?')[0] + '?t=' + Date.now();
         }, 5000);
     </script> -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
