@@ -10,7 +10,7 @@ $categorias = Categorias::listarActivas();
 <nav id="navbar" class="custom-brown fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 shadow-lg">
     <div class="flex items-center">
         <img class="h-10 w-10 object-contain mr-3"
-            src="/LaComanda/public/img/logotipo2.PNG"
+            src="/LaComanda-main/public/img/logotipo2.PNG"
             alt="Cafetería Toscana" />
         <span class="text-beige text-xl font-semibold">Cafetería Toscana</span>
     </div>
@@ -53,7 +53,7 @@ $categorias = Categorias::listarActivas();
 
                 <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
                     <li class="px-3 py-2">
-                        <a class="dropdown-item" href="/LaComanda/views/admin/admin.php">
+                        <a class="dropdown-item" href="/LaComanda-main/views/admin/admin.php">
                             <i class="fas fa-shield-halved me-2"></i> Admin
                         </a>
                     </li>
@@ -61,7 +61,7 @@ $categorias = Categorias::listarActivas();
 
                 <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 3 or isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
                     <li>
-                        <a class="dropdown-item" href="/LaComanda/views/cocina.php">
+                        <a class="dropdown-item" href="/LaComanda-main/views/cocina.php">
                             <i class="fas fa-fire me-2"></i> Cocina
                         </a>
                     </li>
@@ -72,7 +72,7 @@ $categorias = Categorias::listarActivas();
                 </li>
 
                 <li>
-                    <a class="dropdown-item text-danger" href="/LaComanda/controller/logoutController.php">
+                    <a class="dropdown-item text-danger" href="/LaComanda-main/controller/logoutController.php">
                         <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
                     </a>
                 </li>

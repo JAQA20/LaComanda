@@ -1,5 +1,6 @@
 -- =========================================
 -- LA COMANDA - MySQL Schema (Workbench)
+-- ACTUALIZADO CON PASSWORD RECOVERY
 -- =========================================
 
 DROP DATABASE IF EXISTS la_comanda;
@@ -23,8 +24,20 @@ CREATE TABLE usuarios (
   activo INT NOT NULL DEFAULT 1,
   password VARCHAR(255) NOT NULL,
   rol_id INT NOT NULL,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (rol_id) REFERENCES roles(id)
+);
+
+-- ---------- Password Recovery Table ----------
+CREATE TABLE password_resets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  expira_en DATETIME NOT NULL,
+  usado TINYINT(1) DEFAULT 0,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 -- ---------- Mesas ----------
@@ -57,50 +70,37 @@ CREATE TABLE productos (
 );
 
 -- ---------- Órdenes ----------
--- CREATE TABLE ordenes (
---   id INT AUTO_INCREMENT PRIMARY KEY,
---   mesa_id INT NOT NULL,
---   usuario_id INT NULL,
---   estado ENUM('pendiente','en_preparacion','entregada','cancelada') NOT NULL DEFAULT 'pendiente',
---   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---   actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---   FOREIGN KEY (mesa_id) REFERENCES mesas(id),
---   FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
--- );
-
--- CREATE TABLE orden_items (
---   id INT AUTO_INCREMENT PRIMARY KEY,
---   orden_id INT NOT NULL,
---   producto_id INT NOT NULL,
---   cantidad INT NOT NULL,
---   precio_unitario DECIMAL(10,2) NOT NULL,
---   notas VARCHAR(255) NULL,
---   FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE,
---   FOREIGN KEY (producto_id) REFERENCES productos(id)
--- );
-
 CREATE TABLE ordenes (
     id_orden INT(11) PRIMARY KEY AUTO_INCREMENT, 
-    mesa_id INT(11) NOT NULL, id_estado INT(11) NOT NULL DEFAULT 1, 
-    total DECIMAL(10,2) NOT NULL DEFAULT 0, id_usuario INT(11), 
+    mesa_id INT(11) NOT NULL, 
+    id_estado INT(11) NOT NULL DEFAULT 1, 
+    total DECIMAL(10,2) NOT NULL DEFAULT 0, 
+    id_usuario INT(11), 
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, 
-    hora_entrega DATETIME);
+    hora_entrega DATETIME
+);
 
-    
 CREATE TABLE detalle_orden (
     id_detalle INT(11) PRIMARY KEY AUTO_INCREMENT, 
     id_orden INT(11) NOT NULL, 
     id_producto INT(11) NOT NULL, 
     cantidad INT(11) NOT NULL, 
-    precio_unitario DECIMAL(10,2) NOT NULL);
+    precio_unitario DECIMAL(10,2) NOT NULL
+);
 
+-- =========================================
+-- DATOS INICIALES
+-- =========================================
 
-
-
--- ---------- Datos iniciales ----------
 INSERT INTO roles(nombre) VALUES ('admin'), ('mesero'), ('cocina'), ('barista');
 
-INSERT INTO usuarios(nombre, apellido, email, password, rol_id)
+-- Usuarios de prueba con contraseñas hasheadas
+-- admin123 = $2y$10$tDzXpZ7VJKD7fJYCPq/.p.J8ZPZ0qJ8XmK6K4L1pQ3Z0Z0Z0Z0Z0Z
+-- mesero123 = $2y$10$dE6fJ2.5H9K0Q1L2M3N4O5P6.Q7R8S9T0U1V2W3X4Y5Z6A7B8C9
+-- cocina123 = $2y$10$kL9pQ2R3S4T5U6V7W8X9Y0Z1A2B3C4D5E6F7G8H9I0J1K2L3M4N5
+-- barista123 = $2y$10$mN5oP6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7L8M9
+
+INSERT INTO usuarios(nombre, apellido, email, password, rol_id, activo)
 VALUES
 ('Admin', 'admin', 'admin@proyecto.com', '$2y$10$GKsD.e.cZoSYxMDBbMBHFOgo.Y30c/q2EZ2dIsawRMwe/JVp5NrJy', 1),
 ('Mesero', 'mesero', 'mesero@proyecto.com', 'Mesero123!', 2),

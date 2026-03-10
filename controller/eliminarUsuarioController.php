@@ -10,34 +10,34 @@ verificarRol([1]); // Solo Admin
 require_once __DIR__ . "/../model/Usuarios.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: /LaComanda/views/admin/usuarios.php");
+    header("Location: /LaComanda-main/views/admin/usuarios.php");
     exit;
 }
 
 $id = isset($_POST["id"]) ? (int)$_POST["id"] : 0;
 if ($id <= 0) {
-    header("Location: /LaComanda/views/admin/usuarios.php?error=bad_id");
+    header("Location: /LaComanda-main/views/admin/usuarios.php?error=bad_id");
     exit;
 }
 
 
 if ($id === 1) {
-    header("Location: /LaComanda/views/admin/usuarios.php?error=root_delete");
+    header("Location: /LaComanda-main/views/admin/usuarios.php?error=root_delete");
     exit;
 }
 
 // Evitar que el admin se borre a sí mismo
 $miId = isset($_SESSION["user_id"]) ? (int)$_SESSION["user_id"] : 0;
 if ($miId > 0 && $id === $miId) {
-    header("Location: /LaComanda/views/admin/usuarios.php?error=self_delete");
+    header("Location: /LaComanda-main/views/admin/usuarios.php?error=self_delete");
     exit;
 }
 
 try {
     Usuarios::eliminar($id);
-    header("Location: /LaComanda/views/admin/usuarios.php?deleted=1");
+    header("Location: /LaComanda-main/views/admin/usuarios.php?deleted=1");
     exit;
 } catch (Throwable $e) {
-    header("Location: /LaComanda/views/admin/usuarios.php?error=delete_failed");
+    header("Location: /LaComanda-main/views/admin/usuarios.php?error=delete_failed");
     exit;
 }

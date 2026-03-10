@@ -19,8 +19,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos La Comanda -->
-    <link rel="stylesheet" href="/LaComanda/public/css/style.css">
-    <link rel="stylesheet" href="/LaComanda/public/css/admin-editar-producto.css">
+    <link rel="stylesheet" href="/LaComanda-main/public/css/style.css">
+    <link rel="stylesheet" href="/LaComanda-main/public/css/admin-editar-producto.css">
 </head>
 
 <body class="custom-beige min-h-screen">
@@ -36,7 +36,7 @@
                     <div class="text-muted small">Actualiza los datos del producto</div>
                 </div>
 
-                <a href="/LaComanda/views/admin/productos.php" class="btn btn-outline-brown px-3 py-2">
+                <a href="/LaComanda-main/views/admin/productos.php" class="btn btn-outline-brown px-3 py-2">
                     <i class="fa-solid fa-arrow-left me-2"></i> Volver
                 </a>
             </div>
@@ -109,7 +109,7 @@
                         </div>
 
                         <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                            <a href="/LaComanda/views/admin/productos.php" class="btn btn-outline-brown px-4 py-2">
+                            <a href="/LaComanda-main/views/admin/productos.php" class="btn btn-outline-brown px-4 py-2">
                                 Cancelar
                             </a>
                             <button type="submit" class="btn btn-mint px-4 py-2">

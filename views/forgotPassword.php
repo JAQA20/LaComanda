@@ -61,42 +61,43 @@ header("Expires: 0");
 
                 <!-- Forgot Form -->
                 <form id="forgot-form" class="space-y-6" method="POST" action="../controller/forgot_passwordController.php">
+                    <form id="forgot-form" class="space-y-6" method="POST" action="../controller/forgot_passwordController.php">
 
-                    <!-- Email Field -->
-                    <div id="email-field" class="space-y-2">
-                        <label for="email" class="block text-sm font-medium brand-brown">
-                            Email
-                        </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-envelope text-gray-400"></i>
+                        <!-- Email Field -->
+                        <div id="email-field" class="space-y-2">
+                            <label for="email" class="block text-sm font-medium brand-brown">
+                                Email
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-gray-50 focus:bg-white"
+                                    placeholder="tu@email.com"
+                                    required>
                             </div>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-gray-50 focus:bg-white"
-                                placeholder="tu@email.com"
-                                required>
                         </div>
-                    </div>
 
-                    <!-- Submit Button -->
-                    <div id="submit-button-section">
-                        <button
-                            type="submit"
-                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                            <i class="fas fa-envelope-open mr-2"></i>
-                            Enviar enlace de recuperación
-                        </button>
-                    </div>
+                        <!-- Submit Button -->
+                        <div id="submit-button-section">
+                            <button
+                                type="submit"
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                                <i class="fas fa-envelope-open mr-2"></i>
+                                Enviar enlace de recuperación
+                            </button>
+                        </div>
 
-                    <div class="text-center text-sm">
-                        <a href="./login.php" class="text-green-600 hover:underline font-medium">
-                            Volver al login
-                        </a>
-                    </div>
-                </form>
+                        <div class="text-center text-sm">
+                            <a href="./login.php" class="text-green-600 hover:underline font-medium">
+                                Volver al login
+                            </a>
+                        </div>
+                    </form>
 
             </div>
         </div>

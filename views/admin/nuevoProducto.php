@@ -19,7 +19,7 @@ verificarRol([1]);
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos propios -->
-    <link rel="stylesheet" href="/LaComanda/public/css/admin-nuevo-producto.css">
+    <link rel="stylesheet" href="/LaComanda-main/public/css/admin-nuevo-producto.css">
 </head>
 
 <body class="bg-comanda">
@@ -35,7 +35,7 @@ verificarRol([1]);
                     <div class="text-muted small">Configura el producto para el menú</div>
                 </div>
 
-                <a href="/LaComanda/views/admin/productos.php" class="btn btn-outline-brown px-3 py-2">
+                <a href="/LaComanda-main/views/admin/productos.php" class="btn btn-outline-brown px-3 py-2">
                     <i class="fa-solid fa-arrow-left me-2"></i> Volver
                 </a>
             </div>
@@ -54,7 +54,7 @@ verificarRol([1]);
             <div class="card card-comanda shadow-sm">
                 <div class="card-body p-4 p-md-5">
 
-                    <form method="POST" action="/LaComanda/controller/nuevoProductoController.php" class="row g-3" novalidate>
+                    <form method="POST" action="/LaComanda-main/controller/nuevoProductoController.php" class="row g-3" novalidate>
 
                         <div class="col-md-6">
                             <label class="form-label label-comanda">Nombre</label>
@@ -110,7 +110,7 @@ verificarRol([1]);
                         </div>
 
                         <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                            <a href="/LaComanda/views/admin/productos.php" class="btn btn-outline-brown px-4 py-2">
+                            <a href="/LaComanda-main/views/admin/productos.php" class="btn btn-outline-brown px-4 py-2">
                                 Cancelar
                             </a>
                             <button type="submit" class="btn btn-mint px-4 py-2">
