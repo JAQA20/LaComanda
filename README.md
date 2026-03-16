@@ -122,6 +122,10 @@ Detener contenedores
 Reiniciar base de datos
 **docker compose down -v**
 **docker compose up --build**
+Inicalizar MySQL en Docker: 
+**docker exec -it la-comanda-db mysql -u root -p**
+Esto inicializa MySQL dentro del contenedor y permite hacer consultas
+
 Tecnologías utilizadas
 
 PHP 8
