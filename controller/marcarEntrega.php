@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . "/../config/rutas.php";
 $archivo = __DIR__ . "/ordenes.json";
 
 // Leer ordenes
@@ -23,6 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT));
 
     // Volver a la vista de cocina
-    header("Location: ../views/cocina.php");
+    header("Location: " . BASE_URL . "views/cocina.php");
     exit;
 }

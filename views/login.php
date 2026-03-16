@@ -1,16 +1,14 @@
 <?php
-session_start();
-
 if (isset($_SESSION["usuario_id"])) {
-    header("Location: ./index.php");
+    header("Location: " . BASE_URL . "views/index.php");
     exit;
 }
 // ini_set('display_errors', 1);
 // error_reporting(E_ALL);
 
-require_once __DIR__ . '/../model/conexion.php';
+require_once __DIR__ . '/../model/Conexion.php';
 require_once __DIR__ . '/../controller/loginController.php';
-
+require_once __DIR__ . '/../config/rutas.php';
 ?>
 
 <!DOCTYPE html>
@@ -128,7 +126,7 @@ require_once __DIR__ . '/../controller/loginController.php';
 
                         </div>
                         <div class="text-sm">
-                            <a href="./forgotPassword.php" class="font-medium text-brand-green hover:underline">
+                            <a href="<?= BASE_URL ?>views/forgotPassword.php" class="font-medium text-brand-green hover:underline">
                                 ¿Olvidaste tu contraseña?
                             </a>
                         </div>
@@ -148,33 +146,18 @@ require_once __DIR__ . '/../controller/loginController.php';
                 </form>
             </div>
         </div>
+
     </main>
+
+
 
     <!-- Footer -->
     <?php
-    include './layout/footer.php';
-    include '../LaComanda/public/js/togglePassword.js';
-    ?>
+    require_once ROOT_PATH . '/views/layout/footer.php';
     ?>
 
+    <script src="<?= BASE_URL ?>public/js/togglePassword.js"></script>
     <script>
-        //Mostrar contrasenia
-        // document.addEventListener("DOMContentLoaded", () => {
-        //     const btn = document.getElementById("togglePassword");
-        //     const input = document.getElementById("password");
-
-        //     if (!btn || !input) return;
-
-        //     btn.addEventListener("click", () => {
-        //         const isPass = input.type === "password";
-        //         input.type = isPass ? "text" : "password";
-        //         btn.innerHTML = isPass ?
-        //             '<i class="fa-solid fa-eye-slash"></i>' :
-        //             '<i class="fa-solid fa-eye"></i>';
-        //     });
-        // });
-
-
         // Efectos de carga
         const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
         inputs.forEach(input => {

@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . "/../../middleware/auth.php";
 require_once __DIR__ . "/../../middleware/roles.php";
+require_once __DIR__ . "/../../config/rutas.php";
+require_once __DIR__ . "/../../model/Productos.php";
 verificarRol([1]);
 
-require_once __DIR__ . "/../../model/Productos.php";
 
 $productos = Productos::listar();
 ?>
@@ -26,14 +27,14 @@ $productos = Productos::listar();
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     <!-- Estilos propios -->
-    <link rel="stylesheet" href="../../public/css/admin-productos.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/admin-productos.css">
 </head>
 
 
 
 <body class="bg-comanda">
 
-    <?php include __DIR__ . "/adminNavbar.php"; ?>
+    <?php require_once __DIR__ . "/adminNavbar.php"; ?>
 
     <main class="container-fluid pt-5 mt-4">
         <div class="container-xxl py-4">
@@ -73,7 +74,7 @@ $productos = Productos::listar();
                     <div class="text-muted small">Gestión de productos del menú</div>
                 </div>
 
-                <a href="/LaComanda-main/controller/nuevoProductoController.php" class="btn btn-mint px-3 py-2">
+                <a href="<?= BASE_URL ?>views/admin/nuevoProducto.php" class="btn btn-mint px-3 py-2">
                     <i class="fa-solid fa-plus me-2"></i>
                     Agregar nuevo producto
                 </a>
@@ -101,14 +102,14 @@ $productos = Productos::listar();
                                                 <span class="icon-circle">
                                                     <i class="fa-solid <?= htmlspecialchars($p["icono"] ?? "fa-mug-hot") ?>"></i>
                                                 </span>
-                                                <?= htmlspecialchars($p["nombre"]) ?>
+                                                <?= htmlspecialchars($p["nombre"], ENT_QUOTES, 'UTF-8') ?>
                                             </div>
                                             <div class="text-muted small">ID: <?= (int)$p["id"] ?></div>
                                         </td>
 
                                         <td>
                                             <span class="badge badge-category ">
-                                                <?= htmlspecialchars($p["categoria_nombre"] ?? "Sin categoría") ?>
+                                                <?= htmlspecialchars($p["categoria_nombre"] ?? "Sin categoría", ENT_QUOTES, 'UTF-8') ?>
                                             </span>
                                         </td>
 
@@ -128,14 +129,14 @@ $productos = Productos::listar();
 
                                         <td class="text-end">
                                             <a class="btn btn-sm btn-light"
-                                                href="/LaComanda-main/controller/editarProductoController.php?id=<?= (int)$p['id'] ?>"
+                                                href="<?= BASE_URL ?>views/admin/editarProducto.php?id=<?= (int)$p['id'] ?>"
                                                 title="Editar">
                                                 <i class="fa-solid fa-pen"></i>
                                             </a>
 
                                             <form class="d-inline form-eliminar-producto"
                                                 method="POST"
-                                                action="/LaComanda-main/controller/eliminarProductosController.php">
+                                                action="<?= BASE_URL ?>public/api/eliminarProducto.php">
                                                 <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
                                                 <button type="submit"
                                                     class="btn btn-sm btn-light text-danger"
@@ -156,7 +157,7 @@ $productos = Productos::listar();
         </div>
     </main>
 
-    <?php include __DIR__ . "/../layout/footer.php"; ?>
+    <?php require_once __DIR__ . "/../layout/footer.php"; ?>
 
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -170,7 +171,7 @@ $productos = Productos::listar();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Script propio -->
-    <script src="/LaComanda-main/public/js/admin-productos.js"></script>
+    <script src="<?= BASE_URL ?>public/js/admin-productos.js"></script>
 
 </body>
 

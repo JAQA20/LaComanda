@@ -5,9 +5,10 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
+require_once __DIR__ . "/../config/rutas.php";
+require_once __DIR__ . "/../model/Productos.php";
 verificarRol([1]);
 
-require_once __DIR__ . "/../model/Productos.php";
 
 $errors = [];
 $old = [
@@ -41,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             (int)$old["activo"]
         );
 
-        header("Location: /LaComanda-main/views/admin/productos.php?created=1");
+        header("Location: " . BASE_URL . "views/admin/productos.php?created=1");
         exit;
     } catch (Throwable $e) {
         $errors[] = $e->getMessage();

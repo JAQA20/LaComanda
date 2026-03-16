@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once __DIR__ . "/../config/rutas.php";
+require_once __DIR__ . "/../model/Conexion.php";
 
 if (!empty($_POST["btnlogin"])) {
 
@@ -7,7 +9,7 @@ if (!empty($_POST["btnlogin"])) {
     $password = $_POST["password"] ?? "";
 
     if ($email === "" || $password === "") {
-        header("Location: ../views/login.php?error=campos");
+        header("Location: " . BASE_URL . "views/login.php?error=campos");
         exit;
     }
 
@@ -19,7 +21,7 @@ if (!empty($_POST["btnlogin"])) {
     ");
 
     if (!$stmt) {
-        header("Location: ../views/login.php?error=general");
+        header("Location: " . BASE_URL . "views/login.php?error=general");
         exit;
     }
 
@@ -30,7 +32,7 @@ if (!empty($_POST["btnlogin"])) {
     if ($user = $result->fetch_assoc()) {
 
         if (isset($user["activo"]) && (int)$user["activo"] !== 1) {
-            header("Location: ../views/login.php?error=inactivo");
+            header("Location: " . BASE_URL . "views/login.php?error=inactivo");
             exit;
         }
 
@@ -44,30 +46,30 @@ if (!empty($_POST["btnlogin"])) {
 
             switch ($_SESSION["rol_id"]) {
                 case 1:
-                    header("Location: ../views/admin/admin.php");
+                    header("Location: " . BASE_URL . "views/admin/admin.php");
                     exit;
 
                 case 2:
-                    header("Location: ../views/index.php");
+                    header("Location: " . BASE_URL . "views/index.php");
                     exit;
 
                 case 3:
-                    header("Location: ../views/cocina.php");
+                    header("Location: " . BASE_URL . "views/cocina.php");
                     exit;
 
                 case 4:
-                    header("Location: ../views/barista.php");
+                    header("Location: " . BASE_URL . "views/barista.php");
                     exit;
 
                 default:
                     session_unset();
                     session_destroy();
-                    header("Location: ../views/login.php?error=rol");
+                    header("Location: " . BASE_URL . "views/login.php?error=rol");
                     exit;
             }
         }
     }
 
-    header("Location: ../views/login.php?error=credenciales");
+    header("Location: " . BASE_URL . "views/login.php?error=credenciales");
     exit;
 }

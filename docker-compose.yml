@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    container_name: la-comanda-web
+    ports:
+      - "8080:80"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - .:/var/www/html
+  
+
+  db:
+    image: mysql:8.0
+    container_name: la-comanda-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      ports: "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/la_comanda.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+volumes:
+  mysql_data:

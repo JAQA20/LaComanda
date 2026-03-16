@@ -1,3 +1,29 @@
+<?php
+require_once __DIR__ . "/../../config/rutas.php";
+require_once __DIR__ . "/../../middleware/auth.php";
+require_once __DIR__ . "/../../middleware/roles.php";
+require_once __DIR__ . "/../../model/Productos.php";
+verificarRol([1]); // solo Admin
+
+$errors = [];
+$id = (int)($_GET["id"] ?? 0);
+
+try {
+    $categorias = Productos::listarCategoriasActivas();
+} catch (Throwable $e) {
+    $categorias = [];
+    $errors[] = "Error cargando categorías: " . $e->getMessage();
+}
+
+$producto = null;
+try {
+    $producto = Productos::obtenerPorId($id);
+    if (!$producto) throw new Exception("Producto no encontrado.");
+} catch (Throwable $e) {
+    $errors[] = $e->getMessage();
+}
+
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -19,13 +45,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos La Comanda -->
-    <link rel="stylesheet" href="/LaComanda-main/public/css/style.css">
-    <link rel="stylesheet" href="/LaComanda-main/public/css/admin-editar-producto.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/admin-productos.css">
 </head>
 
 <body class="custom-beige min-h-screen">
 
-    <?php include __DIR__ . "/adminNavbar.php"; ?>
+    <?php require_once __DIR__ . "/adminNavbar.php"; ?>
 
     <main class="container-fluid pt-5 mt-4">
         <div class="container-xxl py-4">
@@ -36,7 +62,7 @@
                     <div class="text-muted small">Actualiza los datos del producto</div>
                 </div>
 
-                <a href="/LaComanda-main/views/admin/productos.php" class="btn btn-outline-brown px-3 py-2">
+                <a href="<?= BASE_URL ?>views/admin/productos.php" class="btn btn-outline-brown px-3 py-2">
                     <i class="fa-solid fa-arrow-left me-2"></i> Volver
                 </a>
             </div>
@@ -56,7 +82,7 @@
                 <div class="card-body p-4 p-md-5">
 
                     <!-- action="" para que postee al mismo controller -->
-                    <form method="POST" action="" class="row g-3" novalidate>
+                    <form method="POST" action="<?= BASE_URL ?>public/api/editarProducto.php" class="row g-3" novalidate>
 
                         <input type="hidden" name="id" value="<?= (int)($producto["id"] ?? 0) ?>">
 
@@ -109,7 +135,7 @@
                         </div>
 
                         <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                            <a href="/LaComanda-main/views/admin/productos.php" class="btn btn-outline-brown px-4 py-2">
+                            <a href="<?= BASE_URL ?>views/admin/productos.php" class="btn btn-outline-brown px-4 py-2">
                                 Cancelar
                             </a>
                             <button type="submit" class="btn btn-mint px-4 py-2">
@@ -125,7 +151,7 @@
         </div>
     </main>
 
-    <?php include __DIR__ . "/../layout/footer.php"; ?>
+    <?php require_once __DIR__ . "/../layout/footer.php"; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -2,9 +2,6 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// DEBUG: confirmar ejecución
-//file_put_contents(__DIR__ . "/debug.txt", "LLEGO\n", FILE_APPEND);
-
 header("Content-Type: application/json; charset=utf-8");
 
 // Ruta del archivo de órdenes
@@ -60,9 +57,6 @@ $data["timestamp"] = time();
 
 // Agregar al arreglo
 $ordenes[] = $data;
-
-// DEBUG antes de guardar
-//file_put_contents(__DIR__ . "/save_debug.txt", "----\n" . json_encode($ordenes) . "\n", FILE_APPEND);
 
 // Guardar archivo actualizado
 file_put_contents(

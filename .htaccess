@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Bloquear acceso directo a archivos sensibles
+
+RedirectMatch 403 ^/(db|model|middleware|controller|config)/
+
+<FilesMatch "^(\.env|docker-compose\.yml|Dockerfile|README\.md)$">
+Require all denied
+</FilesMatch>

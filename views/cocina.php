@@ -1,6 +1,7 @@
 <?php
-require_once "../middleware/auth.php";
-require_once "../middleware/roles.php";
+require_once __DIR__ . "/../middleware/auth.php";
+require_once __DIR__ . "/../middleware/roles.php";
+require_once __DIR__ . "/../config/rutas.php";
 
 verificarRol([1, 3]); // Admin(1) y Cocina(3)
 
@@ -30,8 +31,8 @@ if (!is_array($ordenes)) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="..//public/css/cocina.css">
-    <a href="../middleware/"></a>
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/cocina.css">
+
     <script>
         tailwind.config = {
             theme: {
@@ -57,14 +58,14 @@ if (!is_array($ordenes)) {
     <nav class="w-full bg-brown-dark text-beige-light px-6 py-4 flex items-center justify-between shadow-md">
         <div class="text-xl font-semibold tracking-wide">
             <div class="flex items-center">
-                <img class="h-10 w-10 object-contain mr-3" src="../public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
+                <img class="h-10 w-10 object-contain mr-3" src="<?= BASE_URL ?>public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
                 <span class="text-beige text-xl font-semibold">Cafetería Toscana</span>
             </div>
         </div>
 
         <div class="flex items-center space-x-6 text-beige-light">
             <button class="hover:text-mint-green transition-colors">
-                <a href="../views/login.php">
+                <a href="<?= BASE_URL ?>public/api/logout.php" class="text-sm font-medium">
                     Salir
                 </a>
 
@@ -160,7 +161,7 @@ if (!is_array($ordenes)) {
 
                             <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
                                 <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
-                                <form action="../controller/marcarEntrega.php" method="POST">
+                                <form action="<?= BASE_URL ?>controller/marcarEntrega.php" method="POST">
                                     <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>"></input>
                                     <button
                                         class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200 hidden">

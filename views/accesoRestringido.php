@@ -2,6 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once __DIR__ . "/../config/rutas.php";
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -20,7 +21,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <div class="flex gap-3">
             <!-- <a href="./index.php" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold">Ir al inicio</a> -->
-            <a href="../controller/logoutController.php" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-800 font-semibold">Cerrar sesión</a>
+            <a href="<?= BASE_URL ?>controller/logoutController.php" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-800 font-semibold">Cerrar sesión</a>
         </div>
     </div>
 </body>
@@ -42,7 +43,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <p class="mt-4 text-gray-600">
             No tienes permisos para acceder a esta sección.
         </p>
-        <a href="dashboard.php" class="mt-6 inline-block bg-red-600 text-white px-6 py-2 rounded-lg">
+        <a href="<?= BASE_URL ?>views/dashboard.php" class="mt-6 inline-block bg-red-600 text-white px-6 py-2 rounded-lg">
             Volver
         </a>
     </div>

@@ -1,3 +1,36 @@
+<?php
+require_once __DIR__ . "/../../config/rutas.php";
+require_once __DIR__ . "/../../middleware/auth.php";
+require_once __DIR__ . "/../../middleware/roles.php";
+require_once __DIR__ . "/../../model/Usuarios.php";
+
+verificarRol([1]); // solo Admin
+// if (session_status() === PHP_SESSION_NONE) {
+//     session_start();
+// }
+
+$errors = [];
+$roles = [];
+$usuario = null;
+
+$id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
+if ($id <= 0) {
+    header("Location: " . BASE_URL . "/views/admin/usuarios.php");
+    exit;
+}
+
+// Cargar roles y usuario
+try {
+    $roles = Usuarios::listarRoles();
+    $usuario = Usuarios::obtenerPorId($id);
+    if (!$usuario) {
+        header("Location: " . BASE_URL . "/views/admin/usuarios.php");
+        exit;
+    }
+} catch (Throwable $e) {
+    $errors[] = $e->getMessage();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -19,13 +52,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos La Comanda -->
-    <link rel="stylesheet" href="/LaComanda-main/public/css/style.css">
-    <link rel="stylesheet" href="/LaComanda-main/public/css/admin-editar-usuario.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/admin-editar-usuario.css">
 </head>
 
 <body class="custom-beige min-h-screen">
 
-    <?php include __DIR__ . "/adminNavbar.php"; ?>
+    <?php require_once __DIR__ . "/adminNavbar.php"; ?>
 
     <main class="container-fluid pt-5 mt-4">
         <div class="container-xxl py-4">
@@ -36,7 +69,7 @@
                     <div class="text-muted small">Actualiza los datos del usuario</div>
                 </div>
 
-                <a href="/LaComanda-main/views/admin/usuarios.php" class="btn btn-outline-brown px-3 py-2">
+                <a href="<?= BASE_URL ?>views/admin/usuarios.php" class="btn btn-outline-brown px-3 py-2">
                     <i class="fa-solid fa-arrow-left me-2"></i> Volver
                 </a>
             </div>
@@ -55,7 +88,8 @@
             <div class="card card-comanda shadow-sm">
                 <div class="card-body p-4 p-md-5">
 
-                    <form method="POST" action="" class="row g-3" novalidate>
+                    <form method="POST" action="<?= BASE_URL ?>public/api/editarUsuario.php" class="row g-3" novalidate>
+                        <input type="hidden" name="id" value="<?= (int)($usuario["id"] ?? 0) ?>">
 
                         <div class="col-md-6">
                             <label class="form-label label-comanda">Nombre</label>
@@ -114,7 +148,7 @@
                         </div>
 
                         <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                            <a href="/LaComanda-main/views/admin/usuarios.php" class="btn btn-outline-brown px-4 py-2">
+                            <a href="<?= BASE_URL ?>views/admin/usuarios.php" class="btn btn-outline-brown px-4 py-2">
                                 Cancelar
                             </a>
                             <button type="submit" class="btn btn-mint px-4 py-2">
@@ -130,10 +164,10 @@
         </div>
     </main>
 
-    <?php include __DIR__ . "/../layout/footer.php"; ?>
+    <?php require_once __DIR__ . "/../layout/footer.php"; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/LaComanda-main/public/js/togglePassword.js"></script>
+    <script src="<?= BASE_URL ?>public/js/togglePassword.js"></script>
 
 </body>
 

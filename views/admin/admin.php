@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . "/../../middleware/auth.php";
 require_once __DIR__ . "/../../middleware/roles.php";
+require_once __DIR__ . "/../../config/rutas.php";
 
 verificarRol([1]); // solo Admin
 ?>
@@ -37,7 +38,7 @@ verificarRol([1]); // solo Admin
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- âœ… Tu CSS principal (ABSOLUTO) -->
-    <link rel="stylesheet" href="/LaComanda/public/css/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
 
 
 
@@ -47,7 +48,7 @@ verificarRol([1]); // solo Admin
 
     <!-- Navbar -->
     <?php
-    include './adminNavbar.php';
+    require_once ROOT_PATH . "/views/admin/adminNavbar.php";
     ?>
 
     <!-- Main Content -->
@@ -58,7 +59,7 @@ verificarRol([1]); // solo Admin
             <div id="mesas-view" class="block">
                 <h1 class="text-brown text-3xl font-bold mb-8">Admin-Dashboard</h1>
                 <div class="grid grid-cols-4 gap-6">
-                    <a href="./usuarios.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
+                    <a href="<?= BASE_URL ?>views/admin/usuarios.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-user text-white text-xl"></i>
@@ -66,7 +67,7 @@ verificarRol([1]); // solo Admin
                             <h3 class="text-brown font-semibold text-lg">Usuarios</h3>
                         </div>
                     </a>
-                    <a href="./productos.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
+                    <a href="<?= BASE_URL ?>views/admin/productos.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-box text-white text-xl"></i>
@@ -74,7 +75,7 @@ verificarRol([1]); // solo Admin
                             <h3 class="text-brown font-semibold text-lg">Productos</h3>
                         </div>
                     </a>
-                    <a href="./ordenesAdmin.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
+                    <a href="<?= BASE_URL ?>views/admin/ordenesAdmin.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-receipt text-white text-xl"></i>
@@ -82,7 +83,7 @@ verificarRol([1]); // solo Admin
                             <h3 class="text-brown font-semibold text-lg">Historial de órdenes</h3>
                         </div>
                     </a>
-                    <a href="../index.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
+                    <a href="<?= BASE_URL ?>views/index.php" class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer block text-decoration-none">
                         <div class="text-center">
                             <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-utensils text-white text-xl"></i>
@@ -97,7 +98,7 @@ verificarRol([1]); // solo Admin
 
     <!-- Footer -->
     <?php
-    include '../layout/footer.php';
+    require_once ROOT_PATH . '/views/layout/footer.php';
     ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

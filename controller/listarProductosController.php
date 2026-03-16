@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/../middleware/auth.php"; // logueado
+require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../model/Productos.php";
 
 header("Content-Type: application/json; charset=utf-8");

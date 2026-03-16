@@ -1,6 +1,8 @@
 <?php
-require_once "../middleware/auth.php";
-require_once "../middleware/roles.php";
+require_once __DIR__ . "../middleware/auth.php";
+require_once __DIR__ . "../middleware/roles.php";
+require_once __DIR__ . "../model/Barista.php";
+require_once __DIR__ . "../../config/rutas.php";
 
 verificarRol([1, 4]); // Admin(1) y Barista(4)
 
@@ -9,86 +11,6 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// require_once __DIR__ . "../model/Conexion.php";
-
-// $ordenes = [];
-
-// // Pendientes - SOLO BEBIDAS (tipo_preparacion='barista')
-// $stmt = $conexion->prepare("
-//     SELECT DISTINCT o.id, o.mesa_id, o.id_estado, o.creado_en 
-//     FROM ordenes o
-//     JOIN orden_items oi ON o.id = oi.orden_id
-//     JOIN productos p ON oi.producto_id = p.id
-//     WHERE o.id_estado = 1 AND p.tipo_preparacion = 'barista'
-//     ORDER BY o.creado_en ASC
-// ");
-// $stmt->execute();
-// $pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// foreach ($pendientes as $o) {
-//     $items = [];
-//     // Solo traer items que sean bebidas (barista)
-//     $s2 = $conexion->prepare("
-//         SELECT oi.cantidad, oi.precio_unitario, p.nombre 
-//         FROM orden_items oi 
-//         JOIN productos p ON oi.producto_id = p.id 
-//         WHERE oi.orden_id = :id AND p.tipo_preparacion = 'barista'
-//     ");
-//     $s2->execute([':id' => $o['id']]);
-//     $rows = $s2->fetchAll(PDO::FETCH_ASSOC);
-//     foreach ($rows as $r) {
-//         $items[] = ['producto_id' => $r['nombre'], 'cantidad' => $r['cantidad'], 'precio' => $r['precio_unitario']];
-//     }
-
-//     if (count($items) > 0) {
-//         $ordenes[] = [
-//             'id_orden' => $o['id'],
-//             'mesa_id' => $o['mesa_id'],
-//             'items' => $items,
-//             'estado' => 'pendiente',
-//             'creado_en' => $o['creado_en']
-//         ];
-//     }
-// }
-
-// // Entregadas (últimas 20) - SOLO BEBIDAS
-// $stmt = $conexion->prepare("
-//     SELECT DISTINCT o.id, o.mesa_id, o.id_estado, o.hora_entrega 
-//     FROM ordenes o
-//     JOIN orden_items oi ON o.id = oi.orden_id
-//     JOIN productos p ON oi.producto_id = p.id
-//     WHERE o.id_estado = 4 AND p.tipo_preparacion = 'barista'
-//     ORDER BY o.hora_entrega DESC LIMIT 20
-// ");
-// $stmt->execute();
-// $entregadas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// foreach ($entregadas as $o) {
-//     $items = [];
-//     $s2 = $conexion->prepare("
-//         SELECT oi.cantidad, oi.precio_unitario, p.nombre 
-//         FROM orden_items oi 
-//         JOIN productos p ON oi.producto_id = p.id 
-//         WHERE oi.orden_id = :id AND p.tipo_preparacion = 'barista'
-//     ");
-//     $s2->execute([':id' => $o['id']]);
-//     $rows = $s2->fetchAll(PDO::FETCH_ASSOC);
-//     foreach ($rows as $r) {
-//         $items[] = ['producto_id' => $r['nombre'], 'cantidad' => $r['cantidad'], 'precio' => $r['precio_unitario']];
-//     }
-
-//     if (count($items) > 0) {
-//         $ordenes[] = [
-//             'id_orden' => $o['id'],
-//             'mesa_id' => $o['mesa_id'],
-//             'items' => $items,
-//             'estado' => 'entregada',
-//             'hora_entrega' => $o['hora_entrega']
-//         ];
-//     }
-// }
-
-// 
 ?>
 
 <!DOCTYPE html>
@@ -107,7 +29,9 @@ header("Expires: 0");
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../public/css/cocina.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/cocina.css">
+
+
     <script>
         tailwind.config = {
             theme: {
@@ -133,14 +57,14 @@ header("Expires: 0");
     <nav class="w-full bg-brown-dark text-beige-light px-6 py-4 flex items-center justify-between shadow-md">
         <div class="text-xl font-semibold tracking-wide">
             <div class="flex items-center">
-                <img class="h-10 w-10 object-contain mr-3" src="../public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
+                <img class="h-10 w-10 object-contain mr-3" src="<?= BASE_URL ?>public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
                 <span class="text-beige text-xl font-semibold">☕ Barista - Toscana</span>
             </div>
         </div>
 
         <div class="flex items-center space-x-6 text-beige-light">
             <button class="hover:text-mint-green transition-colors">
-                <a href="../views/login.php">
+                <a href="<?= BASE_URL ?>controller/logoutController.php" class="text-sm font-medium">
                     Salir
                 </a>
             </button>
@@ -225,7 +149,7 @@ header("Expires: 0");
                             </div>
 
                             <!-- BOTÓN MARCAR COMO LISTA -->
-                            <form action="../controller/marcarEntrega.php" method="POST">
+                            <form action="<?= BASE_URL ?>controller/marcarEntrega.php" method="POST">
                                 <input type="hidden" name="id_orden" value="<?php echo htmlspecialchars($orden['id_orden'] ?? ''); ?>">
                                 <button type="submit"
                                     class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">

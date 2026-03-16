@@ -1,8 +1,12 @@
 <?php
-require_once "../middleware/auth.php";
-require_once "../middleware/roles.php";
+require_once __DIR__ . "/../middleware/auth.php";
+require_once __DIR__ . "/../middleware/roles.php";
+require_once __DIR__ . "/../config/rutas.php";
 
 verificarRol([1, 2]); // Admin(1) y Mesero(2)
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 ?>
 
 <!DOCTYPE html>
@@ -24,13 +28,15 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
+    <a href="../config/rutas.php"></a>
 
 </head>
 
 <body class="custom-beige min-h-screen">
 
     <!-- Navbar -->
-    <?php include './layout/navbar.php'; ?>
+    <?php require_once ROOT_PATH . '/views/layout/navbar.php'; ?>
 
     <!-- Main Content -->
     <div class="pt-20 min-h-screen">
@@ -177,18 +183,20 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                 </main>
 
                 <!-- Sidebar - Orden Actual -->
-                <?php include './layout/ordenActual.php'; ?>
+                <?php require_once ROOT_PATH . '/views/layout/ordenActual.php'; ?>
 
             </div>
         </div>
+        <a href="../controller/listarProductosController.php"></a>
     </div>
 
     <!-- Footer -->
-    <?php include './layout/footer.php'; ?>
+    <?php require_once ROOT_PATH . '/views/layout/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        const BASE_URL = "<?= BASE_URL ?>";
         let mesaActual = null;
         let ordenActual = [];
         let totalOrden = 0;
@@ -266,9 +274,10 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                     <p>Cargando productos...</p>
                 </div>
             `;
-
             try {
-                const resp = await fetch(`../controller/listarProductosController.php?categoria=${encodeURIComponent(slug)}`);
+
+                // const resp = await fetch(`${BASE_URL}controller/listarProductosController.php?categoria=${encodeURIComponent(slug)}`);
+                const resp = await fetch(`${BASE_URL}public/api/listarProductos.php?categoria=${encodeURIComponent(slug)}`);
                 if (!resp.ok) throw new Error("HTTP " + resp.status);
 
                 const json = await resp.json();
@@ -304,7 +313,6 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                         </div>
                     `;
                 }).join("");
-
             } catch (e) {
                 console.error(e);
                 productosGrid.innerHTML = `
@@ -421,7 +429,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             if (!isConfirmed) return;
 
             try {
-                const respuesta = await fetch("../controller/entregarOrden.php", {
+                const respuesta = await fetch("<?= BASE_URL ?>public/api/entregarOrden.php", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
@@ -559,7 +567,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                     didOpen: () => Swal.showLoading()
                 });
 
-                const respuesta = await fetch("../controller/guardar_orden.php", {
+                const respuesta = await fetch("<?= BASE_URL ?>public/api/guardarOrden.php", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -595,7 +603,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                     actualizarOrden();
                     actualizarBotones();
 
-                    window.location.href = "index.php";
+                    window.location.href = "<?= BASE_URL ?>index.php";
 
                 } else {
                     await Swal.fire({

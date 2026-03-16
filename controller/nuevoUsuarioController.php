@@ -5,9 +5,10 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
-verificarRol([1]); // Solo Admin
-
+require_once __DIR__ . "/../config/rutas.php";
 require_once __DIR__ . "/../model/Usuarios.php";
+
+verificarRol([1]); // Solo Admin
 
 // Variables para la vista
 $errors = [];
@@ -50,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             (int)$old["rol_id"]
         );
 
-        header("Location: /LaComanda-main/views/admin/usuarios.php?created=1");
+        header("Location: " . BASE_URL . "views/admin/usuarios.php?created=1");
         exit;
     } catch (Throwable $e) {
         $errors[] = $e->getMessage();
@@ -58,4 +59,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 
 // Renderizar la vista (solo HTML)
-require_once __DIR__ . "/../views/admin/nuevoUsuario.php";
+require_once ROOT_PATH . "/views/admin/nuevoUsuario.php";
