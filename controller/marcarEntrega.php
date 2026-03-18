@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . "/../config/rutas.php";
+require_once __DIR__ . "/../model/OrdenesSync.php";
+
 // require_once __DIR__ . "/../config/rutas.php";
 // $archivo = __DIR__ . "/ordenes.json";
 
@@ -51,11 +54,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ) {
             $orden["estado"] = "entregada";
             $orden["hora_entrega"] = date("H:i");
+            $orden["timestamp_entrega"] = time();
             break;
         }
     }
     unset($orden);
 
+    // Guardar cambios en el archivo
+    file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    try {
+        OrdenesSync::marcarEntregadaPorNumero($numero, time());
+    } catch (Throwable $e) {
+        error_log("Error sincronizando entrega en MySQL (numero): " . $e->getMessage());
+    }
     file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
     header("Location: " . BASE_URL . "views/cocina.php");

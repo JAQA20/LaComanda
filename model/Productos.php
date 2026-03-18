@@ -3,6 +3,22 @@ require_once __DIR__ . "/Conexion.php";
 
 class Productos
 {
+    private static function normalizarTexto($texto)
+    {
+        if (!is_string($texto) || $texto === '') {
+            return $texto;
+        }
+
+        if (preg_match('/Ã.|Â.|â./u', $texto) === 1) {
+            $convertido = @mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
+            if (is_string($convertido) && $convertido !== '') {
+                return $convertido;
+            }
+        }
+
+        return $texto;
+    }
+
     // Para el CRUD admin (tabla/lista)
     public static function listar()
     {
@@ -20,7 +36,15 @@ class Productos
         if (!$result) throw new Exception("Error al listar productos: " . $conexion->error);
 
         $productos = [];
-        while ($row = $result->fetch_assoc()) $productos[] = $row;
+        while ($row = $result->fetch_assoc()) {
+            if (isset($row['nombre'])) {
+                $row['nombre'] = self::normalizarTexto($row['nombre']);
+            }
+            if (isset($row['categoria_nombre'])) {
+                $row['categoria_nombre'] = self::normalizarTexto($row['categoria_nombre']);
+            }
+            $productos[] = $row;
+        }
         return $productos;
     }
 
@@ -33,7 +57,12 @@ class Productos
         if (!$result) throw new Exception("Error al listar categorías: " . $conexion->error);
 
         $cats = [];
-        while ($row = $result->fetch_assoc()) $cats[] = $row;
+        while ($row = $result->fetch_assoc()) {
+            if (isset($row['nombre'])) {
+                $row['nombre'] = self::normalizarTexto($row['nombre']);
+            }
+            $cats[] = $row;
+        }
         return $cats;
     }
 
@@ -61,7 +90,12 @@ class Productos
         $res = $stmt->get_result();
 
         $items = [];
-        while ($row = $res->fetch_assoc()) $items[] = $row;
+        while ($row = $res->fetch_assoc()) {
+            if (isset($row['nombre'])) {
+                $row['nombre'] = self::normalizarTexto($row['nombre']);
+            }
+            $items[] = $row;
+        }
         return $items;
     }
 

@@ -34,6 +34,19 @@ require_once __DIR__ . "/../../config/rutas.php";
                     <span id="total-orden" class="text-brown font-bold text-lg">₡0</span>
                 </div>
 
+                <!-- Campo de Notas -->
+                <div class="mb-4">
+                    <label for="notas-orden" class="block text-sm font-medium text-brown mb-2">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        Notas adicionales (opcional)
+                    </label>
+                    <textarea
+                        id="notas-orden"
+                        placeholder="Ej: Sin hielo, sin azúcar, alérgico a..."
+                        class="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-mint focus:ring-1 focus:ring-mint resize-none"
+                        rows="3"></textarea>
+                </div>
+
                 <div class="space-y-2">
                     <button
                         id="eliminar-orden"
