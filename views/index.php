@@ -201,21 +201,24 @@ error_reporting(E_ALL);
         let ordenActual = [];
         let totalOrden = 0;
 
-        // Mesas que tienen orden, persistidas en localStorage
-        let mesasConOrden = JSON.parse(localStorage.getItem('mesasConOrden') || '{}');
+        // Estado visual por mesa: libre | pendiente | lista
+        let mesaEstados = JSON.parse(localStorage.getItem('mesaEstados') || '{}');
 
         function guardarEstadoMesas() {
-            localStorage.setItem('mesasConOrden', JSON.stringify(mesasConOrden));
+            localStorage.setItem('mesaEstados', JSON.stringify(mesaEstados));
         }
 
-        function seleccionarMesa(numeroMesa) {
+        function aplicarSeleccionMesa(numeroMesa) {
+            numeroMesa = String(numeroMesa);
             mesaActual = numeroMesa;
 
             const mesaActualSpan = document.getElementById('mesa-actual');
-            if (mesaActualSpan) mesaActualSpan.textContent = `Mesa ${numeroMesa}`;
+            if (mesaActualSpan) {
+                mesaActualSpan.textContent = `Mesa ${numeroMesa}`;
+            }
 
             document.querySelectorAll('.mesa-card').forEach(card => {
-                card.style.border = "4px solid transparent";
+                card.style.border = "2px solid transparent";
             });
 
             const cardSeleccionada = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
@@ -226,33 +229,202 @@ error_reporting(E_ALL);
             actualizarBotones();
         }
 
+        function seleccionarMesa(numeroMesa) {
+            numeroMesa = String(numeroMesa);
+
+            // Si es la misma mesa, no hacer nada
+            if (mesaActual === numeroMesa) return;
+
+            // Si ya hay productos y quiere cambiar a otra mesa, pedir confirmación
+            if (mesaActual && ordenActual.length > 0 && mesaActual !== numeroMesa) {
+                Swal.fire({
+                    title: '¿Cambiar de mesa?',
+                    html: `
+                La orden actual tiene productos seleccionados.<br><br>
+                <strong>No se eliminarán</strong>, pero quedarán asignados a la nueva mesa.<br><br>
+                Cambiar de <strong>Mesa ${mesaActual}</strong> a <strong>Mesa ${numeroMesa}</strong>.
+            `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cambiar mesa',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true,
+                    confirmButtonColor: '#70A38F',
+                    cancelButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        aplicarSeleccionMesa(numeroMesa);
+                    }
+                });
+
+                return;
+            }
+
+            aplicarSeleccionMesa(numeroMesa);
+        }
+
+        // function actualizarEstadoMesa(numeroMesa) {
+        //     const card = document.querySelector(`[data-mesa="${numeroMesa}"]`);
+        //     if (!card) return;
+
+        //     const tieneOrden = mesasConOrden[numeroMesa];
+
+        //     if (tieneOrden) {
+        //         card.innerHTML = `
+        //             <div class="text-center">
+        //                 <div class="w-16 h-16 custom-brown rounded-full flex items-center justify-center mx-auto mb-3">
+        //                     <i class="fas fa-utensils text-beige text-xl"></i>
+        //                 </div>
+        //                 <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
+        //                 <p class="text-brown text-sm">Con orden</p>
+        //                 <button class="btn-entregar w-full py-2 custom-mint text-white rounded-lg hover-mint-bg font-medium">Entregar orden</button>
+        //             </div>
+        //         `;
+        //     } else {
+        //         card.innerHTML = `
+        //             <div class="text-center">
+        //                 <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
+        //                     <i class="fas fa-utensils text-white text-xl"></i>
+        //                 </div>
+        //                 <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
+        //                 <p class="text-mint text-sm">Disponible</p>
+        //             </div>
+        //         `;
+        //     }
+        // }
+
+
         function actualizarEstadoMesa(numeroMesa) {
-            const card = document.querySelector(`[data-mesa="${numeroMesa}"]`);
+            numeroMesa = String(numeroMesa);
+
+            const card = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
             if (!card) return;
 
-            const tieneOrden = mesasConOrden[numeroMesa];
+            const estado = mesaEstados[numeroMesa] || "libre";
 
-            if (tieneOrden) {
+            if (estado === "pendiente") {
                 card.innerHTML = `
-                    <div class="text-center">
-                        <div class="w-16 h-16 custom-brown rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-utensils text-beige text-xl"></i>
-                        </div>
-                        <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-                        <p class="text-brown text-sm">Con orden</p>
-                        <button class="btn-entregar w-full py-2 custom-mint text-white rounded-lg hover-mint-bg font-medium">Entregar orden</button>
-                    </div>
-                `;
+            <div class="text-center">
+                <div class="w-16 h-16 custom-brown rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-utensils text-beige text-xl"></i>
+                </div>
+                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
+                <p class="text-brown text-sm">En cocina</p>
+            </div>
+        `;
+            } else if (estado === "lista") {
+                card.innerHTML = `
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-bell text-white text-xl"></i>
+                </div>
+                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
+                <p class="text-green-600 text-sm font-medium">Lista para entregar</p>
+                <button class="btn-entregar w-full py-2 custom-mint text-white rounded-lg hover-mint-bg font-medium mt-3">
+                    Entregar orden
+                </button>
+            </div>
+        `;
             } else {
                 card.innerHTML = `
-                    <div class="text-center">
-                        <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-utensils text-white text-xl"></i>
-                        </div>
-                        <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-                        <p class="text-mint text-sm">Disponible</p>
-                    </div>
-                `;
+            <div class="text-center">
+                <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-utensils text-white text-xl"></i>
+                </div>
+                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
+                <p class="text-mint text-sm">Disponible</p>
+            </div>
+        `;
+            }
+
+            // Mantener borde si está seleccionada
+            if (mesaActual === numeroMesa) {
+                card.style.border = "2px solid #70A38F";
+            } else {
+                card.style.border = "2px solid transparent";
+            }
+        }
+
+        function actualizarTodasLasMesas() {
+            document.querySelectorAll('.mesa-card').forEach(card => {
+                const mesa = card.getAttribute('data-mesa');
+                if (mesa) actualizarEstadoMesa(mesa);
+            });
+        }
+
+        function mostrarToastMesaLista(numeroMesa) {
+            const toastEl = document.getElementById('toastMesaLista');
+            const toastBody = document.getElementById('toastMesaListaBody');
+
+            if (!toastEl || !toastBody) return;
+
+            toastBody.textContent = `La orden de la Mesa ${numeroMesa} está lista para entregar.`;
+
+            const toast = new bootstrap.Toast(toastEl, {
+                delay: 4000
+            });
+
+            toast.show();
+        }
+
+        function reproducirSonidoNotificacion() {
+            const audio = document.getElementById('audio-notificacion');
+            if (!audio) return;
+
+            audio.currentTime = 0;
+            audio.play().catch(error => {
+                console.warn("No se pudo reproducir el sonido automáticamente:", error);
+            });
+        }
+
+        async function sincronizarEstadosMesas(mostrarNotificacion = false) {
+            try {
+                const resp = await fetch(`${BASE_URL}public/api/estadoMesas.php?_=${Date.now()}`);
+
+                if (!resp.ok) {
+                    const errorText = await resp.text();
+                    console.error("Respuesta 500 de estadoMesas.php:", errorText);
+                    throw new Error(`HTTP ${resp.status}`);
+                }
+
+                const json = await resp.json();
+
+                if (json.status !== "OK") throw new Error(json.message || "Error obteniendo estados");
+
+                const nuevosEstados = json.data || {};
+                const estadosAnteriores = {
+                    ...mesaEstados
+                };
+
+                // Normalizar: si una mesa no viene en la respuesta, queda libre
+                const estadosNormalizados = {};
+                document.querySelectorAll('.mesa-card').forEach(card => {
+                    const mesa = card.getAttribute('data-mesa');
+                    if (!mesa) return;
+
+                    const estado = nuevosEstados[mesa];
+                    if (estado === "pendiente" || estado === "lista") {
+                        estadosNormalizados[mesa] = estado;
+                    } else {
+                        estadosNormalizados[mesa] = "libre";
+                    }
+                });
+
+                mesaEstados = estadosNormalizados;
+                guardarEstadoMesas();
+                actualizarTodasLasMesas();
+
+                if (mostrarNotificacion) {
+                    Object.keys(mesaEstados).forEach(mesa => {
+                        if (mesaEstados[mesa] === "lista" && estadosAnteriores[mesa] !== "lista") {
+                            mostrarToastMesaLista(mesa);
+                            reproducirSonidoNotificacion();
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error("Error sincronizando estados de mesas:", error);
             }
         }
 
@@ -437,35 +609,44 @@ error_reporting(E_ALL);
                     body: `mesa=${encodeURIComponent(numeroMesa)}`
                 });
 
+                if (!respuesta.ok) {
+                    const errorText = await respuesta.text();
+                    console.error("Respuesta entregarOrden:", errorText);
+                    throw new Error(`HTTP ${respuesta.status}`);
+                }
+
                 const result = await respuesta.json();
+                console.log("Resultado entregarOrden:", result);
 
                 if (result.status === "OK") {
-                    mesasConOrden[numeroMesa] = false;
+                    mesaEstados[numeroMesa] = "libre";
                     guardarEstadoMesas();
                     actualizarEstadoMesa(numeroMesa);
 
-                    Swal.fire({
+                    await Swal.fire({
                         position: "center",
                         icon: "success",
                         html: `<strong>Mesa ${numeroMesa}</strong><br>Orden marcada como ENTREGADA`,
                         showConfirmButton: false,
-                        timer: 2500
+                        timer: 2000
                     });
 
+                    sincronizarEstadosMesas(false);
+
                 } else {
-                    Swal.fire({
+                    await Swal.fire({
                         icon: "error",
                         title: "Oops...",
-                        text: "No se pudo entregar la orden"
+                        text: result.message || "No se pudo entregar la orden"
                     });
                 }
 
             } catch (error) {
-                console.error(error);
-                Swal.fire({
+                console.error("Error en entregarOrden:", error);
+                await Swal.fire({
                     icon: "error",
                     title: "Oops...",
-                    text: "Error al entregar la orden",
+                    text: error.message || "Error al entregar la orden"
                 });
             }
         }
@@ -582,8 +763,18 @@ error_reporting(E_ALL);
                 const result = await respuesta.json();
 
                 if (result.status === "OK") {
-                    mesasConOrden[mesaActual] = true;
+                    console.log("Orden guardada correctamente en backend");
+                    console.log("mesaActual antes de actualizar estado:", mesaActual);
+                    console.log("mesaEstados antes:", mesaEstados);
+
+                    mesaEstados[mesaActual] = "pendiente";
+                    console.log("mesaEstados después:", mesaEstados);
+
                     guardarEstadoMesas();
+                    console.log("Estado guardado en localStorage");
+
+                    actualizarEstadoMesa(mesaActual);
+                    console.log("UI de mesa actualizada");
 
                     await Swal.fire({
                         position: "center",
@@ -614,12 +805,12 @@ error_reporting(E_ALL);
                 }
 
             } catch (error) {
-                console.error("Error enviando orden:", error);
+                console.error("Error real en enviarCocina:", error);
 
                 await Swal.fire({
                     icon: "error",
                     title: "Oops...",
-                    text: "Error al enviar la orden"
+                    text: error.message || "Error al enviar la orden"
                 });
             }
         }
@@ -653,34 +844,52 @@ error_reporting(E_ALL);
             const mesasBtn = document.querySelector('#navbar button[data-slug="mesas"]');
             if (mesasBtn) actualizarNavbar(mesasBtn);
 
-            document.addEventListener('click', (e) => {
-                const card = e.target.closest('.mesa-card');
-                if (!card) return;
-
-                if (e.target.closest('.btn-entregar')) return;
-
-                const mesa = card.getAttribute('data-mesa');
-                if (!mesa) return;
-
-                seleccionarMesa(mesa);
-            });
-
             const eliminarBtn = document.getElementById('eliminar-orden');
             const enviarBtn = document.getElementById('enviar-cocina');
 
             if (eliminarBtn) eliminarBtn.addEventListener('click', eliminarOrden);
             if (enviarBtn) enviarBtn.addEventListener('click', enviarCocina);
 
-            Object.keys(mesasConOrden).forEach(numMesa => {
-                if (mesasConOrden[numMesa]) {
-                    actualizarEstadoMesa(numMesa);
-                }
-            });
+            actualizarTodasLasMesas();
+            sincronizarEstadosMesas(false);
+
+            setInterval(() => {
+                sincronizarEstadosMesas(true);
+            }, 5000);
 
             document.addEventListener('click', (e) => {
-                const boton = e.target.closest('.btn-entregar');
+                const botonEntregar = e.target.closest('.btn-entregar');
+                if (botonEntregar) return;
+
                 const card = e.target.closest('.mesa-card');
-                if (!boton || !card) return;
+                if (!card) return;
+
+                const mesa = card.getAttribute('data-mesa');
+                if (!mesa) return;
+
+                const estadoMesa = mesaEstados[mesa] || "libre";
+
+                if ((estadoMesa === "pendiente" || estadoMesa === "lista") && mesaActual !== mesa) {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Mesa ocupada",
+                        text: estadoMesa === "lista" ?
+                            `La Mesa ${mesa} tiene una orden lista para entregar.` : `La Mesa ${mesa} tiene una orden en cocina.`
+                    });
+                    return;
+                }
+
+                seleccionarMesa(mesa);
+            });
+            document.addEventListener('click', (e) => {
+                const boton = e.target.closest('.btn-entregar');
+                if (!boton) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                const card = e.target.closest('.mesa-card');
+                if (!card) return;
 
                 const mesa = card.getAttribute('data-mesa');
                 if (!mesa) return;
@@ -689,6 +898,19 @@ error_reporting(E_ALL);
             });
         });
     </script>
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="toastMesaLista" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMesaListaBody">
+                    La orden está lista para entregar.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            </div>
+        </div>
+    </div>
+    <audio id="audio-notificacion" preload="auto">
+        <source src="<?= BASE_URL ?>public/sounds/notificacion.mp3" type="audio/mpeg">
+    </audio>
 
 </body>
 

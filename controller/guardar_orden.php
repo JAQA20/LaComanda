@@ -50,10 +50,14 @@ foreach ($ordenes as $o) {
 }
 $numero = $ultimoNumero + 1;
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Completar orden
 $data["numero"]    = $numero;
 $data["estado"]    = "pendiente";
 $data["timestamp"] = time();
+$data["usuario_id"] = $_SESSION["usuario_id"] ?? null;
 
 // Agregar al arreglo
 $ordenes[] = $data;

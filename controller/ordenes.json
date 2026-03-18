@@ -1,178 +1,77 @@
 [
     {
-        "mesa": "1",
-        "items": "Espresso x4",
+        "mesa": "5",
+        "items": "Bowl de Yogurt y Frutas x1",
         "numero": 1,
         "estado": "entregada",
-        "timestamp": 1769045037,
-        "hora_entrega": "02:24"
-    },
-    {
-        "mesa": "1",
-        "items": "Espresso x1\nEmpanada de Carne x1",
-        "numero": 2,
-        "estado": "entregada",
-        "timestamp": 1769050484,
-        "hora_entrega": "02:10"
-    },
-    {
-        "mesa": "11",
-        "items": "Bruschetta x1",
-        "numero": 3,
-        "estado": "entregada",
-        "timestamp": 1770254014,
-        "hora_entrega": "02:16"
-    },
-    {
-        "mesa": "1",
-        "items": "Espresso x1",
-        "numero": 4,
-        "estado": "entregada",
-        "timestamp": 1770260884,
-        "hora_entrega": "04:08"
-    },
-    {
-        "mesa": "1",
-        "items": "Espresso x1",
-        "numero": 5,
-        "estado": "entregada",
-        "timestamp": 1770261076,
-        "hora_entrega": "04:17"
-    },
-    {
-        "mesa": "1",
-        "items": "Espresso x1",
-        "numero": 6,
-        "estado": "entregada",
-        "timestamp": 1770261709,
-        "hora_entrega": "04:23"
-    },
-    {
-        "mesa": "4",
-        "items": "Latte x1",
-        "numero": 7,
-        "estado": "entregada",
-        "timestamp": 1770261853,
-        "hora_entrega": "04:24"
-    },
-    {
-        "mesa": "1",
-        "items": "Espresso x1",
-        "numero": 8,
-        "estado": "entregada",
-        "timestamp": 1770402749,
-        "hora_entrega": "19:34"
-    },
-    {
-        "mesa": "1",
-        "items": "Espresso x1",
-        "numero": 9,
-        "estado": "entregada",
-        "timestamp": 1770402986,
-        "hora_entrega": "19:36"
-    },
-    {
-        "mesa": "2",
-        "items": "Americano x1",
-        "numero": 10,
-        "estado": "entregada",
-        "timestamp": 1770783208,
-        "hora_entrega": "05:15"
-    },
-    {
-        "mesa": "3",
-        "items": "Bruschetta x1",
-        "numero": 11,
-        "estado": "entregada",
-        "timestamp": 1770783277,
-        "hora_entrega": "05:16"
-    },
-    {
-        "mesa": "2",
-        "items": "Americano x1",
-        "numero": 12,
-        "estado": "entregada",
-        "timestamp": 1770783467,
-        "hora_entrega": "05:42"
-    },
-    {
-        "mesa": "3",
-        "items": "Bruschetta x1",
-        "numero": 13,
-        "estado": "entregada",
-        "timestamp": 1770783684,
-        "hora_entrega": "05:42"
-    },
-    {
-        "mesa": "10",
-        "items": "Cannoli x1",
-        "numero": 14,
-        "estado": "entregada",
-        "timestamp": 1770783762,
-        "hora_entrega": "06:48"
-    },
-    {
-        "mesa": "12",
-        "items": "Affogato x1",
-        "numero": 15,
-        "estado": "entregada",
-        "timestamp": 1770855969,
-        "hora_entrega": "22:39"
-    },
-    {
-        "mesa": "1",
-        "items": "Americano x1",
-        "numero": 16,
-        "estado": "entregada",
-        "timestamp": 1771465347,
-        "hora_entrega": "03:17"
+        "timestamp": 1773809204,
+        "hora_lista": "04:52",
+        "hora_entrega": "04:52"
     },
     {
         "mesa": "6",
-        "items": "caca x1",
-        "numero": 17,
+        "items": "FrappÃ© Caramelo x1",
+        "numero": 2,
         "estado": "entregada",
-        "timestamp": 1771467515,
-        "hora_entrega": "03:19"
+        "timestamp": 1773809252,
+        "hora_lista": "04:52",
+        "hora_entrega": "04:52"
+    },
+    {
+        "mesa": "2",
+        "items": "Latte Lavanda x1",
+        "numero": 3,
+        "estado": "entregada",
+        "timestamp": 1773809545,
+        "hora_lista": "04:52",
+        "hora_entrega": "04:53"
+    },
+    {
+        "mesa": "1",
+        "items": "Bowl de Yogurt y Frutas x1",
+        "numero": 4,
+        "estado": "entregada",
+        "timestamp": 1773809595,
+        "hora_lista": "04:53",
+        "hora_entrega": "05:13"
+    },
+    {
+        "mesa": "2",
+        "items": "CafÃ© con Leche x1",
+        "numero": 5,
+        "estado": "entregada",
+        "timestamp": 1773810722,
+        "hora_lista": "05:12",
+        "hora_entrega": "05:13"
+    },
+    {
+        "mesa": "5",
+        "items": "Bagel de SalmÃ³n x1",
+        "numero": 6,
+        "estado": "entregada",
+        "timestamp": 1773811129,
+        "usuario_id": 23,
+        "hora_lista": "05:19",
+        "hora_entrega": "05:19"
     },
     {
         "mesa": "1",
         "items": "Americano x1",
-        "numero": 18,
+        "numero": 7,
         "estado": "entregada",
-        "timestamp": 1771471411,
-        "hora_entrega": "02:22"
+        "timestamp": 1773811571,
+        "usuario_id": 23,
+        "hora_lista": "05:26",
+        "hora_entrega": "05:27"
     },
     {
-        "mesa": "1",
-        "items": "Americano x1",
-        "numero": 19,
+        "mesa": "5",
+        "items": "Empanada de Carne x1",
+        "numero": 8,
         "estado": "entregada",
-        "timestamp": 1772675040,
-        "hora_entrega": "02:52"
-    },
-    {
-        "mesa": "1",
-        "items": "Americano x1",
-        "numero": 20,
-        "estado": "entregada",
-        "timestamp": 1773215505,
-        "hora_entrega": "07:55"
-    },
-    {
-        "mesa": "1",
-        "items": "Americano x1",
-        "numero": 21,
-        "estado": "entregada",
-        "timestamp": 1773641498,
-        "hora_entrega": "06:11"
-    },
-    {
-        "mesa": "1",
-        "items": "Croissant de Jam\u00c3\u00b3n y Queso x1",
-        "numero": 22,
-        "estado": "entregada",
-        "timestamp": 1773644682,
-        "hora_entrega": "07:57"
+        "timestamp": 1773812054,
+        "usuario_id": 23,
+        "hora_lista": "05:34",
+        "hora_entrega": "05:35"
     }
 ]

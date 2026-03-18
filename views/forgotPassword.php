@@ -22,6 +22,7 @@ require_once __DIR__ . "../../config/rutas.php";
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/forgotPassword.css">
 
+
 </head>
 
 <body class="bg-brand-beige min-h-screen">

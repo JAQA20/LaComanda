@@ -13,7 +13,40 @@ $ordenes = file_exists($archivo)
 if (!is_array($ordenes)) {
     $ordenes = [];
 }
+
+function stepCircleClass($activo, $completado = false)
+{
+    if ($completado) return "bg-mint-green text-white";
+    if ($activo) return "bg-brown-dark text-white";
+    return "bg-gray-300 text-white";
+}
+
+function stepTextClass($activo, $completado = false)
+{
+    if ($completado || $activo) return "text-brown-dark font-semibold";
+    return "text-gray-400";
+}
+
+function stepLineClass($completado = false)
+{
+    return $completado ? "bg-mint-green" : "bg-gray-300";
+}
+
+function obtenerPasoOrden($estado)
+{
+    switch ($estado) {
+        case "pendiente":
+            return 2; // En cocina
+        case "lista":
+            return 3; // Lista
+        case "entregada":
+            return 4; // Entregada
+        default:
+            return 1; // Pedido
+    }
+}
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -116,12 +149,64 @@ if (!is_array($ordenes)) {
             <div id="pending-orders-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
                 <?php foreach ($ordenes as $orden): ?>
-                    <?php if (isset($orden["estado"]) && $orden["estado"] === "pendiente"): ?>
+                    <?php if (isset($orden["estado"]) && in_array($orden["estado"], ["pendiente", "lista"])): ?>
 
                         <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
 
                             <!-- Encabezado -->
                             <div class="flex items-center justify-between mb-4">
+                                <?php $pasoActual = obtenerPasoOrden($orden["estado"] ?? "pendiente"); ?>
+
+                                <div class="mb-6">
+                                    <div class="flex items-center justify-between gap-2 flex-wrap">
+
+                                        <!-- Pedido -->
+                                        <div class="flex flex-col items-center min-w-[70px]">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 1, $pasoActual > 1) ?>">
+                                                <?= $pasoActual > 1 ? "✓" : "1" ?>
+                                            </div>
+                                            <span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 1, $pasoActual > 1) ?>">
+                                                Pedido
+                                            </span>
+                                        </div>
+
+                                        <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 1) ?>"></div>
+
+                                        <!-- En cocina -->
+                                        <div class="flex flex-col items-center min-w-[70px]">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 2, $pasoActual > 2) ?>">
+                                                <?= $pasoActual > 2 ? "✓" : "2" ?>
+                                            </div>
+                                            <span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 2, $pasoActual > 2) ?>">
+                                                En cocina
+                                            </span>
+                                        </div>
+
+                                        <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 2) ?>"></div>
+
+                                        <!-- Lista -->
+                                        <div class="flex flex-col items-center min-w-[70px]">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 3, $pasoActual > 3) ?>">
+                                                <?= $pasoActual > 3 ? "✓" : "3" ?>
+                                            </div>
+                                            <span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 3, $pasoActual > 3) ?>">
+                                                Lista
+                                            </span>
+                                        </div>
+
+                                        <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 3) ?>"></div>
+
+                                        <!-- Entregada -->
+                                        <div class="flex flex-col items-center min-w-[70px]">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 4, false) ?>">
+                                                <?= $pasoActual === 4 ? "✓" : "4" ?>
+                                            </div>
+                                            <span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 4, false) ?>">
+                                                Entregada
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div>
                                     <h3 class="text-xl font-semibold text-brown-dark">
                                         Orden #<?php echo htmlspecialchars($orden["numero"]); ?>
@@ -159,12 +244,21 @@ if (!is_array($ordenes)) {
                                 </div>
                             </div>
 
-                            <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
-                                <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
-                                <form action="<?= BASE_URL ?>controller/marcarEntrega.php" method="POST">
-                                    <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>"></input>
+                            <?php if (isset($_SESSION["rol_id"]) && in_array((int)$_SESSION["rol_id"], [1, 3]) && $orden["estado"] === "pendiente"): ?>
+                                <form action="<?= BASE_URL ?>public/api/marcarLista.php" method="POST">
+                                    <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>">
                                     <button
-                                        class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200 hidden">
+                                        class="w-full bg-brown-dark hover:bg-[#4a2d22] text-white font-medium py-3 rounded-xl transition-colors duration-200">
+                                        Marcar como lista
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+
+                            <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1 && $orden["estado"] === "lista"): ?>
+                                <form action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST">
+                                    <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>">
+                                    <button
+                                        class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
                                         Marcar como entregada
                                     </button>
                                 </form>

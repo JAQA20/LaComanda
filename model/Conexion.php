@@ -4,7 +4,9 @@ class Conexion
     public static function conectar()
     {
 
-        $host = getenv('DB_HOST') ?: 'db'; // Cambiamos 'localhost/ 127.0.0.1' por 'db' para que funcione con Docker
+        // $host = getenv('DB_HOST') ?: 'db'; // 'db' para que funcione con Docker
+        $host = getenv('DB_HOST') ?: '127.0.0.1'; // 'localhost/127.0.0.1 para desarrollo local sin Docker' 
+
         $user = getenv('DB_USER') ?: 'root';
 
         $password = getenv('DB_PASSWORD');
