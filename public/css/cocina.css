@@ -18,3 +18,60 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
+
+        /* Estilos para el modal de detalles */
+        #order-detail-modal {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        #order-detail-modal .bg-white {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Área de notas con estilos diferenciados */
+        .notes-section {
+            border-left: 4px solid currentColor;
+        }
+
+        .notes-section.bg-yellow-50 {
+            border-left-color: #eab308;
+        }
+
+        .notes-section.bg-red-50 {
+            border-left-color: #ef4444;
+        }
+
+        /* Botón de expandir orden */
+        .expand-order-btn {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .expand-order-btn:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        /* Transiciones suaves para modal */
+        #order-detail-modal.hidden {
+            display: none;
+        }

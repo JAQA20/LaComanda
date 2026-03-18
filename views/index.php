@@ -226,6 +226,10 @@ error_reporting(E_ALL);
                 cardSeleccionada.style.border = "2px solid #70A38F";
             }
 
+            // Limpiar campo de notas cuando se selecciona una mesa
+            const notasField = document.getElementById('notas-orden');
+            if (notasField) notasField.value = '';
+
             actualizarBotones();
         }
 
@@ -262,37 +266,6 @@ error_reporting(E_ALL);
 
             aplicarSeleccionMesa(numeroMesa);
         }
-
-        // function actualizarEstadoMesa(numeroMesa) {
-        //     const card = document.querySelector(`[data-mesa="${numeroMesa}"]`);
-        //     if (!card) return;
-
-        //     const tieneOrden = mesasConOrden[numeroMesa];
-
-        //     if (tieneOrden) {
-        //         card.innerHTML = `
-        //             <div class="text-center">
-        //                 <div class="w-16 h-16 custom-brown rounded-full flex items-center justify-center mx-auto mb-3">
-        //                     <i class="fas fa-utensils text-beige text-xl"></i>
-        //                 </div>
-        //                 <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-        //                 <p class="text-brown text-sm">Con orden</p>
-        //                 <button class="btn-entregar w-full py-2 custom-mint text-white rounded-lg hover-mint-bg font-medium">Entregar orden</button>
-        //             </div>
-        //         `;
-        //     } else {
-        //         card.innerHTML = `
-        //             <div class="text-center">
-        //                 <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-        //                     <i class="fas fa-utensils text-white text-xl"></i>
-        //                 </div>
-        //                 <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-        //                 <p class="text-mint text-sm">Disponible</p>
-        //             </div>
-        //         `;
-        //     }
-        // }
-
 
         function actualizarEstadoMesa(numeroMesa) {
             numeroMesa = String(numeroMesa);
@@ -683,6 +656,8 @@ error_reporting(E_ALL);
             }).then((result) => {
                 if (result.isConfirmed) {
                     ordenActual = [];
+                    const notasField = document.getElementById('notas-orden');
+                    if (notasField) notasField.value = '';
                     actualizarOrden();
                     actualizarBotones();
 
@@ -734,9 +709,14 @@ error_reporting(E_ALL);
                 .map(item => `${item.nombre} x${item.cantidad}`)
                 .join("\n");
 
+
+            const notasField = document.getElementById('notas-orden');
+            const notas = notasField ? notasField.value.trim() : '';
+
             const data = {
                 mesa: mesaActual,
-                items: listaProductos
+                items: listaProductos,
+                notas: notas
             };
 
             try {
@@ -790,6 +770,9 @@ error_reporting(E_ALL);
 
                     const mesaActualSpan = document.getElementById("mesa-actual");
                     if (mesaActualSpan) mesaActualSpan.textContent = "No seleccionada";
+
+                    const notasField = document.getElementById('notas-orden');
+                    if (notasField) notasField.value = '';
 
                     actualizarOrden();
                     actualizarBotones();
