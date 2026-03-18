@@ -158,11 +158,48 @@ if (!is_array($ordenes)) {
                                 </div>
                             </div>
 
+                            <!-- NOTAS ADICIONALES -->
+                            <?php
+                            $tieneNotas = isset($orden["notas"]) && !empty(trim($orden["notas"]));
+                            ?>
+                            <div class="notes-section mb-6 p-3 rounded-lg <?php echo $tieneNotas ? 'bg-yellow-50 border border-yellow-200' : 'bg-red-50 border border-red-200'; ?>">
+                                <div class="flex items-start">
+                                    <?php if ($tieneNotas): ?>
+                                        <i class="fas fa-sticky-note text-yellow-600 mt-1 mr-2 flex-shrink-0"></i>
+                                        <div class="flex-1">
+                                            <h5 class="text-sm font-semibold text-yellow-900">Notas especiales:</h5>
+                                            <p class="text-sm text-yellow-800 mt-1"><?php echo htmlspecialchars($orden["notas"]); ?></p>
+                                        </div>
+                                    <?php else: ?>
+                                        <i class="fas fa-exclamation-triangle text-red-600 mt-1 mr-2 flex-shrink-0"></i>
+                                        <div class="flex-1">
+                                            <h5 class="text-sm font-semibold text-red-900">⚠ Sin notas especiales</h5>
+                                            <p class="text-sm text-red-800 mt-1">Verificar con el cliente si hay requerimientos especiales</p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <!-- BOTÓN EXPANDIR PARA VER DETALLES COMPLETOS -->
+                            <button 
+                                class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn"
+                                data-orden-numero="<?php echo htmlspecialchars($orden['numero']); ?>"
+                                data-orden-mesa="<?php echo htmlspecialchars($orden['mesa']); ?>"
+                                data-orden-items="<?php echo htmlspecialchars($orden['items']); ?>"
+                                data-orden-notas="<?php echo htmlspecialchars($orden['notas'] ?? ''); ?>">
+                                <i class="fas fa-expand"></i>
+                                Ver detalles completos
+                            </button>
+
                             <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
                                 <!-- BOTÓN MARCAR COMO ENTREGADA (fuera del foreach de productos) -->
                                 <form action="../controller/marcarEntrega.php" method="POST">
                                     <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['numero']); ?>"></input>
+<<<<<<< Updated upstream
                                     <button
+=======
+                                    <button type="submit"
+>>>>>>> Stashed changes
                                         class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
                                         Marcar como entregada
                                     </button>
@@ -178,13 +215,192 @@ if (!is_array($ordenes)) {
         </div>
     </div>
 
-    <!-- AUTO REFRESH -->
+    <!-- MODAL PARA VER DETALLES COMPLETOS -->
+    <div id="order-detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <!-- Encabezado del Modal -->
+            <div class="sticky top-0 bg-brown-dark text-beige-light p-6 flex items-center justify-between z-10">
+                <div>
+                    <h2 class="text-2xl font-semibold" id="modal-orden-numero">Orden #</h2>
+                    <p class="text-sm opacity-80" id="modal-orden-mesa">Mesa: </p>
+                </div>
+                <button id="close-modal-btn" class="text-beige-light hover:text-white text-2xl transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Contenido del Modal -->
+            <div class="p-6">
+                <!-- Productos Detallados -->
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-brown-dark mb-4 flex items-center">
+                        <i class="fas fa-list mr-2"></i>
+                        Productos a preparar
+                    </h3>
+                    <div id="modal-productos-list" class="space-y-3 bg-beige-light p-4 rounded-xl">
+                        <!-- Se llenará con JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Notas Especiales -->
+                <div id="modal-notas-section" class="mb-6">
+                    <!-- Se llenará con JavaScript -->
+                </div>
+
+                <!-- Pie del Modal con Botón de Marcar Entregada -->
+                <div class="border-t pt-6">
+                    <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
+                        <form id="deliver-form" action="<?= BASE_URL ?>controller/marcarEntrega.php" method="POST" class="flex gap-3">
+                            <input type="hidden" id="modal-orden-numero-input" name="numero">
+                            <button type="submit" class="flex-1 bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
+                                <i class="fas fa-check mr-2"></i>
+                                Marcar como entregada
+                            </button>
+                            <button type="button" id="close-modal-btn-bottom" class="flex-1 bg-gray-300 hover:bg-gray-400 text-brown-dark font-medium py-3 rounded-xl transition-colors duration-200">
+                                Cerrar
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        <button type="button" id="close-modal-btn-bottom" class="w-full bg-gray-300 hover:bg-gray-400 text-brown-dark font-medium py-3 rounded-xl transition-colors duration-200">
+                            Cerrar
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTO REFRESH (pero preservar orden seleccionada) -->
     <script>
-        setInterval(() => {
+        // Guardar orden seleccionada en localStorage
+        function saveSelectedOrder(numeroOrden) {
+            localStorage.setItem('selectedOrder', numeroOrden);
+        }
+
+        // Obtener orden seleccionada de localStorage
+        function getSelectedOrder() {
+            return localStorage.getItem('selectedOrder');
+        }
+
+        // Limpiar orden seleccionada
+        function clearSelectedOrder() {
+            localStorage.removeItem('selectedOrder');
+        }
+
+        // Abrir modal con detalles de orden
+        function openOrderModal(numeroOrden, mesa, items, notas) {
+            const modal = document.getElementById('order-detail-modal');
+            
+            // Llenar encabezado
+            document.getElementById('modal-orden-numero').textContent = `Orden #${numeroOrden}`;
+            document.getElementById('modal-orden-mesa').textContent = `Mesa: ${mesa}`;
+            document.getElementById('modal-orden-numero-input').value = numeroOrden;
+
+            // Llenar productos
+            const productosList = document.getElementById('modal-productos-list');
+            productosList.innerHTML = '';
+            
+            const lineas = items.split('\n').filter(l => l.trim() !== '');
+            lineas.forEach(linea => {
+                linea = linea.trim();
+                let producto, cantidad;
+                
+                const match = linea.match(/^(.*) x(\d+)$/);
+                if (match) {
+                    producto = match[1];
+                    cantidad = match[2];
+                } else {
+                    producto = linea;
+                    cantidad = '1';
+                }
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex justify-between items-center py-2 px-3 bg-white rounded border border-beige-light';
+                itemDiv.innerHTML = `
+                    <span class="font-medium text-brown-dark">${producto}</span>
+                    <span class="bg-mint-green text-white px-3 py-1 rounded-full font-semibold">x${cantidad}</span>
+                `;
+                productosList.appendChild(itemDiv);
+            });
+
+            // Llenar notas
+            const notasSection = document.getElementById('modal-notas-section');
+            if (notas && notas.trim() !== '') {
+                notasSection.innerHTML = `
+                    <div class="p-4 rounded-xl bg-yellow-50 border border-yellow-200">
+                        <h3 class="text-lg font-semibold text-yellow-900 mb-2 flex items-center">
+                            <i class="fas fa-sticky-note mr-2"></i>
+                            Notas especiales
+                        </h3>
+                        <p class="text-yellow-800 whitespace-pre-wrap">${notas}</p>
+                    </div>
+                `;
+            } else {
+                notasSection.innerHTML = `
+                    <div class="p-4 rounded-xl bg-orange-50 border border-orange-200">
+                        <h3 class="text-lg font-semibold text-orange-900 mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            ⚠ Advertencia - Sin notas especiales
+                        </h3>
+                        <p class="text-orange-800">Verificar con el cliente si hay requerimientos especiales antes de preparar</p>
+                    </div>
+                `;
+            }
+
+            // Mostrar modal y guardar orden seleccionada
+            modal.classList.remove('hidden');
+            saveSelectedOrder(numeroOrden);
+        }
+
+        // Cerrar modal
+        function closeOrderModal() {
+            const modal = document.getElementById('order-detail-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Event listeners para botones de expandir
+        document.querySelectorAll('.expand-order-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const numeroOrden = this.getAttribute('data-orden-numero');
+                const mesa = this.getAttribute('data-orden-mesa');
+                const items = this.getAttribute('data-orden-items');
+                const notas = this.getAttribute('data-orden-notas');
+                openOrderModal(numeroOrden, mesa, items, notas);
+            });
+        });
+
+        // Event listeners para cerrar modal
+        document.querySelectorAll('#close-modal-btn, #close-modal-btn-bottom').forEach(btn => {
+            btn.addEventListener('click', closeOrderModal);
+        });
+
+        // Cerrar modal al hacer clic fuera del contenido
+        document.getElementById('order-detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeOrderModal();
+            }
+        });
+
+        // Auto refresh cada 10 segundos
+        let refreshInterval = setInterval(() => {
             location.reload();
         }, 10000);
-    </script>
 
-</body>
+        // Cuando se recarga, restaurar la orden seleccionada
+        window.addEventListener('load', function() {
+            const selectedOrderNo = getSelectedOrder();
+            if (selectedOrderNo) {
+                // Pequeña pausa para que se cargue el DOM
+                setTimeout(() => {
+                    const expandBtn = document.querySelector(`[data-orden-numero="${selectedOrderNo}"]`);
+                    if (expandBtn) {
+                        expandBtn.click();
+                    }
+                }, 500);
+            }
+        });
 
-</html>
+        // Limpiar orden al enviar el formulario de entrega
+        document.getElementById('deliver-form')?.addEventListener('submit', function() {
+            clearSelectedOrder();
+        });

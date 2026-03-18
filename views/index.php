@@ -222,6 +222,10 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                 cardSeleccionada.style.border = "2px solid #70A38F";
             }
 
+            // Limpiar campo de notas cuando se selecciona una mesa
+            const notasField = document.getElementById('notas-orden');
+            if (notasField) notasField.value = '';
+
             actualizarBotones();
         }
 
@@ -520,6 +524,8 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             }).then((result) => {
                 if (result.isConfirmed) {
                     ordenActual = [];
+                    const notasField = document.getElementById('notas-orden');
+                    if (notasField) notasField.value = '';
                     actualizarOrden();
                     actualizarBotones();
 
@@ -576,10 +582,17 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                 .map(item => `${item.nombre} x${item.cantidad}`)
                 .join("\n");
 
+<<<<<<< Updated upstream
             //  Crear estructura de la orden
+=======
+            const notasField = document.getElementById('notas-orden');
+            const notas = notasField ? notasField.value.trim() : '';
+
+>>>>>>> Stashed changes
             const data = {
                 mesa: mesaActual,
-                items: listaProductos
+                items: listaProductos,
+                notas: notas
             };
 
             try {
@@ -629,6 +642,9 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
                     const mesaActualSpan = document.getElementById("mesa-actual");
                     if (mesaActualSpan) mesaActualSpan.textContent = "No seleccionada";
+
+                    const notasField = document.getElementById('notas-orden');
+                    if (notasField) notasField.value = '';
 
                     actualizarOrden();
                     actualizarBotones();

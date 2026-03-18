@@ -139,7 +139,129 @@
         "mesa": "1",
         "items": "Americano x1",
         "numero": 18,
+<<<<<<< Updated upstream
         "estado": "pendiente",
         "timestamp": 1771471411
+=======
+        "estado": "entregada",
+        "timestamp": 1771471411,
+        "hora_entrega": "02:22"
+    },
+    {
+        "mesa": "1",
+        "items": "Americano x1",
+        "numero": 19,
+        "estado": "entregada",
+        "timestamp": 1772675040,
+        "hora_entrega": "02:52"
+    },
+    {
+        "mesa": "1",
+        "items": "Americano x1",
+        "numero": 20,
+        "estado": "entregada",
+        "timestamp": 1773215505,
+        "hora_entrega": "07:55"
+    },
+    {
+        "mesa": "1",
+        "items": "Americano x1",
+        "numero": 21,
+        "estado": "entregada",
+        "timestamp": 1773641498,
+        "hora_entrega": "06:11"
+    },
+    {
+        "mesa": "1",
+        "items": "Croissant de Jamón y Queso x1",
+        "numero": 22,
+        "estado": "entregada",
+        "timestamp": 1773644682,
+        "hora_entrega": "07:57"
+    },
+    {
+        "mesa": "3",
+        "items": "Espresso x2\nCapuchino x1",
+        "numero": 23,
+        "estado": "entregada",
+        "timestamp": 1773644800,
+        "notas": "Sin azúcar en el espresso, cliente alérgico a la leche",
+        "hora_entrega": "06:20"
+    },
+    {
+        "mesa": "5",
+        "items": "Americano x1\nBruschetta x2",
+        "numero": 24,
+        "estado": "pendiente",
+        "timestamp": 1773644900,
+        "notas": ""
+    },
+    {
+        "mesa": "2",
+        "items": "Café con Leche x1\nCafé Negro x1\nCapuccino x1",
+        "notas": "Café negro sin azúcar",
+        "numero": 25,
+        "estado": "entregada",
+        "timestamp": 1773814247,
+        "hora_entrega": "06:10"
+    },
+    {
+        "mesa": "3",
+        "items": "Americano x1",
+        "notas": "Doble azúcar",
+        "numero": 26,
+        "estado": "pendiente",
+        "timestamp": 1773814838
+    },
+    {
+        "mesa": "1",
+        "items": "Croissant de Jamón y Queso x1",
+        "notas": "sin queso",
+        "numero": 27,
+        "estado": "entregada",
+        "timestamp": 1773816052,
+        "hora_entrega": "00:40",
+        "timestamp_entrega": 1773816057
+    },
+    {
+        "mesa": "1",
+        "items": "Café con Leche x1",
+        "notas": "sin azucar",
+        "numero": 28,
+        "estado": "entregada",
+        "timestamp": 1773816399,
+        "hora_entrega": "00:46",
+        "timestamp_entrega": 1773816405
+    },
+    {
+        "mesa": "1",
+        "items": "Café Negro x1",
+        "notas": "Intolerante a la lactosa",
+        "numero": 29,
+        "estado": "entregada",
+        "timestamp": 1773817864,
+        "hora_entrega": "01:11",
+        "timestamp_entrega": 1773817878
+    },
+    {
+        "mesa": "1",
+        "items": "Macchiato x1",
+        "notas": "sin hielo",
+        "numero": 30,
+        "estado": "entregada",
+        "timestamp": 1773818406,
+        "hora_entrega": "01:20",
+        "timestamp_entrega": 1773818423
+    },
+    {
+        "mesa": "1",
+        "items": "Café Vainilla x1",
+        "notas": "sin hielo",
+        "numero": 31,
+        "estado": "entregada",
+        "timestamp": 1773818474,
+        "hora_entrega": "01:21",
+        "timestamp_entrega": 1773818480
+>>>>>>> Stashed changes
     }
 ]

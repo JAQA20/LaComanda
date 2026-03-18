@@ -210,7 +210,7 @@ if ($token && $email && !$success) {
                         Ir al login
                     </a>
 
-                <?php elseif (!$token_valid && $token): ?>
+                <?php elseif (!$tokenValid && $token): ?>
 
                     <!-- Token Invalid -->
                     <div class="mb-6 p-4 bg-red-100 border border-red-400 rounded-lg">
@@ -227,9 +227,8 @@ if ($token && $email && !$success) {
                     <!-- Reset Form -->
                     <form id="reset-form" class="space-y-6" method="POST">
 
-                        <!-- Hidden fields para token y email -->
+                        <!-- Hidden field para token -->
                         <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
-                        <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
 
                         <?php if ($error): ?>
                             <div class="p-4 bg-red-100 border border-red-400 rounded-lg">

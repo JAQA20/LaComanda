@@ -2,6 +2,8 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+require_once __DIR__ . "/../model/OrdenesSync.php";
+
 $archivo = __DIR__ . "/ordenes.json";
 $contenido = file_get_contents($archivo);
 $ordenes = json_decode($contenido, true);
@@ -23,12 +25,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // Cambiar estado igual que cocina
             $orden["estado"] = "entregada";
             $orden["hora_entrega"] = date("H:i");
+            $orden["timestamp_entrega"] = time();
             break;
         }
     }
     unset($orden);
 
-    file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT));
+    file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+    try {
+        OrdenesSync::marcarEntregadaPorMesa((int)$mesa, time());
+    } catch (Throwable $e) {
+        error_log("Error sincronizando entrega en MySQL (mesa): " . $e->getMessage());
+    }
 
     echo json_encode(["status" => "OK"]);
     exit;
