@@ -156,7 +156,6 @@ function obtenerPasoOrden($estado)
                                 <div class="mb-6 w-full">
                                     <div class="flex items-center justify-between gap-2 flex-wrap">
 
-                                        <!-- Pedido -->
                                         <div class="flex flex-col items-center min-w-[70px]">
                                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 1, $pasoActual > 1) ?>">
                                                 <?= $pasoActual > 1 ? "✓" : "1" ?>
@@ -168,7 +167,6 @@ function obtenerPasoOrden($estado)
 
                                         <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 1) ?>"></div>
 
-                                        <!-- En cocina -->
                                         <div class="flex flex-col items-center min-w-[70px]">
                                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 2, $pasoActual > 2) ?>">
                                                 <?= $pasoActual > 2 ? "✓" : "2" ?>
@@ -180,7 +178,6 @@ function obtenerPasoOrden($estado)
 
                                         <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 2) ?>"></div>
 
-                                        <!-- Lista -->
                                         <div class="flex flex-col items-center min-w-[70px]">
                                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 3, $pasoActual > 3) ?>">
                                                 <?= $pasoActual > 3 ? "✓" : "3" ?>
@@ -192,7 +189,6 @@ function obtenerPasoOrden($estado)
 
                                         <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 3) ?>"></div>
 
-                                        <!-- Entregada -->
                                         <div class="flex flex-col items-center min-w-[70px]">
                                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 4, false) ?>">
                                                 <?= $pasoActual === 4 ? "✓" : "4" ?>
@@ -214,7 +210,6 @@ function obtenerPasoOrden($estado)
                                 </p>
                             </div>
 
-                            <!-- LISTA DE PRODUCTOS -->
                             <div class="products-list mb-6">
                                 <h4 class="text-sm font-medium text-brown-dark mb-3">Productos:</h4>
 
@@ -241,7 +236,6 @@ function obtenerPasoOrden($estado)
                                 </div>
                             </div>
 
-                            <!-- NOTAS ADICIONALES -->
                             <?php
                             $tieneNotas = isset($orden["notas"]) && !empty(trim($orden["notas"]));
                             ?>
@@ -263,13 +257,9 @@ function obtenerPasoOrden($estado)
                                 </div>
                             </div>
 
-                            <!-- BOTÓN EXPANDIR PARA VER DETALLES COMPLETOS -->
                             <button
                                 class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn"
-                                data-orden-numero="<?php echo htmlspecialchars($orden['numero']); ?>"
-                                data-orden-mesa="<?php echo htmlspecialchars($orden['mesa']); ?>"
-                                data-orden-items="<?php echo htmlspecialchars($orden['items'] ?? ''); ?>"
-                                data-orden-notas="<?php echo htmlspecialchars($orden['notas'] ?? ''); ?>">
+                                data-orden-numero="<?php echo htmlspecialchars($orden['numero']); ?>">
                                 <i class="fas fa-expand"></i>
                                 Ver detalles completos
                             </button>
@@ -306,10 +296,8 @@ function obtenerPasoOrden($estado)
         </div>
     </div>
 
-    <!-- MODAL PARA VER DETALLES COMPLETOS -->
     <div id="order-detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <!-- Encabezado del Modal -->
             <div class="sticky top-0 bg-brown-dark text-beige-light p-6 flex items-center justify-between z-10">
                 <div>
                     <h2 class="text-2xl font-semibold" id="modal-orden-numero">Orden #</h2>
@@ -320,25 +308,17 @@ function obtenerPasoOrden($estado)
                 </button>
             </div>
 
-            <!-- Contenido del Modal -->
             <div class="p-6">
-                <!-- Productos Detallados -->
                 <div class="mb-6">
                     <h3 class="text-xl font-semibold text-brown-dark mb-4 flex items-center">
                         <i class="fas fa-list mr-2"></i>
                         Productos a preparar
                     </h3>
-                    <div id="modal-productos-list" class="space-y-3 bg-beige-light p-4 rounded-xl">
-                        <!-- Se llenará con JavaScript -->
-                    </div>
+                    <div id="modal-productos-list" class="space-y-3 bg-beige-light p-4 rounded-xl"></div>
                 </div>
 
-                <!-- Notas Especiales -->
-                <div id="modal-notas-section" class="mb-6">
-                    <!-- Se llenará con JavaScript -->
-                </div>
+                <div id="modal-notas-section" class="mb-6"></div>
 
-                <!-- Pie del Modal -->
                 <div class="border-t pt-6">
                     <?php if (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1): ?>
                         <form id="deliver-form" action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST" class="flex gap-3">
@@ -362,20 +342,251 @@ function obtenerPasoOrden($estado)
     </div>
 
     <script>
-        function saveSelectedOrder(numeroOrden) {
-            localStorage.setItem('selectedOrder', numeroOrden);
+        let modalOpen = false;
+        let selectedOrderNumber = null;
+        let currentOrders = [];
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text ?? '';
+            return div.innerHTML;
         }
 
-        function getSelectedOrder() {
-            return localStorage.getItem('selectedOrder');
+        function obtenerPasoOrdenFrontend(estado) {
+            switch (estado) {
+                case 'pendiente':
+                    return 2;
+                case 'lista':
+                    return 3;
+                case 'entregada':
+                    return 4;
+                default:
+                    return 1;
+            }
         }
 
-        function clearSelectedOrder() {
-            localStorage.removeItem('selectedOrder');
+        function stepCircleClassJs(activo, completado = false) {
+            if (completado) return "bg-mint-green text-white";
+            if (activo) return "bg-brown-dark text-white";
+            return "bg-gray-300 text-white";
+        }
+
+        function stepTextClassJs(activo, completado = false) {
+            if (completado || activo) return "text-brown-dark font-semibold";
+            return "text-gray-400";
+        }
+
+        function stepLineClassJs(completado = false) {
+            return completado ? "bg-mint-green" : "bg-gray-300";
+        }
+
+        function renderDeliveredOrders(ordenes) {
+            const deliveredList = document.getElementById('delivered-list');
+            const entregadas = ordenes.filter(o => o.estado === 'entregada').slice(-20);
+
+            deliveredList.innerHTML = entregadas.map(orden => `
+                <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-brown-dark">
+                            Orden #${escapeHtml(orden.numero)}
+                        </span>
+                        <i class="fa-solid fa-check text-mint-green"></i>
+                    </div>
+                    <div class="text-xs text-brown-dark opacity-70">
+                        <div>Mesa ${escapeHtml(orden.mesa)}</div>
+                        <div>${escapeHtml(orden.hora_entrega || '--:--')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderProductos(items) {
+            const lineas = (items || '').split('\n').filter(l => l.trim() !== '');
+
+            return lineas.map(linea => {
+                linea = linea.trim();
+                let producto, cantidad;
+
+                const match = linea.match(/^(.*) x(\d+)$/);
+                if (match) {
+                    producto = match[1];
+                    cantidad = match[2];
+                } else {
+                    producto = linea;
+                    cantidad = '1';
+                }
+
+                return `
+                    <div class="flex justify-between text-sm">
+                        <span class="text-brown-dark">${escapeHtml(producto)}</span>
+                        <span class="text-brown-dark font-medium">x${escapeHtml(cantidad)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderNotas(notas) {
+            const tieneNotas = notas && notas.trim() !== '';
+
+            if (tieneNotas) {
+                return `
+                    <div class="notes-section mb-6 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                        <div class="flex items-start">
+                            <i class="fas fa-sticky-note text-yellow-600 mt-1 mr-2 flex-shrink-0"></i>
+                            <div class="flex-1">
+                                <h5 class="text-sm font-semibold text-yellow-900">Notas especiales:</h5>
+                                <p class="text-sm text-yellow-800 mt-1">${escapeHtml(notas)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="notes-section mb-6 p-3 rounded-lg bg-red-50 border border-red-200">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-red-600 mt-1 mr-2 flex-shrink-0"></i>
+                        <div class="flex-1">
+                            <h5 class="text-sm font-semibold text-red-900">⚠ Sin notas especiales</h5>
+                            <p class="text-sm text-red-800 mt-1">Verificar con el cliente si hay requerimientos especiales</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPendingOrders(ordenes) {
+            const grid = document.getElementById('pending-orders-grid');
+            const pendientes = ordenes.filter(o => o.estado === 'pendiente' || o.estado === 'lista');
+            const rolId = <?= isset($_SESSION["rol_id"]) ? (int)$_SESSION["rol_id"] : 0 ?>;
+
+            grid.innerHTML = pendientes.map(orden => {
+                const pasoActual = obtenerPasoOrdenFrontend(orden.estado || 'pendiente');
+
+                return `
+                    <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="mb-6 w-full">
+                                <div class="flex items-center justify-between gap-2 flex-wrap">
+
+                                    <div class="flex flex-col items-center min-w-[70px]">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 1, pasoActual > 1)}">
+                                            ${pasoActual > 1 ? "✓" : "1"}
+                                        </div>
+                                        <span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 1, pasoActual > 1)}">
+                                            Pedido
+                                        </span>
+                                    </div>
+
+                                    <div class="flex-1 h-1 rounded ${stepLineClassJs(pasoActual > 1)}"></div>
+
+                                    <div class="flex flex-col items-center min-w-[70px]">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 2, pasoActual > 2)}">
+                                            ${pasoActual > 2 ? "✓" : "2"}
+                                        </div>
+                                        <span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 2, pasoActual > 2)}">
+                                            En cocina
+                                        </span>
+                                    </div>
+
+                                    <div class="flex-1 h-1 rounded ${stepLineClassJs(pasoActual > 2)}"></div>
+
+                                    <div class="flex flex-col items-center min-w-[70px]">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 3, pasoActual > 3)}">
+                                            ${pasoActual > 3 ? "✓" : "3"}
+                                        </div>
+                                        <span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 3, pasoActual > 3)}">
+                                            Lista
+                                        </span>
+                                    </div>
+
+                                    <div class="flex-1 h-1 rounded ${stepLineClassJs(pasoActual > 3)}"></div>
+
+                                    <div class="flex flex-col items-center min-w-[70px]">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 4, false)}">
+                                            ${pasoActual === 4 ? "✓" : "4"}
+                                        </div>
+                                        <span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 4, false)}">
+                                            Entregada
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h3 class="text-xl font-semibold text-brown-dark">
+                                Orden #${escapeHtml(orden.numero)}
+                            </h3>
+                            <p class="text-sm text-brown-dark opacity-70">
+                                Mesa ${escapeHtml(orden.mesa)}
+                            </p>
+                        </div>
+
+                        <div class="products-list mb-6">
+                            <h4 class="text-sm font-medium text-brown-dark mb-3">Productos:</h4>
+                            <div class="space-y-2">
+                                ${renderProductos(orden.items || '')}
+                            </div>
+                        </div>
+
+                        ${renderNotas(orden.notas || '')}
+
+                        <button
+                            class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn"
+                            data-orden-numero="${escapeHtml(orden.numero)}">
+                            <i class="fas fa-expand"></i>
+                            Ver detalles completos
+                        </button>
+
+                        ${(rolId === 1 || rolId === 3) && orden.estado === 'pendiente' ? `
+                            <form action="<?= BASE_URL ?>public/api/marcarLista.php" method="POST">
+                                <input type="hidden" name="numero" value="${escapeHtml(orden.numero)}">
+                                <button type="submit"
+                                    class="w-full bg-brown-dark hover:bg-[#4a2d22] text-white font-medium py-3 rounded-xl transition-colors duration-200">
+                                    Marcar como lista
+                                </button>
+                            </form>
+                        ` : ''}
+
+                        ${rolId === 1 && orden.estado === 'lista' ? `
+                            <form action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST">
+                                <input type="hidden" name="numero" value="${escapeHtml(orden.numero)}">
+                                <button type="submit"
+                                    class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
+                                    Marcar como entregada
+                                </button>
+                            </form>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            bindExpandButtons();
+        }
+
+        function bindExpandButtons() {
+            document.querySelectorAll('.expand-order-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const numeroOrden = this.getAttribute('data-orden-numero');
+                    const orden = currentOrders.find(o => String(o.numero) === String(numeroOrden));
+
+                    if (orden) {
+                        openOrderModal(
+                            orden.numero,
+                            orden.mesa,
+                            orden.items || '',
+                            orden.notas || ''
+                        );
+                    }
+                });
+            });
         }
 
         function openOrderModal(numeroOrden, mesa, items, notas) {
             const modal = document.getElementById('order-detail-modal');
+            modalOpen = true;
+            selectedOrderNumber = numeroOrden;
 
             document.getElementById('modal-orden-numero').textContent = `Orden #${numeroOrden}`;
             document.getElementById('modal-orden-mesa').textContent = `Mesa: ${mesa}`;
@@ -388,7 +599,7 @@ function obtenerPasoOrden($estado)
             const productosList = document.getElementById('modal-productos-list');
             productosList.innerHTML = '';
 
-            const lineas = items.split('\n').filter(l => l.trim() !== '');
+            const lineas = (items || '').split('\n').filter(l => l.trim() !== '');
             lineas.forEach(linea => {
                 linea = linea.trim();
                 let producto, cantidad;
@@ -405,8 +616,8 @@ function obtenerPasoOrden($estado)
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'flex justify-between items-center py-2 px-3 bg-white rounded border border-beige-light';
                 itemDiv.innerHTML = `
-                    <span class="font-medium text-brown-dark">${producto}</span>
-                    <span class="bg-mint-green text-white px-3 py-1 rounded-full font-semibold">x${cantidad}</span>
+                    <span class="font-medium text-brown-dark">${escapeHtml(producto)}</span>
+                    <span class="bg-mint-green text-white px-3 py-1 rounded-full font-semibold">x${escapeHtml(cantidad)}</span>
                 `;
                 productosList.appendChild(itemDiv);
             });
@@ -419,7 +630,7 @@ function obtenerPasoOrden($estado)
                             <i class="fas fa-sticky-note mr-2"></i>
                             Notas especiales
                         </h3>
-                        <p class="text-yellow-800 whitespace-pre-wrap">${notas}</p>
+                        <p class="text-yellow-800 whitespace-pre-wrap">${escapeHtml(notas)}</p>
                     </div>
                 `;
             } else {
@@ -435,23 +646,49 @@ function obtenerPasoOrden($estado)
             }
 
             modal.classList.remove('hidden');
-            saveSelectedOrder(numeroOrden);
         }
 
         function closeOrderModal() {
-            const modal = document.getElementById('order-detail-modal');
-            modal.classList.add('hidden');
+            document.getElementById('order-detail-modal').classList.add('hidden');
+            modalOpen = false;
+            selectedOrderNumber = null;
         }
 
-        document.querySelectorAll('.expand-order-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const numeroOrden = this.getAttribute('data-orden-numero');
-                const mesa = this.getAttribute('data-orden-mesa');
-                const items = this.getAttribute('data-orden-items');
-                const notas = this.getAttribute('data-orden-notas');
-                openOrderModal(numeroOrden, mesa, items, notas);
-            });
-        });
+        async function fetchOrdenes() {
+            try {
+                const response = await fetch('<?= BASE_URL ?>public/api/obtenerOrdenes.php', {
+                    cache: 'no-store'
+                });
+
+                const data = await response.json();
+
+                if (!data.ok || !Array.isArray(data.ordenes)) {
+                    return;
+                }
+
+                currentOrders = data.ordenes;
+
+                renderDeliveredOrders(currentOrders);
+                renderPendingOrders(currentOrders);
+
+                if (modalOpen && selectedOrderNumber !== null) {
+                    const ordenActualizada = currentOrders.find(o => String(o.numero) === String(selectedOrderNumber));
+
+                    if (ordenActualizada) {
+                        openOrderModal(
+                            ordenActualizada.numero,
+                            ordenActualizada.mesa,
+                            ordenActualizada.items || '',
+                            ordenActualizada.notas || ''
+                        );
+                    } else {
+                        closeOrderModal();
+                    }
+                }
+            } catch (error) {
+                console.error('Error actualizando órdenes:', error);
+            }
+        }
 
         document.querySelectorAll('#close-modal-btn, #close-modal-btn-bottom').forEach(btn => {
             btn.addEventListener('click', closeOrderModal);
@@ -463,25 +700,13 @@ function obtenerPasoOrden($estado)
             }
         });
 
-        setInterval(() => {
-            location.reload();
-        }, 10000);
-
-        window.addEventListener('load', function() {
-            const selectedOrderNo = getSelectedOrder();
-            if (selectedOrderNo) {
-                setTimeout(() => {
-                    const expandBtn = document.querySelector(`[data-orden-numero="${selectedOrderNo}"]`);
-                    if (expandBtn) {
-                        expandBtn.click();
-                    }
-                }, 500);
-            }
-        });
-
         document.getElementById('deliver-form')?.addEventListener('submit', function() {
-            clearSelectedOrder();
+            modalOpen = false;
+            selectedOrderNumber = null;
         });
+
+        bindExpandButtons();
+        setInterval(fetchOrdenes, 5000);
     </script>
 </body>
 

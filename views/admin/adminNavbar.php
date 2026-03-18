@@ -69,10 +69,7 @@ $rutaActual = $_SERVER["REQUEST_URI"];
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/index.php', $rutaActual) ?>"
                 href="<?= BASE_URL ?>views/index.php">
                 Tomar ordenes
-                =======
-                href="<?= BASE_URL ?>views/index.php">
-                Tomar órdenes
-                >>>>>>> Stashed changes
+
             </a>
 
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/usuarios.php', $rutaActual) || isActive('/controller/', $rutaActual) ? 'border-b-2 border-mint' : '' ?>"
@@ -88,10 +85,7 @@ $rutaActual = $_SERVER["REQUEST_URI"];
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/ordenesAdmin.php', $rutaActual) ?>"
                 href="<?= BASE_URL ?>views/admin/ordenesAdmin.php">
                 Historial de ordenes
-                =======
-                href="<?= BASE_URL ?>views/admin/ordenesAdmin.php">
-                Historial de órdenes
-                >>>>>>> Stashed changes
+
             </a>
 
             <div class="dropdown">

@@ -7,6 +7,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
 ?>
 
 <!DOCTYPE html>
