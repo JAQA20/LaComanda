@@ -47,5 +47,5 @@ try {
 
 $total_ordenes = count($ordenes);
 $total_vendido = array_sum(array_column($ordenes, 'total'));
-$entregadas = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'entregad') !== false));
+$entregadas = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'entregada') !== false));
 $pendientes = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'pendiente') !== false));
