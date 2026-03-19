@@ -1,9 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
+require_once __DIR__ . "/../../config/env.php";
+app_configure_errors();
 require_once __DIR__ . "/../../middleware/auth.php";
 require_once __DIR__ . "/../../middleware/roles.php";
 require_once __DIR__ . "/../../config/rutas.php";
@@ -37,7 +34,7 @@ verificarRol([1]); // solo Admin
     <!-- Fuente -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- âœ… Tu CSS principal (ABSOLUTO) -->
+    <!-- Tu CSS principal -->
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
 
 

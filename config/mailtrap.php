@@ -1,37 +1,19 @@
 <?php
-// Datos Mailtrap Moises
+require_once __DIR__ . '/env.php';
 
-// return [
-//     'enabled' => true,
-//     'transport' => 'smtp',
-
-//     'smtp_host' => 'sandbox.smtp.mailtrap.io',
-//     'smtp_port' => 587,
-//     'smtp_username' => 'e849ecd31b2b87',
-//     'smtp_password' => '7aaf37bfeb9e1c',
-//     'smtp_encryption' => 'tls',
-
-//     'token' => '',
-//     'inbox_id' => '',
-//     'from_email' => 'no-reply@lacomanda.local',
-//     'from_name' => 'La Comanda',
-//     'endpoint_base' => 'https://sandbox.api.mailtrap.io/api/send/',
-// ];
-
-// Datos Mailtrap Javier
 return [
-    'enabled' => true,
-    'transport' => 'smtp',
+    'enabled' => app_env_bool('MAILTRAP_ENABLED', false),
+    'transport' => app_env('MAILTRAP_TRANSPORT', 'smtp'),
 
-    'smtp_host' => 'sandbox.smtp.mailtrap.io',
-    'smtp_port' => 587,
-    'smtp_username' => 'd8a217567d346c',
-    'smtp_password' => 'c7488526529f13',
-    'smtp_encryption' => 'tls',
+    'smtp_host' => app_env('MAILTRAP_SMTP_HOST', 'sandbox.smtp.mailtrap.io'),
+    'smtp_port' => (int)app_env('MAILTRAP_SMTP_PORT', 587),
+    'smtp_username' => app_env('MAILTRAP_SMTP_USERNAME', ''),
+    'smtp_password' => app_env('MAILTRAP_SMTP_PASSWORD', ''),
+    'smtp_encryption' => app_env('MAILTRAP_SMTP_ENCRYPTION', 'tls'),
 
-    'token' => '',
-    'inbox_id' => '',
-    'from_email' => 'no-reply@lacomanda.local',
-    'from_name' => 'La Comanda',
-    'endpoint_base' => 'https://sandbox.api.mailtrap.io/api/send/',
+    'token' => app_env('MAILTRAP_TOKEN', ''),
+    'inbox_id' => app_env('MAILTRAP_INBOX_ID', ''),
+    'from_email' => app_env('MAILTRAP_FROM_EMAIL', 'no-reply@lacomanda.local'),
+    'from_name' => app_env('MAILTRAP_FROM_NAME', 'La Comanda'),
+    'endpoint_base' => app_env('MAILTRAP_ENDPOINT_BASE', 'https://sandbox.api.mailtrap.io/api/send/'),
 ];
