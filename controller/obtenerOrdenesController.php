@@ -1,6 +1,7 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
 
+require_once __DIR__ . "/../config/text.php";
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
 

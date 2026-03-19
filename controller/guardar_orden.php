@@ -1,36 +1,10 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_once __DIR__ . "/../config/env.php";
+require_once __DIR__ . "/../config/text.php";
+app_configure_errors();
 
 header("Content-Type: application/json; charset=utf-8");
 require_once __DIR__ . "/../model/OrdenesSync.php";
-
-function normalizarTextoOrden($texto)
-{
-    if (!is_string($texto)) {
-        return '';
-    }
-
-    $texto = trim($texto);
-    if ($texto === '') {
-        return '';
-    }
-
-    for ($i = 0; $i < 3; $i++) {
-        if (preg_match('/Ã.|Â.|â./u', $texto) !== 1 && preg_match('//u', $texto) === 1) {
-            break;
-        }
-
-        $convertido = @mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
-        if (!is_string($convertido) || $convertido === '' || $convertido === $texto) {
-            break;
-        }
-
-        $texto = $convertido;
-    }
-
-    return $texto;
-}
 
 // Ruta del archivo de órdenes
 $archivo = __DIR__ . "/ordenes.json";
@@ -67,8 +41,8 @@ if (!is_array($data)) {
 
 // Normalizar valores
 $data["mesa"]  = isset($data["mesa"])  ? (string)$data["mesa"]  : "N/A";
-$data["items"] = isset($data["items"]) ? normalizarTextoOrden((string)$data["items"]) : "";
-$data["notas"] = isset($data["notas"]) ? normalizarTextoOrden((string)$data["notas"]) : "";
+$data["items"] = isset($data["items"]) ? app_normalize_text((string)$data["items"]) : "";
+$data["notas"] = isset($data["notas"]) ? app_normalize_text((string)$data["notas"]) : "";
 
 // Generar número de orden consecutivo
 $ultimoNumero = 0;

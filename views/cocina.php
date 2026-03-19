@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../config/text.php";
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../config/rutas.php";
@@ -710,4 +711,4 @@ function obtenerPasoOrden($estado)
     </script>
 </body>
 
-</html>
+</html>ml>

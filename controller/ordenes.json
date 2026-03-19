@@ -1,7 +1,7 @@
 [
     {
         "mesa": "4",
-        "items": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© con Leche x1",
+        "items": "Café con Leche x1",
         "notas": "",
         "numero": 1,
         "estado": "entregada",
@@ -78,7 +78,7 @@
     },
     {
         "mesa": "1",
-        "items": "Bagel de SalmÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³n x1",
+        "items": "Bagel de Salmón x1",
         "notas": "",
         "numero": 8,
         "estado": "entregada",
@@ -100,7 +100,7 @@
     },
     {
         "mesa": "2",
-        "items": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© con Leche x1",
+        "items": "Café con Leche x1",
         "notas": "",
         "numero": 10,
         "estado": "entregada",
@@ -122,7 +122,7 @@
     },
     {
         "mesa": "2",
-        "items": "Croissant de JamÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³n y Queso x1",
+        "items": "Croissant de Jamón y Queso x1",
         "notas": "",
         "numero": 12,
         "estado": "entregada",
@@ -134,7 +134,7 @@
     },
     {
         "mesa": "8",
-        "items": "FrappÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© Caramelo x1",
+        "items": "Frappé Caramelo x1",
         "notas": "",
         "numero": 13,
         "estado": "entregada",
@@ -167,7 +167,7 @@
     },
     {
         "mesa": "3",
-        "items": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© con Leche x1",
+        "items": "Café con Leche x1",
         "notas": "",
         "numero": 16,
         "estado": "entregada",

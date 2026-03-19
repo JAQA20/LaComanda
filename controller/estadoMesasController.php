@@ -1,6 +1,8 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
 
+require_once __DIR__ . "/../config/text.php";
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -25,6 +27,8 @@ try {
     if (!is_array($ordenes)) {
         $ordenes = [];
     }
+
+    $ordenes = app_normalize_order_array($ordenes);
 
     $usuarioId = $_SESSION["usuario_id"] ?? null;
 

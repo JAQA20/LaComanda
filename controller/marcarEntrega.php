@@ -43,6 +43,8 @@ if (!is_array($ordenes)) {
     $ordenes = [];
 }
 
+$ordenes = app_normalize_order_array($ordenes);
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $numero = intval($_POST["numero"] ?? 0);
 

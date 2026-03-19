@@ -1,24 +1,9 @@
 <?php
 require_once __DIR__ . "/Conexion.php";
+require_once __DIR__ . "/../config/text.php";
 
 class Productos
 {
-    private static function normalizarTexto($texto)
-    {
-        if (!is_string($texto) || $texto === '') {
-            return $texto;
-        }
-
-        if (preg_match('/Ã.|Â.|â./u', $texto) === 1) {
-            $convertido = @mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
-            if (is_string($convertido) && $convertido !== '') {
-                return $convertido;
-            }
-        }
-
-        return $texto;
-    }
-
     // Para el CRUD admin (tabla/lista)
     public static function listar()
     {
@@ -38,10 +23,10 @@ class Productos
         $productos = [];
         while ($row = $result->fetch_assoc()) {
             if (isset($row['nombre'])) {
-                $row['nombre'] = self::normalizarTexto($row['nombre']);
+                $row['nombre'] = app_normalize_text($row['nombre']);
             }
             if (isset($row['categoria_nombre'])) {
-                $row['categoria_nombre'] = self::normalizarTexto($row['categoria_nombre']);
+                $row['categoria_nombre'] = app_normalize_text($row['categoria_nombre']);
             }
             $productos[] = $row;
         }
@@ -59,7 +44,7 @@ class Productos
         $cats = [];
         while ($row = $result->fetch_assoc()) {
             if (isset($row['nombre'])) {
-                $row['nombre'] = self::normalizarTexto($row['nombre']);
+                $row['nombre'] = app_normalize_text($row['nombre']);
             }
             $cats[] = $row;
         }
@@ -92,7 +77,7 @@ class Productos
         $items = [];
         while ($row = $res->fetch_assoc()) {
             if (isset($row['nombre'])) {
-                $row['nombre'] = self::normalizarTexto($row['nombre']);
+                $row['nombre'] = app_normalize_text($row['nombre']);
             }
             $items[] = $row;
         }
@@ -168,7 +153,6 @@ class Productos
             throw new Exception("Debe completar todos los campos obligatorios.");
         }
 
-        // Validación simple del icono (para evitar basura)
         if ($icono === "") $icono = "fa-mug-hot";
 
         if (self::nombreExisteEnCategoria($nombre, $categoria_id)) {

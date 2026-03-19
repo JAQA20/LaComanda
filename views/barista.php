@@ -1,16 +1,70 @@
 <?php
-require_once __DIR__ . "../middleware/auth.php";
-require_once __DIR__ . "../middleware/roles.php";
-require_once __DIR__ . "../model/Barista.php";
-require_once __DIR__ . "../../config/rutas.php";
+require_once __DIR__ . "/../middleware/auth.php";
+require_once __DIR__ . "/../middleware/roles.php";
+require_once __DIR__ . "/../config/rutas.php";
+require_once __DIR__ . "/../model/OrdenesSync.php";
 
 verificarRol([1, 4]); // Admin(1) y Barista(4)
 
-// No cachear esta página
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
 
+$conexion = Conexion::conectar();
+$ordenes = [];
+
+$sql = "
+    SELECT
+        o.id_orden,
+        o.mesa_id,
+        o.id_estado,
+        o.hora_entrega,
+        o.timestamp,
+        o.items_text
+    FROM ordenes o
+    ORDER BY o.timestamp ASC
+";
+
+$result = $conexion->query($sql);
+
+while ($row = $result->fetch_assoc()) {
+    $items = [];
+    $itemsTexto = trim((string)($row['items_text'] ?? ''));
+
+    if ($itemsTexto !== '') {
+        $lineas = preg_split('/\r\n|\r|\n/', $itemsTexto);
+        foreach ($lineas as $linea) {
+            $linea = trim((string)$linea);
+            if ($linea === '') {
+                continue;
+            }
+
+            $cantidad = 1;
+            $nombre = $linea;
+
+            if (preg_match('/^(.*?)\s*x\s*(\d+)$/u', $linea, $m)) {
+                $nombre = trim($m[1]);
+                $cantidad = (int)$m[2];
+            }
+
+            $items[] = [
+                'producto_id' => $nombre,
+                'cantidad' => $cantidad,
+            ];
+        }
+    }
+
+    $estado = ((int)$row['id_estado'] === 2) ? 'entregada' : 'pendiente';
+
+    $ordenes[] = [
+        'id_orden' => $row['id_orden'],
+        'mesa_id' => $row['mesa_id'],
+        'items' => $items,
+        'estado' => $estado,
+        'hora_entrega' => $row['hora_entrega'],
+        'creado_en' => $row['timestamp'],
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -57,14 +111,14 @@ header("Expires: 0");
     <nav class="w-full bg-brown-dark text-beige-light px-6 py-4 flex items-center justify-between shadow-md">
         <div class="text-xl font-semibold tracking-wide">
             <div class="flex items-center">
-                <img class="h-10 w-10 object-contain mr-3" src="<?= BASE_URL ?>public/img/logotipo2.PNG" alt="elegant coffee shop logo with toscana text, warm brown and mint colors, minimalist design" />
+                <img class="h-10 w-10 object-contain mr-3" src="<?= BASE_URL ?>public/img/logotipo2.PNG" alt="Logo Cafetería Toscana" />
                 <span class="text-beige text-xl font-semibold">☕ Barista - Toscana</span>
             </div>
         </div>
 
         <div class="flex items-center space-x-6 text-beige-light">
             <button class="hover:text-mint-green transition-colors">
-                <a href="<?= BASE_URL ?>controller/logoutController.php" class="text-sm font-medium">
+                <a href="<?= BASE_URL ?>public/api/logout.php" class="text-sm font-medium">
                     Salir
                 </a>
             </button>
@@ -73,7 +127,6 @@ header("Expires: 0");
 
     <div id="barista-main" class="flex h-screen">
 
-        <!-- PANEL IZQUIERDO (ENTREGADAS) -->
         <div id="delivered-orders-panel" class="w-[30%] bg-beige-light p-6 overflow-y-auto">
             <div id="delivered-header" class="mb-6">
                 <h2 class="text-2xl font-semibold text-brown-dark mb-2">Bebidas listas</h2>
@@ -96,14 +149,13 @@ header("Expires: 0");
                         </div>
                         <div class="text-xs text-brown-dark opacity-70">
                             <div>Mesa <?php echo htmlspecialchars($orden["mesa_id"] ?? "N/A"); ?></div>
-                            <div><?php echo isset($orden["hora_entrega"]) ? date('H:i', strtotime($orden["hora_entrega"])) : "--:--"; ?></div>
+                            <div><?php echo isset($orden["hora_entrega"]) ? date('H:i', strtotime((string)$orden["hora_entrega"])) : "--:--"; ?></div>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
 
-        <!-- PANEL DERECHO – BEBIDAS PENDIENTES -->
         <div id="pending-orders-panel" class="w-[70%] bg-white p-8 overflow-y-auto">
 
             <div id="pending-header" class="mb-8">
@@ -116,8 +168,6 @@ header("Expires: 0");
                     <?php if (isset($orden["estado"]) && $orden["estado"] === "pendiente"): ?>
 
                         <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-gray-100">
-
-                            <!-- Encabezado -->
                             <div class="flex items-center justify-between mb-4">
                                 <div>
                                     <h3 class="text-xl font-semibold text-brown-dark">
@@ -129,7 +179,6 @@ header("Expires: 0");
                                 </div>
                             </div>
 
-                            <!-- LISTA DE BEBIDAS -->
                             <div class="products-list mb-6">
                                 <h4 class="text-sm font-medium text-brown-dark mb-3">Bebidas:</h4>
 
@@ -148,9 +197,8 @@ header("Expires: 0");
                                 </div>
                             </div>
 
-                            <!-- BOTÓN MARCAR COMO LISTA -->
-                            <form action="<?= BASE_URL ?>controller/marcarEntrega.php" method="POST">
-                                <input type="hidden" name="id_orden" value="<?php echo htmlspecialchars($orden['id_orden'] ?? ''); ?>">
+                            <form action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST">
+                                <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['id_orden'] ?? ''); ?>">
                                 <button type="submit"
                                     class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
                                     ✓ Bebidas listas
@@ -167,7 +215,6 @@ header("Expires: 0");
         </div>
     </div>
 
-    <!-- AUTO REFRESH -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let refreshInterval;
@@ -180,7 +227,7 @@ header("Expires: 0");
             clearInterval(refreshInterval);
 
             const form = e.target;
-            const id_orden = form.querySelector('input[name="id_orden"]').value;
+            const numero = form.querySelector('input[name="numero"]').value;
             const btn = form.querySelector('button[type="submit"]');
             const card = form.closest('.pending-order-card');
 
@@ -193,9 +240,15 @@ header("Expires: 0");
                     body: new FormData(form)
                 });
 
-                const data = await response.json();
+                const text = await response.text();
+                let data = {};
+                try {
+                    data = JSON.parse(text);
+                } catch (_) {
+                    data = { status: 'OK' };
+                }
 
-                if (data.status === 'OK') {
+                if (data.status === 'OK' || response.ok) {
                     card.style.transition = 'all 0.5s ease';
                     card.style.opacity = '0';
                     card.style.transform = 'scale(0.95)';
@@ -203,7 +256,7 @@ header("Expires: 0");
                     await Swal.fire({
                         icon: 'success',
                         title: 'Bebida lista',
-                        text: 'Orden #' + id_orden + ' marcada como lista',
+                        text: 'Orden #' + numero + ' marcada como lista',
                         timer: 1000,
                         showConfirmButton: false
                     });

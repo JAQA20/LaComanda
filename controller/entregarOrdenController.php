@@ -42,6 +42,8 @@ if (!is_array($ordenes)) {
     $ordenes = [];
 }
 
+$ordenes = app_normalize_order_array($ordenes);
+
 $usuarioId = $_SESSION["usuario_id"] ?? null;
 $actualizada = false;
 

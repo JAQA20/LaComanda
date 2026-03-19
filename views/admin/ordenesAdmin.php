@@ -14,6 +14,8 @@ if (!is_array($ordenes)) {
     $ordenes = [];
 }
 
+$ordenes = app_normalize_order_array($ordenes);
+
 $total_ordenes = count($ordenes);
 $total_vendido = 0;
 $entregadas = 0;

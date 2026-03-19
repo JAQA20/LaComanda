@@ -1,36 +1,10 @@
 <?php
 require_once __DIR__ . "/Conexion.php";
+require_once __DIR__ . "/../config/text.php";
 
 class OrdenesSync
 {
     private static $schemaReady = false;
-
-    private static function normalizarTexto($texto)
-    {
-        if (!is_string($texto)) {
-            return '';
-        }
-
-        $texto = trim($texto);
-        if ($texto === '') {
-            return '';
-        }
-
-        for ($i = 0; $i < 3; $i++) {
-            if (preg_match('/Ã.|Â.|â./u', $texto) !== 1 && preg_match('//u', $texto) === 1) {
-                break;
-            }
-
-            $convertido = @mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
-            if (!is_string($convertido) || $convertido === '' || $convertido === $texto) {
-                break;
-            }
-
-            $texto = $convertido;
-        }
-
-        return $texto;
-    }
 
     private static function columnaExiste($conexion, $tabla, $columna)
     {
@@ -198,8 +172,8 @@ class OrdenesSync
         $fechaOrden = date('Y-m-d H:i:s', $timestampUnix);
         $horaEntrega = self::fechaEntregaDesdeOrden($orden);
 
-        $notas = self::normalizarTexto((string)($orden['notas'] ?? ''));
-        $itemsTexto = self::normalizarTexto((string)($orden['items'] ?? ''));
+        $notas = app_normalize_text((string)($orden['notas'] ?? ''));
+        $itemsTexto = app_normalize_text((string)($orden['items'] ?? ''));
         $items = self::parsearItems($itemsTexto);
 
         $mapa = self::mapaProductos($conexion);
