@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . "/../config/rutas.php";
+require_once __DIR__ . "/../config/text.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
 
 // require_once __DIR__ . "/../config/rutas.php";
