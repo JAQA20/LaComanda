@@ -148,9 +148,32 @@
         "items": "Bowl de Yogurt y Frutas x1",
         "notas": "",
         "numero": 14,
-        "estado": "pendiente",
+        "estado": "entregada",
         "timestamp": 1773880820,
-        "hora_entrega": null,
-        "usuario_id": 1
+        "hora_entrega": "19:17",
+        "usuario_id": 1,
+        "hora_lista": "19:17"
+    },
+    {
+        "mesa": "3",
+        "items": "Bowl de Yogurt y Frutas x1",
+        "notas": "Sin fressas",
+        "numero": 15,
+        "estado": "entregada",
+        "timestamp": 1773886001,
+        "hora_entrega": "20:07",
+        "usuario_id": 1,
+        "hora_lista": "20:07"
+    },
+    {
+        "mesa": "3",
+        "items": "CafÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© con Leche x1",
+        "notas": "",
+        "numero": 16,
+        "estado": "entregada",
+        "timestamp": 1773886112,
+        "hora_entrega": "20:10",
+        "usuario_id": 1,
+        "hora_lista": "20:10"
     }
 ]
