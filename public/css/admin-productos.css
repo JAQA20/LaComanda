@@ -39,14 +39,43 @@
 }
 
 .badge-category {
-  background: rgba(75, 46, 42);
+  background: rgba(75, 46, 42, 0.08);
   color: #4b2e2a;
   border: 1px solid rgba(75, 46, 42, 0.15);
   font-weight: 600;
 }
 
-/* Inputs DataTables */
+.section-header {
+  border-bottom: 1px solid rgba(75, 46, 42, 0.1);
+  padding-bottom: 0.75rem;
+}
+
+.modal-comanda {
+  border: 0;
+  border-radius: 20px;
+}
+
+.label-comanda {
+  color: #4b2e2a;
+  font-weight: 600;
+}
+
+.form-comanda {
+  border-radius: 12px;
+  border: 1px solid rgba(75, 46, 42, 0.18);
+  min-height: 46px;
+}
+
+.form-comanda:focus {
+  border-color: #70A38F;
+  box-shadow: 0 0 0 0.2rem rgba(112, 163, 143, 0.18);
+}
+
 .dataTables_wrapper .dataTables_filter input,
-.dataTables_wrapper .dataTables_length select{
+.dataTables_wrapper .dataTables_length select {
   border-radius: 10px !important;
+}
+
+.alerts-stack .alert {
+  border-radius: 14px;
 }
