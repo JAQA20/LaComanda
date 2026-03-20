@@ -144,7 +144,7 @@ $categorias = Categorias::listarTodas();
                             <div class="section-header mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div>
                                     <h2 class="h5 mb-1 text-brown fw-bold">Categorías</h2>
-                                    <div class="text-muted small">CRUD integrado dentro de la misma pantalla de productos</div>
+
                                 </div>
                                 <button type="button" class="btn btn-mint btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevaCategoria">
                                     <i class="fa-solid fa-plus me-2"></i>Agregar categoría

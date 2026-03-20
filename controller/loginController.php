@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . "/../config/rutas.php";
 require_once __DIR__ . "/../model/Conexion.php";
+require_once __DIR__ . "/../model/SesionesActivas.php";
 
 if (!empty($_POST["btnlogin"])) {
 
@@ -43,6 +44,8 @@ if (!empty($_POST["btnlogin"])) {
             $_SESSION["apellido"] = $user["apellido"];
             $_SESSION["email"] = $user["email"];
             $_SESSION["rol_id"] = (int)$user["rol_id"];
+
+            SesionesActivas::registrar($user);
 
             switch ($_SESSION["rol_id"]) {
                 case 1:

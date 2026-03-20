@@ -45,6 +45,17 @@ CREATE TABLE mesas (
   estado ENUM('disponible','ocupada') NOT NULL DEFAULT 'disponible'
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- ---------- Layout compartido del croquis ----------
+CREATE TABLE layout_configs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  layout_key VARCHAR(100) NOT NULL UNIQUE,
+  payload_json LONGTEXT NULL,
+  actualizado_por INT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (actualizado_por) REFERENCES usuarios(id) ON DELETE SET NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- ---------- Catálogo ----------
 CREATE TABLE categorias (
   id INT AUTO_INCREMENT PRIMARY KEY,

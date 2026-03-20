@@ -1,42 +1,30 @@
 <?php
+
 require_once __DIR__ . "/../../middleware/auth.php";
 require_once __DIR__ . "/../../middleware/roles.php";
 require_once __DIR__ . "/../../config/rutas.php";
-require_once __DIR__ . "/../../config/text.php";
 
 verificarRol([1]); // solo Admin
 
-$archivo = __DIR__ . "/../../controller/ordenes.json";
-$ordenes = file_exists($archivo)
-    ? json_decode(file_get_contents($archivo), true)
-    : [];
+function obtenerClaseEstado(string $estado): string
+{
+    $estado = strtolower($estado);
 
-if (!is_array($ordenes)) {
-    $ordenes = [];
-}
-
-$ordenes = app_normalize_order_array($ordenes);
-
-$total_ordenes = count($ordenes);
-$total_vendido = 0;
-$entregadas = 0;
-$pendientes = 0;
-
-foreach ($ordenes as $orden) {
-    if (isset($orden['estado'])) {
-        if ($orden['estado'] === 'entregada') {
-            $entregadas++;
-        } elseif ($orden['estado'] === 'pendiente') {
-            $pendientes++;
-        }
+    if (strpos($estado, 'entregada') !== false) {
+        return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
     }
+
+    if (strpos($estado, 'proceso') !== false || strpos($estado, 'lista') !== false) {
+        return 'bg-amber-100 text-amber-700 border border-amber-200';
+    }
+
+    if (strpos($estado, 'cancel') !== false) {
+        return 'bg-rose-100 text-rose-700 border border-rose-200';
+    }
+
+    return 'bg-stone-100 text-stone-700 border border-stone-200';
 }
-
-usort($ordenes, function ($a, $b) {
-    return ($b['timestamp'] ?? 0) - ($a['timestamp'] ?? 0);
-});
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -44,104 +32,368 @@ usort($ordenes, function ($a, $b) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Órdenes - La Comanda</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        montserrat: ['Montserrat', 'sans-serif']
+                    },
+                    colors: {
+                        cream: '#F8F5F0',
+                        beigeSoft: '#EDE3D6',
+                        brownDark: '#4E342E',
+                        brownSoft: '#8D6E63',
+                        mintGreen: '#7FB69E',
+                        goldSoft: '#D6B98C'
+                    },
+                    boxShadow: {
+                        card: '0 10px 25px rgba(0,0,0,0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/styles.css">
 </head>
 
-<body class="bg-gray-100 font-montserrat">
-    <?php
-    require_once ROOT_PATH . "/views/admin/adminNavbar.php";
-    ?>
+<body class="bg-cream font-montserrat text-brownDark">
+    <?php require_once ROOT_PATH . "/views/admin/adminNavbar.php"; ?>
 
-    <div class="pt-20 p-8">
+    <div class="pt-24 px-4 md:px-8 pb-10">
         <div class="max-w-7xl mx-auto">
-            <h1 class="text-4xl font-bold text-gray-800 mb-8">Historial de Órdenes</h1>
 
-            <div class="grid grid-cols-4 gap-4 mb-8">
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="text-gray-600 text-sm mb-2">Total Órdenes</div>
-                    <div class="text-3xl font-bold text-gray-800"><?php echo $total_ordenes; ?></div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="text-gray-600 text-sm mb-2">Entregadas</div>
-                    <div class="text-3xl font-bold text-green-600"><?php echo $entregadas; ?></div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="text-gray-600 text-sm mb-2">Pendientes</div>
-                    <div class="text-3xl font-bold text-yellow-600"><?php echo $pendientes; ?></div>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <div class="text-gray-600 text-sm mb-2">Total Vendido</div>
-                    <div class="text-3xl font-bold text-blue-600"><?php echo number_format($total_vendido, 2, ',', '.'); ?></div>
-                </div>
+            <div class="mb-8">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-brownDark mb-2">Historial de Órdenes</h1>
+                <p class="text-sm md:text-base text-brownSoft max-w-2xl">
+                    Consulta el detalle completo de las órdenes registradas en La Comanda.
+                </p>
             </div>
 
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <table class="w-full">
-                    <thead class="bg-blue-600 text-white">
-                        <tr>
-                            <th class="px-6 py-3 text-left">ID Orden</th>
-                            <th class="px-6 py-3 text-left">Mesa</th>
-                            <th class="px-6 py-3 text-left">Productos</th>
-                            <th class="px-6 py-3 text-left">Notas</th>
-                            <th class="px-6 py-3 text-left">Estado</th>
-                            <th class="px-6 py-3 text-left">Fecha y Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (count($ordenes) > 0): ?>
-                            <?php foreach ($ordenes as $orden): ?>
-                                <tr class="border-b hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 font-semibold">#<?php echo htmlspecialchars($orden['numero'] ?? 'N/A'); ?></td>
-                                    <td class="px-6 py-4"><?php echo htmlspecialchars($orden['mesa'] ?? 'N/A'); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-700"><?php echo htmlspecialchars(str_replace("\n", " | ", $orden['items'] ?? 'N/A')); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-700">
-                                        <?php
-                                        $notas = trim((string)($orden['notas'] ?? ''));
-                                        echo $notas !== '' ? htmlspecialchars($notas) : '<span class="text-gray-400">Sin notas</span>';
-                                        ?>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-3 py-1 rounded-full text-white text-sm font-medium
-                                            <?php
-                                            $estado = strtolower($orden['estado'] ?? 'pendiente');
-                                            if ($estado === 'entregada') echo 'bg-green-500';
-                                            elseif ($estado === 'pendiente') echo 'bg-yellow-500';
-                                            else echo 'bg-gray-500';
-                                            ?>">
-                                            <?php echo ucfirst(str_replace('_', ' ', $orden['estado'] ?? 'pendiente')); ?>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-600 text-sm">
-                                        <?php
-                                        if (isset($orden['timestamp'])) {
-                                            $ts = (int)$orden['timestamp'];
-                                            echo date('d/m/Y H:i', $ts);
-                                            if (!empty($orden['hora_entrega'])) {
-                                                echo '<br><span class="text-xs text-green-700">Entregada: ' . htmlspecialchars((string)$orden['hora_entrega']) . '</span>';
-                                            }
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
+            <div class="bg-white rounded-3xl shadow-card border border-[#efe7db] overflow-hidden">
+                <div class="px-6 py-5 border-b border-[#f1e8dc] bg-[#FCFAF7]">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div>
+                            <h2 class="text-xl font-bold text-brownDark">Listado de órdenes</h2>
+                            <p class="text-sm text-brownSoft">Visualiza el detalle general del historial registrado.</p>
+                        </div>
+
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F5EEE5] text-sm font-medium text-brownDark">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            Actualización automática
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-[#5D4037] text-white">
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                                    <p>No hay órdenes registradas</p>
+                                <th class="px-6 py-4 text-left text-sm font-semibold">ID Orden</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold">Mesa</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold">Usuario</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold">Total</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold">Estado</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-ordenes-body" class="divide-y divide-[#f1e8dc]">
+                            <tr>
+                                <td colspan="6" class="px-6 py-16 text-center text-brownSoft">
+                                    Cargando órdenes...
                                 </td>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</body>
 
+    <div id="modal-orden" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-4">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-card overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-[#f1e8dc] bg-[#FCFAF7]">
+                <div>
+                    <h3 class="text-xl font-bold text-brownDark">Detalle de la orden <span id="modal-orden-id"></span></h3>
+                    <p class="text-sm text-brownSoft">Información completa de la orden seleccionada.</p>
+                </div>
+                <button id="cerrar-modal-orden" class="w-10 h-10 rounded-full bg-[#F5EEE5] text-brownDark hover:bg-[#eadbc6] transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-[#FCFAF7] rounded-2xl p-4 border border-[#f1e8dc]">
+                        <div class="text-xs uppercase tracking-wide text-brownSoft mb-1">Mesa</div>
+                        <div id="modal-mesa" class="text-lg font-bold text-brownDark">-</div>
+                    </div>
+                    <div class="bg-[#FCFAF7] rounded-2xl p-4 border border-[#f1e8dc]">
+                        <div class="text-xs uppercase tracking-wide text-brownSoft mb-1">Usuario</div>
+                        <div id="modal-usuario" class="text-lg font-bold text-brownDark">-</div>
+                    </div>
+                    <div class="bg-[#FCFAF7] rounded-2xl p-4 border border-[#f1e8dc]">
+                        <div class="text-xs uppercase tracking-wide text-brownSoft mb-1">Estado</div>
+                        <div id="modal-estado" class="text-lg font-bold text-brownDark">-</div>
+                    </div>
+                    <div class="bg-[#FCFAF7] rounded-2xl p-4 border border-[#f1e8dc]">
+                        <div class="text-xs uppercase tracking-wide text-brownSoft mb-1">Total</div>
+                        <div id="modal-total" class="text-lg font-bold text-mintGreen">₡0.00</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-[#f1e8dc] overflow-hidden">
+                    <div class="px-5 py-4 border-b border-[#f1e8dc] bg-[#FCFAF7]">
+                        <h4 class="font-bold text-brownDark">Productos</h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-[#5D4037] text-white">
+                                <tr>
+                                    <th class="px-5 py-3 text-left text-sm font-semibold">Producto</th>
+                                    <th class="px-5 py-3 text-left text-sm font-semibold">Cantidad</th>
+                                    <th class="px-5 py-3 text-left text-sm font-semibold">Precio unitario</th>
+                                    <th class="px-5 py-3 text-left text-sm font-semibold">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-items-body" class="divide-y divide-[#f1e8dc]"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-[#FCFAF7] rounded-2xl p-5 border border-[#f1e8dc]">
+                    <div class="text-sm font-semibold text-brownDark mb-2">Notas adicionales</div>
+                    <p id="modal-notas" class="text-brownSoft">Sin notas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_ORDENES = "<?= BASE_URL ?>public/api/ordenesAdminData.php";
+        const tablaBody = document.getElementById("tabla-ordenes-body");
+
+        const modalOrden = document.getElementById("modal-orden");
+        const cerrarModalOrdenBtn = document.getElementById("cerrar-modal-orden");
+        const modalOrdenId = document.getElementById("modal-orden-id");
+        const modalMesa = document.getElementById("modal-mesa");
+        const modalUsuario = document.getElementById("modal-usuario");
+        const modalEstado = document.getElementById("modal-estado");
+        const modalTotal = document.getElementById("modal-total");
+        const modalItemsBody = document.getElementById("modal-items-body");
+        const modalNotas = document.getElementById("modal-notas");
+
+        function formatearColones(valor) {
+            return "₡" + Number(valor || 0).toLocaleString("es-CR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function escapeHtml(texto) {
+            const div = document.createElement("div");
+            div.textContent = texto ?? "";
+            return div.innerHTML;
+        }
+
+        function obtenerClaseEstado(estado) {
+            estado = (estado || "").toLowerCase();
+
+            if (estado.includes("entregada")) {
+                return "bg-emerald-100 text-emerald-700 border border-emerald-200";
+            }
+
+            if (estado.includes("proceso") || estado.includes("lista")) {
+                return "bg-amber-100 text-amber-700 border border-amber-200";
+            }
+
+            if (estado.includes("cancel")) {
+                return "bg-rose-100 text-rose-700 border border-rose-200";
+            }
+
+            return "bg-stone-100 text-stone-700 border border-stone-200";
+        }
+
+        function capitalizarEstado(estado) {
+            if (!estado) return "Pendiente";
+            return estado.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function abrirModalOrden(orden) {
+            modalOrdenId.textContent = `#${escapeHtml(String(orden.id_mostrado ?? 'N/A'))}`;
+            modalMesa.textContent = `Mesa ${String(orden.mesa ?? 'N/A')}`;
+            modalUsuario.textContent = String(orden.usuario_nombre ?? 'Sin usuario');
+            modalEstado.textContent = capitalizarEstado(String(orden.estado_normalizado ?? 'pendiente'));
+            modalTotal.textContent = formatearColones(orden.total ?? 0);
+            modalNotas.textContent = String(orden.notas ?? 'Sin notas');
+
+            const items = Array.isArray(orden.items_detalle) ? orden.items_detalle : [];
+            if (items.length === 0) {
+                modalItemsBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-5 py-8 text-center text-brownSoft">No hay detalle de productos disponible.</td>
+                    </tr>
+                `;
+            } else {
+                modalItemsBody.innerHTML = items.map(item => `
+                    <tr>
+                        <td class="px-5 py-4 font-medium text-brownDark">${escapeHtml(String(item.nombre ?? 'N/A'))}</td>
+                        <td class="px-5 py-4 text-brownSoft">${escapeHtml(String(item.cantidad ?? 0))}</td>
+                        <td class="px-5 py-4 text-brownSoft">${formatearColones(item.precio_unitario ?? 0)}</td>
+                        <td class="px-5 py-4 font-semibold text-mintGreen">${formatearColones(item.subtotal ?? 0)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            modalOrden.classList.remove('hidden');
+            modalOrden.classList.add('flex');
+        }
+
+        function cerrarModalOrden() {
+            modalOrden.classList.add('hidden');
+            modalOrden.classList.remove('flex');
+        }
+
+        function renderTabla(ordenes) {
+            if (!Array.isArray(ordenes) || ordenes.length === 0) {
+                tablaBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-16 text-center">
+                            <div class="flex flex-col items-center justify-center text-brownSoft">
+                                <div class="w-16 h-16 rounded-2xl bg-[#F5EEE5] flex items-center justify-center text-2xl text-brownDark mb-4">
+                                    <i class="fa-solid fa-inbox"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-brownDark mb-1">No hay órdenes registradas</h3>
+                                <p class="text-sm">Cuando se generen órdenes, aparecerán aquí.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tablaBody.innerHTML = ordenes.map(orden => {
+                const id = escapeHtml(String(orden.id_mostrado ?? "N/A"));
+                const mesa = escapeHtml(String(orden.mesa ?? "N/A"));
+                const usuario = escapeHtml(String(orden.usuario_nombre ?? "Sin usuario"));
+                const total = formatearColones(orden.total ?? 0);
+                const estado = String(orden.estado_normalizado ?? "pendiente");
+                const fecha = escapeHtml(String(orden.fecha_formateada ?? "N/A"));
+                const claseEstado = obtenerClaseEstado(estado);
+                const estadoTexto = escapeHtml(capitalizarEstado(estado));
+
+                const ordenPayload = encodeURIComponent(JSON.stringify(orden));
+
+                return `
+                    <tr class="hover:bg-[#FCFAF7] transition-colors cursor-pointer" data-orden="${ordenPayload}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-[#F5EEE5] text-brownDark flex items-center justify-center">
+                                    <i class="fa-solid fa-bag-shopping"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-brownDark">#${id}</div>
+                                    <div class="text-xs text-brownSoft">Orden registrada</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-sm font-semibold text-brownDark">
+                            Mesa ${mesa}
+                        </td>
+
+                        <td class="px-6 py-4 text-sm text-brownSoft">
+                            ${usuario}
+                        </td>
+
+                        <td class="px-6 py-4 font-bold text-mintGreen">
+                            ${total}
+                        </td>
+
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${claseEstado}">
+                                ${estadoTexto}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4 text-sm text-brownSoft">
+                            ${fecha}
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        let cargando = false;
+
+        async function cargarOrdenes() {
+            if (cargando) return;
+            cargando = true;
+
+            try {
+                const response = await fetch(API_ORDENES, {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    cache: "no-store"
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.ok) {
+                    throw new Error("Respuesta inválida del backend");
+                }
+
+                renderTabla(data.ordenes || []);
+
+                document.querySelectorAll('#tabla-ordenes-body tr[data-orden]').forEach(fila => {
+                    fila.addEventListener('click', () => {
+                        try {
+                            const orden = JSON.parse(decodeURIComponent(fila.dataset.orden || ''));
+                            abrirModalOrden(orden);
+                        } catch (e) {
+                            console.error('Error leyendo detalle de orden:', e);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error("Error cargando órdenes:", error);
+
+                tablaBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-rose-600 font-medium">
+                            Error cargando las órdenes. Intenta de nuevo en unos segundos.
+                        </td>
+                    </tr>
+                `;
+            } finally {
+                cargando = false;
+            }
+        }
+
+        cerrarModalOrdenBtn.addEventListener('click', cerrarModalOrden);
+        modalOrden.addEventListener('click', (event) => {
+            if (event.target === modalOrden) {
+                cerrarModalOrden();
+            }
+        });
+
+        cargarOrdenes();
+        setInterval(cargarOrdenes, 5000);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 
 </html>

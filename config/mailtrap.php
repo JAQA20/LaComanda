@@ -2,13 +2,13 @@
 require_once __DIR__ . '/env.php';
 
 return [
-    'enabled' => app_env_bool('MAILTRAP_ENABLED', false),
+    'enabled' => app_env_bool('MAILTRAP_ENABLED', true),
     'transport' => app_env('MAILTRAP_TRANSPORT', 'smtp'),
 
     'smtp_host' => app_env('MAILTRAP_SMTP_HOST', 'sandbox.smtp.mailtrap.io'),
-    'smtp_port' => (int)app_env('MAILTRAP_SMTP_PORT', 587),
-    'smtp_username' => app_env('MAILTRAP_SMTP_USERNAME', ''),
-    'smtp_password' => app_env('MAILTRAP_SMTP_PASSWORD', ''),
+    'smtp_port' => (int)app_env('MAILTRAP_SMTP_PORT', 2525),
+    'smtp_username' => app_env('MAILTRAP_SMTP_USERNAME', 'd8a217567d346c'),
+    'smtp_password' => app_env('MAILTRAP_SMTP_PASSWORD', 'c7488526529f13'),
     'smtp_encryption' => app_env('MAILTRAP_SMTP_ENCRYPTION', 'tls'),
 
     'token' => app_env('MAILTRAP_TOKEN', ''),
