@@ -6,6 +6,11 @@ class OrdenesSync
 {
     private static $schemaReady = false;
 
+    private static function normalizarTexto($texto)
+    {
+        return app_normalize_text($texto);
+    }
+
     private static function columnaExiste($conexion, $tabla, $columna)
     {
         $stmt = $conexion->prepare("SELECT COUNT(*) AS total FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
