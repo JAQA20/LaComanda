@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/../model/resetPassword.php";
+require_once __DIR__ . "/../model/ResetPassword.php";
 require_once __DIR__ . "/../config/rutas.php";
 
 ?>

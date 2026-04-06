@@ -34,17 +34,23 @@ require_once __DIR__ . "/../../config/rutas.php";
                     <span id="total-orden" class="text-brown font-bold text-lg">₡0</span>
                 </div>
 
-                <!-- Campo de Notas -->
                 <div class="mb-4">
-                    <label for="notas-orden" class="block text-sm font-medium text-brown mb-2">
-                        <i class="fas fa-sticky-note mr-1"></i>
-                        Notas adicionales (opcional)
-                    </label>
-                    <textarea
-                        id="notas-orden"
-                        placeholder="Ej: Sin hielo, sin azúcar, alérgico a..."
-                        class="w-full p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-mint focus:ring-1 focus:ring-mint resize-none"
-                        rows="3"></textarea>
+                    <button
+                        id="gestionar-notas"
+                        type="button"
+                        class="w-full flex items-center justify-between gap-3 p-3 text-left border border-gray-200 rounded-xl hover:border-mint hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        <span>
+                            <span class="block text-sm font-medium text-brown">
+                                <i class="fas fa-sticky-note mr-1"></i>
+                                Notas por producto
+                            </span>
+                            <span id="resumen-notas" class="block text-xs text-gray-500 mt-1">
+                                Agrega productos para poder añadir notas específicas.
+                            </span>
+                        </span>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </button>
                 </div>
 
                 <div class="space-y-2">

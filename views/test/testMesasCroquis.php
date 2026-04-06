@@ -736,9 +736,7 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 card.classList.toggle('is-selected', card.getAttribute('data-mesa') === numeroMesa);
             });
 
-            const notasField = document.getElementById('notas-orden');
-            if (notasField) notasField.value = '';
-
+            actualizarResumenNotas();
             actualizarBotones();
         }
 
@@ -1198,10 +1196,150 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 ordenActual.push({
                     nombre,
                     precio,
-                    cantidad: 1
+                    cantidad: 1,
+                    notas: []
                 });
             }
 
+            actualizarOrden();
+        }
+
+        function obtenerTotalNotas() {
+            return ordenActual.reduce((total, item) => total + ((item.notas || []).length), 0);
+        }
+
+        function escaparHtml(valor = '') {
+            return String(valor)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function actualizarResumenNotas() {
+            const resumen = document.getElementById('resumen-notas');
+            if (!resumen) return;
+
+            if (ordenActual.length === 0) {
+                resumen.textContent = 'Agrega productos para poder añadir notas específicas.';
+                return;
+            }
+
+            const totalNotas = obtenerTotalNotas();
+            resumen.textContent = totalNotas > 0 ?
+                `${totalNotas} nota${totalNotas === 1 ? '' : 's'} distribuida${totalNotas === 1 ? '' : 's'} en la orden.` :
+                'Puedes agregar notas separadas a cada producto de la orden.';
+        }
+
+        function abrirModalNotas() {
+            if (ordenActual.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Primero agrega productos',
+                    text: 'Necesitas al menos un producto en la orden para añadir notas.'
+                });
+                return;
+            }
+
+            const opciones = ordenActual.map((item, index) => {
+                const notas = item.notas || [];
+                return `
+                    <button type="button"
+                            class="w-full text-left border border-gray-200 rounded-xl p-3 hover:border-mint hover:bg-gray-50 transition-all duration-200"
+                            onclick="seleccionarProductoParaNotas(${index})">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="font-semibold text-brown">${escaparHtml(item.nombre)}</p>
+                                <p class="text-sm text-gray-500">Cantidad: ${item.cantidad}</p>
+                            </div>
+                            <span class="text-xs font-medium ${notas.length ? 'text-mint' : 'text-gray-400'}">
+                                ${notas.length} nota${notas.length === 1 ? '' : 's'}
+                            </span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            Swal.fire({
+                title: 'Agregar notas por producto',
+                html: `
+                    <div class="space-y-3 text-left">
+                        <p class="text-sm text-gray-500">Selecciona el producto al que quieres agregarle una nota.</p>
+                        <div class="space-y-2 max-h-80 overflow-y-auto pr-1">${opciones}</div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: 520
+            });
+        }
+
+        function seleccionarProductoParaNotas(index) {
+            const item = ordenActual[index];
+            if (!item) return;
+
+            Swal.fire({
+                title: `Nota para ${item.nombre}`,
+                html: `
+                    <div class="text-left space-y-3">
+                        <p class="text-sm text-gray-500">Escribe una nota específica para este producto.</p>
+                        <textarea id="nota-producto-input"
+                                  class="swal2-textarea !m-0 !w-full !min-h-[120px]"
+                                  placeholder="Ej: Sin cebolla, término medio, salsa aparte..."></textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Agregar nota',
+                cancelButtonText: 'Volver',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const nota = document.getElementById('nota-producto-input')?.value.trim() || '';
+                    if (!nota) {
+                        Swal.showValidationMessage('Escribe una nota antes de continuar.');
+                        return false;
+                    }
+                    return nota;
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    agregarNotaProducto(index, result.value);
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    abrirModalNotas();
+                }
+            });
+        }
+
+        function agregarNotaProducto(index, nota) {
+            const item = ordenActual[index];
+            if (!item) return;
+
+            if (!Array.isArray(item.notas)) {
+                item.notas = [];
+            }
+
+            item.notas.push(nota);
+            actualizarOrden();
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Nota agregada',
+                showConfirmButton: false,
+                timer: 1800
+            }).then(() => {
+                if (ordenActual.length > 1) {
+                    abrirModalNotas();
+                }
+            });
+        }
+
+        function eliminarNotaProducto(indexProducto, indexNota) {
+            const item = ordenActual[indexProducto];
+            if (!item || !Array.isArray(item.notas)) return;
+
+            item.notas.splice(indexNota, 1);
             actualizarOrden();
         }
 
@@ -1219,23 +1357,48 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                     </div>
                 `;
             } else {
-                ordenItems.innerHTML = ordenActual.map((item, index) => `
-                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                        <div class="flex-1">
-                            <p class="text-brown font-medium">${item.nombre}</p>
-                            <p class="text-mint text-sm">₡${item.precio.toLocaleString()} c/u</p>
+                ordenItems.innerHTML = ordenActual.map((item, index) => {
+                    const notas = Array.isArray(item.notas) ? item.notas : [];
+                    const notasHtml = notas.length ? `
+                        <div class="mt-3 space-y-2 border-t border-gray-200 pt-3">
+                            ${notas.map((nota, notaIndex) => `
+                                <div class="flex items-start justify-between gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
+                                    <div class="flex items-start gap-2 text-sm text-gray-700">
+                                        <i class="fas fa-note-sticky text-mint mt-1"></i>
+                                        <span>${escaparHtml(nota)}</span>
+                                    </div>
+                                    <button type="button"
+                                            onclick="eliminarNotaProducto(${index}, ${notaIndex})"
+                                            class="text-red-500 hover:text-red-700 text-xs font-medium whitespace-nowrap">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            `).join('')}
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="cambiarCantidad(${index}, -1)" class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-sm">-</button>
-                            <span class="text-brown font-medium w-8 text-center">${item.cantidad}</span>
-                            <button onclick="cambiarCantidad(${index}, 1)" class="w-6 h-6 custom-mint text-white rounded-full flex items-center justify-center text-sm">+</button>
+                    ` : '<p class="mt-3 text-xs text-gray-400">Sin notas para este producto.</p>';
+
+                    return `
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-brown font-medium">${escaparHtml(item.nombre)}</p>
+                                    <p class="text-mint text-sm">₡${item.precio.toLocaleString()} c/u</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="cambiarCantidad(${index}, -1)" class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-sm">-</button>
+                                    <span class="text-brown font-medium w-8 text-center">${item.cantidad}</span>
+                                    <button onclick="cambiarCantidad(${index}, 1)" class="w-6 h-6 custom-mint text-white rounded-full flex items-center justify-center text-sm">+</button>
+                                </div>
+                            </div>
+                            ${notasHtml}
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             totalOrden = ordenActual.reduce((total, item) => total + (item.precio * item.cantidad), 0);
             totalElement.textContent = `₡${totalOrden.toLocaleString()}`;
+            actualizarResumenNotas();
             actualizarBotones();
         }
 
@@ -1315,10 +1478,12 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
         function actualizarBotones() {
             const eliminarBtn = document.getElementById('eliminar-orden');
             const enviarBtn = document.getElementById('enviar-cocina');
+            const gestionarNotasBtn = document.getElementById('gestionar-notas');
 
             const tieneOrden = ordenActual.length > 0 && mesaActual;
             if (eliminarBtn) eliminarBtn.disabled = !tieneOrden;
             if (enviarBtn) enviarBtn.disabled = !tieneOrden;
+            if (gestionarNotasBtn) gestionarNotasBtn.disabled = !tieneOrden;
         }
 
         function eliminarOrden() {
@@ -1336,8 +1501,6 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             }).then((result) => {
                 if (result.isConfirmed) {
                     ordenActual = [];
-                    const notasField = document.getElementById('notas-orden');
-                    if (notasField) notasField.value = '';
                     actualizarOrden();
                     actualizarBotones();
 
@@ -1386,12 +1549,16 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             if (!isConfirmed) return;
 
             const listaProductos = ordenActual
-                .map(item => `${item.nombre} x${item.cantidad}`)
+                .map(item => {
+                    const notas = Array.isArray(item.notas) ? item.notas.filter(Boolean) : [];
+                    const bloqueNotas = notas.length ? `\n  - Notas: ${notas.join(' | ')}` : '';
+                    return `${item.nombre} x${item.cantidad}${bloqueNotas}`;
+                })
                 .join("\n");
 
-
-            const notasField = document.getElementById('notas-orden');
-            const notas = notasField ? notasField.value.trim() : '';
+            const notas = ordenActual
+                .flatMap(item => (Array.isArray(item.notas) ? item.notas.map(nota => `${item.nombre}: ${nota}`) : []))
+                .join("\n");
 
             const data = {
                 mesa: mesaActual,
@@ -1452,9 +1619,6 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                     const mesaActualSpan = document.getElementById("mesa-actual");
                     if (mesaActualSpan) mesaActualSpan.textContent = "No seleccionada";
 
-                    const notasField = document.getElementById('notas-orden');
-                    if (notasField) notasField.value = '';
-
                     actualizarOrden();
                     actualizarBotones();
 
@@ -1510,12 +1674,14 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
 
             const eliminarBtn = document.getElementById('eliminar-orden');
             const enviarBtn = document.getElementById('enviar-cocina');
+            const gestionarNotasBtn = document.getElementById('gestionar-notas');
             const saveLayoutBtn = document.getElementById('saveLayoutBtn');
             const resetLayoutBtn = document.getElementById('resetLayoutBtn');
             const editLayoutChip = document.getElementById('editLayoutChip');
 
             if (eliminarBtn) eliminarBtn.addEventListener('click', eliminarOrden);
             if (enviarBtn) enviarBtn.addEventListener('click', enviarCocina);
+            if (gestionarNotasBtn) gestionarNotasBtn.addEventListener('click', abrirModalNotas);
             if (saveLayoutBtn) saveLayoutBtn.addEventListener('click', guardarPosicionesLayout);
             if (resetLayoutBtn) resetLayoutBtn.addEventListener('click', restablecerPosicionesLayout);
             if (editLayoutChip) {

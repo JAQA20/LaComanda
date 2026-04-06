@@ -111,6 +111,9 @@ try {
         if ($password !== $password2) {
             throw new Exception("Las contraseñas no coinciden.");
         }
+        if (strlen($password) < 8) {
+            throw new Exception("La contraseña debe tener al menos 8 caracteres.");
+        }
         $passToUpdate = $password;
     }
 

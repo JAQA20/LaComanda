@@ -6,6 +6,8 @@ require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../config/rutas.php";
 
 verificarRol([1, 2]); // Admin(1) y Mesero(2)
+
+$isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
 ?>
 
 <!DOCTYPE html>
@@ -30,6 +32,575 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
     <a href="../config/rutas.php"></a>
 
+    <style>
+        :root {
+            --floor-shell-bg: #fffdf8;
+            --floor-panel-bg: linear-gradient(180deg, rgba(112, 163, 143, 0.12), rgba(139, 69, 19, 0.06));
+            --floor-stroke: rgba(139, 69, 19, 0.12);
+            --floor-text: #4a2c17;
+            --floor-muted: #7b6a5f;
+            --floor-wood-1: #d7b188;
+            --floor-wood-2: #c49667;
+            --table-free-1: #8fd2b7;
+            --table-free-2: #70a38f;
+            --table-pending-1: #a06b45;
+            --table-pending-2: #8b4513;
+            --table-ready-1: #4ade80;
+            --table-ready-2: #16a34a;
+            --table-selected: #f59e0b;
+            --chair: #97b7e6;
+            --floor-shell-padding: clamp(.8rem, 1.4vw, 1.15rem);
+            --floor-canvas-padding: clamp(.45rem, 1.1vw, .9rem);
+            --floor-gap: clamp(.65rem, 1vw, .85rem);
+            --control-gap: clamp(.55rem, 1vw, .75rem);
+            --control-font: clamp(.78rem, .92vw, .92rem);
+        }
+
+        .floor-shell {
+            background: var(--floor-shell-bg);
+            border: 1px solid rgba(139, 69, 19, 0.08);
+            border-radius: 24px;
+            padding: var(--floor-shell-padding);
+            box-shadow: 0 20px 40px rgba(74, 44, 23, 0.08);
+        }
+
+        .floor-layout {
+            display: grid;
+            gap: var(--floor-gap);
+        }
+
+        .floor-legend-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem .65rem;
+            align-items: center;
+        }
+
+        .floor-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: clamp(.35rem, .8vw, .45rem) clamp(.6rem, 1vw, .8rem);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .72);
+            border: 1px solid rgba(139, 69, 19, .08);
+            color: var(--floor-text);
+            font-size: clamp(.74rem, .88vw, .85rem);
+            font-weight: 700;
+        }
+
+        .sw {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            display: inline-block;
+            flex: 0 0 auto;
+        }
+
+        .sw.libre {
+            background: linear-gradient(180deg, var(--table-free-1), var(--table-free-2));
+        }
+
+        .sw.pendiente {
+            background: linear-gradient(180deg, var(--table-pending-1), var(--table-pending-2));
+        }
+
+        .sw.lista {
+            background: linear-gradient(180deg, var(--table-ready-1), var(--table-ready-2));
+        }
+
+        .sw.kitchen {
+            background: linear-gradient(135deg, #8b5cf6, #60a5fa);
+        }
+
+        .floor-canvas {
+            border-radius: 20px;
+            border: 1px solid var(--floor-stroke);
+            background: rgba(255, 255, 255, .45);
+            padding: var(--floor-canvas-padding);
+            overflow: hidden;
+        }
+
+        .restaurant-plan {
+            width: 100%;
+            aspect-ratio: 1280 / 700;
+            min-height: clamp(430px, 62vh, 760px);
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .05));
+            container-type: inline-size;
+            --plan-unit: clamp(8px, 1.18cqi, 13px);
+            --table-square-size: clamp(74px, calc(var(--plan-unit) * 7.6), 94px);
+            --table-rect-width: clamp(132px, calc(var(--plan-unit) * 13.2), 164px);
+            --table-rect-height: clamp(74px, calc(var(--plan-unit) * 7.6), 94px);
+            --table-radius: clamp(14px, calc(var(--plan-unit) * 1.4), 18px);
+            --table-shadow: 0 clamp(12px, calc(var(--plan-unit) * 1.45), 18px) clamp(22px, calc(var(--plan-unit) * 2.8), 35px) rgba(74, 44, 23, .16);
+            --table-label-size: clamp(1rem, calc(var(--plan-unit) * 1.1), 1.2rem);
+            --table-status-size: clamp(.66rem, calc(var(--plan-unit) * .62), .78rem);
+            --table-status-padding-y: clamp(.24rem, calc(var(--plan-unit) * .18), .32rem);
+            --table-status-padding-x: clamp(.45rem, calc(var(--plan-unit) * .42), .6rem);
+            --table-content-gap: clamp(.22rem, calc(var(--plan-unit) * .2), .36rem);
+            --chair-width: clamp(18px, calc(var(--plan-unit) * 1.75), 22px);
+            --chair-height: clamp(11px, calc(var(--plan-unit) * 1.1), 14px);
+            --chairs-inset: clamp(-20px, calc(var(--plan-unit) * -2), -28px);
+            --kitchen-width: clamp(190px, calc(var(--plan-unit) * 21), 260px);
+            --kitchen-height: clamp(152px, calc(var(--plan-unit) * 17), 210px);
+            --drag-handle-size: clamp(34px, calc(var(--plan-unit) * 3), 42px);
+            --drag-handle-offset: clamp(7px, calc(var(--plan-unit) * .7), 10px);
+            --drag-handle-radius: clamp(10px, calc(var(--plan-unit) * .8), 12px);
+            --drag-handle-font: clamp(.95rem, calc(var(--plan-unit) * .9), 1.15rem);
+        }
+
+        .floor-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--control-gap);
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .floor-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--control-gap);
+        }
+
+        .floor-btn {
+            border: 1px solid rgba(139, 69, 19, .14);
+            padding: clamp(.75rem, .95vw, .95rem) clamp(1rem, 1.4vw, 1.2rem);
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: var(--control-font);
+            min-height: 46px;
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+        }
+
+        .floor-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(74, 44, 23, .12);
+        }
+
+        .floor-btn.primary {
+            background: linear-gradient(135deg, #70a38f, #8fd2b7);
+            color: #fff;
+        }
+
+        .floor-btn.ghost {
+            background: transparent;
+            color: var(--floor-text);
+        }
+
+        .floor-edit-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .55rem .75rem;
+        }
+
+        .floor-chip {
+            align-self: flex-start;
+            border: 1px solid rgba(112, 163, 143, .25);
+            background: rgba(112, 163, 143, .12);
+            color: var(--floor-text);
+            font-size: clamp(.78rem, .9vw, .86rem);
+            font-weight: 800;
+            padding: clamp(.58rem, .9vw, .7rem) clamp(.85rem, 1.2vw, 1rem);
+            border-radius: 999px;
+            min-height: 44px;
+            cursor: pointer;
+        }
+
+        .floor-chip.active {
+            background: rgba(112, 163, 143, .2);
+        }
+
+        .floor-hint {
+            color: var(--floor-muted);
+            font-size: .82rem;
+        }
+
+        .floor-controls-note {
+            width: 100%;
+            color: var(--floor-muted);
+            font-size: .78rem;
+        }
+
+        .restaurant-floor {
+            position: absolute;
+            inset: 0;
+            margin: clamp(.2rem, .55vw, .35rem);
+            border-radius: 16px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, .08), rgba(0, 0, 0, .08)), repeating-linear-gradient(90deg, rgba(255, 255, 255, .08) 0px, rgba(255, 255, 255, .08) 18px, rgba(255, 255, 255, .03) 18px, rgba(255, 255, 255, .03) 36px), linear-gradient(180deg, var(--floor-wood-1), var(--floor-wood-2));
+            box-shadow: inset 0 0 0 1px rgba(74, 44, 23, .14);
+        }
+
+        .draggable {
+            position: absolute;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .drag-handle {
+            position: absolute;
+            left: var(--drag-handle-offset);
+            top: var(--drag-handle-offset);
+            width: var(--drag-handle-size);
+            height: var(--drag-handle-size);
+            border-radius: var(--drag-handle-radius);
+            background: rgba(255, 255, 255, .9);
+            display: grid;
+            place-items: center;
+            color: #3b2415;
+            font-size: var(--drag-handle-font);
+            font-weight: 900;
+            box-shadow: 0 10px 20px rgba(74, 44, 23, .18);
+            cursor: grab;
+            z-index: 2;
+        }
+
+        .layout-readonly .drag-handle {
+            display: none;
+        }
+
+        .dragging .drag-handle {
+            cursor: grabbing;
+        }
+
+        .dragging {
+            filter: brightness(1.04);
+        }
+
+        .kitchen {
+            width: var(--kitchen-width);
+            height: var(--kitchen-height);
+            border-radius: clamp(16px, calc(var(--plan-unit) * 1.5), 18px);
+            background: linear-gradient(180deg, #3d4f77, #253552);
+            border: 1px solid rgba(255, 255, 255, .18);
+            box-shadow: 0 clamp(12px, calc(var(--plan-unit) * 1.5), 18px) clamp(22px, calc(var(--plan-unit) * 2.8), 35px) rgba(0, 0, 0, .18);
+            overflow: hidden;
+        }
+
+        .kitchen::after {
+            content: 'Cocina';
+            position: absolute;
+            right: clamp(10px, calc(var(--plan-unit) * .9), 12px);
+            top: clamp(8px, calc(var(--plan-unit) * .7), 10px);
+            color: rgba(255, 255, 255, .88);
+            font-size: clamp(.7rem, calc(var(--plan-unit) * .72), .82rem);
+            font-weight: 900;
+            letter-spacing: .04em;
+        }
+
+        .kitchen .burners {
+            position: absolute;
+            left: clamp(10px, calc(var(--plan-unit) * 1.1), 14px);
+            top: clamp(34px, calc(var(--plan-unit) * 3.7), 44px);
+            width: clamp(52px, calc(var(--plan-unit) * 5.4), 66px);
+            height: clamp(104px, calc(var(--plan-unit) * 12), 150px);
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: clamp(12px, calc(var(--plan-unit) * 1.1), 14px);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(7px, calc(var(--plan-unit) * .75), 10px);
+            padding: clamp(9px, calc(var(--plan-unit) * .9), 12px);
+            pointer-events: none;
+        }
+
+        .kitchen .burners span {
+            width: clamp(14px, calc(var(--plan-unit) * 1.45), 18px);
+            height: clamp(14px, calc(var(--plan-unit) * 1.45), 18px);
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .22);
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .25);
+            justify-self: center;
+            align-self: center;
+        }
+
+        .kitchen .prep {
+            position: absolute;
+            left: clamp(76px, calc(var(--plan-unit) * 8), 98px);
+            top: clamp(48px, calc(var(--plan-unit) * 5), 60px);
+            width: clamp(94px, calc(var(--plan-unit) * 11.8), 145px);
+            height: clamp(58px, calc(var(--plan-unit) * 7.5), 92px);
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: clamp(12px, calc(var(--plan-unit) * 1.3), 16px);
+        }
+
+        .kitchen .prep::before,
+        .kitchen .prep::after {
+            content: '';
+            position: absolute;
+            top: clamp(10px, calc(var(--plan-unit) * 1.25), 16px);
+            width: clamp(11px, calc(var(--plan-unit) * 1.3), 16px);
+            height: clamp(11px, calc(var(--plan-unit) * 1.3), 16px);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .86);
+        }
+
+        .kitchen .prep::before {
+            left: clamp(20px, calc(var(--plan-unit) * 2.4), 30px);
+        }
+
+        .kitchen .prep::after {
+            left: clamp(58px, calc(var(--plan-unit) * 7), 88px);
+        }
+
+        .kitchen .sinks {
+            position: absolute;
+            left: clamp(76px, calc(var(--plan-unit) * 8), 98px);
+            bottom: clamp(12px, calc(var(--plan-unit) * 1.5), 18px);
+            display: flex;
+            gap: clamp(8px, calc(var(--plan-unit) * .9), 12px);
+        }
+
+        .sink {
+            width: clamp(40px, calc(var(--plan-unit) * 5), 62px);
+            height: clamp(25px, calc(var(--plan-unit) * 3.1), 38px);
+            border-radius: clamp(10px, calc(var(--plan-unit) * 1.1), 14px);
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .12);
+            position: relative;
+        }
+
+        .sink::before {
+            content: '';
+            position: absolute;
+            left: clamp(7px, calc(var(--plan-unit) * .8), 10px);
+            top: clamp(6px, calc(var(--plan-unit) * .8), 10px);
+            width: clamp(11px, calc(var(--plan-unit) * 1.45), 18px);
+            height: clamp(10px, calc(var(--plan-unit) * 1.3), 16px);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .88);
+        }
+
+        .sink::after {
+            content: '';
+            position: absolute;
+            right: clamp(7px, calc(var(--plan-unit) * .8), 10px);
+            top: clamp(9px, calc(var(--plan-unit) * 1), 14px);
+            width: clamp(10px, calc(var(--plan-unit) * 1.3), 16px);
+            height: clamp(4px, calc(var(--plan-unit) * .45), 6px);
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .35);
+            transform: rotate(20deg);
+        }
+
+        .table {
+            display: grid;
+            place-items: center;
+            color: #1f2937;
+            font-weight: 900;
+            border: 1px solid rgba(74, 44, 23, .14);
+            box-shadow: var(--table-shadow);
+            cursor: pointer;
+            overflow: visible;
+        }
+
+        .table.square {
+            width: var(--table-square-size);
+            height: var(--table-square-size);
+            border-radius: var(--table-radius);
+        }
+
+        .table.rect {
+            width: var(--table-rect-width);
+            height: var(--table-rect-height);
+            border-radius: var(--table-radius);
+        }
+
+        .table.state-libre {
+            background: linear-gradient(180deg, var(--table-free-1), var(--table-free-2));
+        }
+
+        .table.state-pendiente {
+            background: linear-gradient(180deg, var(--table-pending-1), var(--table-pending-2));
+            color: #fff7ed;
+        }
+
+        .table.state-lista {
+            background: linear-gradient(180deg, var(--table-ready-1), var(--table-ready-2));
+            color: white;
+        }
+
+        .table.is-selected {
+            box-shadow: inset 0 0 0 clamp(3px, calc(var(--plan-unit) * .34), 4px) var(--table-selected), var(--table-shadow);
+        }
+
+        .table-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--table-content-gap);
+            text-align: center;
+            padding: clamp(.6rem, calc(var(--plan-unit) * .62), .78rem) clamp(.32rem, calc(var(--plan-unit) * .28), .42rem);
+        }
+
+        .table-label {
+            font-size: var(--table-label-size);
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .table-status {
+            font-size: var(--table-status-size);
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, .22);
+            padding: var(--table-status-padding-y) var(--table-status-padding-x);
+            border-radius: 999px;
+        }
+
+        .btn-entregar-plan {
+            border: 0;
+            background: rgba(255, 255, 255, .92);
+            color: #166534;
+            font-size: clamp(.69rem, calc(var(--plan-unit) * .62), .78rem);
+            font-weight: 900;
+            border-radius: 999px;
+            padding: clamp(.38rem, calc(var(--plan-unit) * .34), .48rem) clamp(.7rem, calc(var(--plan-unit) * .62), .9rem);
+            min-height: 36px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, .14);
+        }
+
+        .chairs {
+            position: absolute;
+            inset: var(--chairs-inset);
+            pointer-events: none;
+            opacity: .95;
+        }
+
+        .chair {
+            position: absolute;
+            width: var(--chair-width);
+            height: var(--chair-height);
+            border-radius: clamp(6px, calc(var(--plan-unit) * .6), 8px);
+            background: linear-gradient(180deg, var(--chair), #6f90c0);
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .08);
+        }
+
+        .c-top {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .c-bottom {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .c-left {
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        .c-right {
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        .c-top2 {
+            top: 0;
+            left: 35%;
+            transform: translateX(-50%);
+        }
+
+        .c-top3 {
+            top: 0;
+            left: 65%;
+            transform: translateX(-50%);
+        }
+
+        .c-bottom2 {
+            bottom: 0;
+            left: 35%;
+            transform: translateX(-50%);
+        }
+
+        .c-bottom3 {
+            bottom: 0;
+            left: 65%;
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 1180px) {
+            .restaurant-plan {
+                min-height: clamp(440px, 68vh, 760px);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .restaurant-plan {
+                --plan-unit: clamp(8px, 1.35cqi, 13px);
+            }
+
+            .floor-controls {
+                align-items: stretch;
+            }
+
+            .floor-actions,
+            .floor-edit-wrap {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 1024px) and (orientation: portrait) {
+            .restaurant-plan {
+                aspect-ratio: 4 / 5;
+                min-height: clamp(560px, 72vh, 900px);
+                --plan-unit: clamp(9px, 1.65cqi, 14px);
+            }
+        }
+
+        @media (max-width: 1024px) and (orientation: landscape) {
+            .restaurant-plan {
+                aspect-ratio: 1280 / 760;
+                min-height: clamp(430px, 62vh, 680px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .floor-controls {
+                flex-direction: column;
+            }
+
+            .floor-actions .floor-btn,
+            .floor-edit-wrap .floor-chip {
+                flex: 1 1 auto;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .floor-hint,
+            .floor-controls-note {
+                font-size: .78rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .restaurant-plan {
+                aspect-ratio: 4 / 5;
+                min-height: clamp(460px, 68vh, 780px);
+                --plan-unit: clamp(8px, 1.9cqi, 13px);
+            }
+
+            .floor-legend-bar {
+                gap: .45rem;
+            }
+        }
+    </style>
+
 </head>
 
 <body class="custom-beige min-h-screen">
@@ -39,7 +610,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
     <!-- Main Content -->
     <div class="pt-20 min-h-screen">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col xl:flex-row gap-6 items-start">
 
                 <!-- Content Area -->
@@ -47,129 +618,70 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
                     <!-- Mesas View -->
                     <div id="mesas-view" class="block">
-                        <h1 class="text-brown text-3xl font-bold mb-8">Mesas disponibles</h1>
+                        <h1 class="text-brown text-3xl font-bold mb-6">Mesas disponibles</h1>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="1">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 1</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
+                        <section class="floor-shell">
+                            <div class="floor-layout">
+                                <div class="floor-legend-bar" aria-label="Leyenda de estados de mesa">
+                                    <div class="floor-legend-item"><span class="sw libre"></span> Disponible</div>
+                                    <div class="floor-legend-item"><span class="sw pendiente"></span> En cocina</div>
+                                    <div class="floor-legend-item"><span class="sw lista"></span> Lista para entregar</div>
+                                    <!-- <div class="floor-legend-item"><span class="sw kitchen"></span> Cocina movible</div> -->
                                 </div>
-                            </div>
 
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="2">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 2</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
+                                <div class="floor-canvas">
+                                    <div class="restaurant-plan">
+                                        <div class="restaurant-floor <?= $isAdminLayout ? '' : 'layout-readonly' ?>" id="restaurant-floor">
+                                            <div class="draggable kitchen" data-id="kitchen" style="left: 2%; top: 2%;">
+                                                <?php if ($isAdminLayout): ?>
+                                                    <div class="drag-handle" title="Arrastrar">⠿</div>
+                                                <?php endif; ?>
+                                                <div class="burners" aria-hidden="true">
+                                                    <span></span><span></span>
+                                                    <span></span><span></span>
+                                                    <span></span><span></span>
+                                                    <span></span><span></span>
+                                                </div>
+                                                <div class="prep" aria-hidden="true"></div>
+                                                <div class="sinks" aria-hidden="true">
+                                                    <div class="sink"></div>
+                                                    <div class="sink"></div>
+                                                </div>
+                                            </div>
 
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="3">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
+                                            <div class="draggable mesa-card table square" data-id="t1" data-mesa="1" data-shape="square" style="left: 34%; top: 9%;"></div>
+                                            <div class="draggable mesa-card table square" data-id="t2" data-mesa="2" data-shape="square" style="left: 47%; top: 9%;"></div>
+                                            <div class="draggable mesa-card table rect" data-id="t3" data-mesa="3" data-shape="rect" style="left: 63%; top: 8%;"></div>
+                                            <div class="draggable mesa-card table square" data-id="t4" data-mesa="4" data-shape="square" style="left: 34%; top: 26%;"></div>
+                                            <div class="draggable mesa-card table square" data-id="t5" data-mesa="5" data-shape="square" style="left: 47%; top: 26%;"></div>
+                                            <div class="draggable mesa-card table rect" data-id="t6" data-mesa="6" data-shape="rect" style="left: 75%; top: 31%;"></div>
+                                            <div class="draggable mesa-card table square" data-id="t7" data-mesa="7" data-shape="square" style="left: 34%; top: 47%;"></div>
+                                            <div class="draggable mesa-card table square" data-id="t8" data-mesa="8" data-shape="square" style="left: 47%; top: 47%;"></div>
+                                            <div class="draggable mesa-card table rect" data-id="t9" data-mesa="9" data-shape="rect" style="left: 19%; top: 72%;"></div>
+                                            <div class="draggable mesa-card table square" data-id="t10" data-mesa="10" data-shape="square" style="left: 34%; top: 73%;"></div>
+                                            <div class="draggable mesa-card table square" data-id="t11" data-mesa="11" data-shape="square" style="left: 47%; top: 73%;"></div>
+                                            <div class="draggable mesa-card table rect" data-id="t12" data-mesa="12" data-shape="rect" style="left: 63%; top: 72%;"></div>
+                                        </div>
                                     </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 3</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
                                 </div>
-                            </div>
 
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="4">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 4</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
+                                <?php if ($isAdminLayout): ?>
+                                    <div class="floor-controls">
+                                        <div class="floor-actions">
+                                            <button class="floor-btn primary" id="saveLayoutBtn" type="button">Guardar posiciones</button>
+                                            <button class="floor-btn ghost" id="resetLayoutBtn" type="button">Restablecer</button>
+                                        </div>
 
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="5">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 5</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
+                                        <div class="floor-edit-wrap">
+                                            <button class="floor-chip active" id="editLayoutChip" type="button">Modo edición: ON</button>
+                                            <span class="floor-hint">Desactívalo para evitar mover el plano por accidente.</span>
+                                        </div>
 
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="6">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
+                                        <div class="floor-controls-note">Selecciona mesas desde el croquis y usa el asa ⠿ para mover mesas y cocina. Las posiciones ahora se guardan de forma compartida para todo el equipo.</div>
                                     </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 6</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
+                                <?php endif; ?>
                             </div>
-
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="7">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 7</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
-
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="8">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 8</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
-
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="9">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 9</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
-
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="10">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 10</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
-
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="11">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 11</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
-
-                            <div class="mesa-card bg-white rounded-xl p-6 shadow-sm border-2 border-transparent hover:border-mint transition-all duration-200 cursor-pointer" data-mesa="12">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <i class="fas fa-utensils text-white text-xl"></i>
-                                    </div>
-                                    <h3 class="text-brown font-semibold text-lg">Mesa 12</h3>
-                                    <p class="text-mint text-sm">Disponible</p>
-                                </div>
-                            </div>
-                        </div>
+                        </section>
                     </div>
 
                     <!-- Menu Views -->
@@ -196,9 +708,13 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
     <script>
         const BASE_URL = "<?= BASE_URL ?>";
+        const LAYOUT_API_URL = `${BASE_URL}public/api/layoutMesas.php`;
+        const USER_IS_ADMIN = <?= $isAdminLayout ? 'true' : 'false' ?>;
         let mesaActual = null;
         let ordenActual = [];
         let totalOrden = 0;
+        let dragState = null;
+        let editLayoutMode = USER_IS_ADMIN;
 
         // Estado visual por mesa: libre | pendiente | lista
         let mesaEstados = JSON.parse(localStorage.getItem('mesaEstados') || '{}');
@@ -217,18 +733,10 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             }
 
             document.querySelectorAll('.mesa-card').forEach(card => {
-                card.style.border = "2px solid transparent";
+                card.classList.toggle('is-selected', card.getAttribute('data-mesa') === numeroMesa);
             });
 
-            const cardSeleccionada = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
-            if (cardSeleccionada) {
-                cardSeleccionada.style.border = "2px solid #70A38F";
-            }
-
-            // Limpiar campo de notas cuando se selecciona una mesa
-            const notasField = document.getElementById('notas-orden');
-            if (notasField) notasField.value = '';
-
+            actualizarResumenNotas();
             actualizarBotones();
         }
 
@@ -273,48 +781,46 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             if (!card) return;
 
             const estado = mesaEstados[numeroMesa] || "libre";
+            const shape = card.dataset.shape || 'square';
+            const isRect = shape === 'rect';
 
-            if (estado === "pendiente") {
-                card.innerHTML = `
-            <div class="text-center">
-                <div class="w-16 h-16 custom-brown rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-utensils text-beige text-xl"></i>
+            card.className = `draggable mesa-card table ${shape} state-${estado}`;
+            card.dataset.mesa = numeroMesa;
+            card.classList.toggle('is-selected', mesaActual === numeroMesa);
+
+            const chairs = isRect ? `
+                <div class="chairs" aria-hidden="true">
+                    <span class="chair c-top2"></span><span class="chair c-top3"></span>
+                    <span class="chair c-bottom2"></span><span class="chair c-bottom3"></span>
+                    <span class="chair c-left"></span><span class="chair c-right"></span>
                 </div>
-                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-                <p class="text-brown text-sm">En cocina</p>
-            </div>
-        `;
-            } else if (estado === "lista") {
-                card.innerHTML = `
-            <div class="text-center">
-                <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-bell text-white text-xl"></i>
+            ` : `
+                <div class="chairs" aria-hidden="true">
+                    <span class="chair c-top"></span><span class="chair c-bottom"></span>
+                    <span class="chair c-left"></span><span class="chair c-right"></span>
                 </div>
-                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-                <p class="text-green-600 text-sm font-medium">Lista para entregar</p>
-                <button class="btn-entregar w-full py-2 custom-mint text-white rounded-lg hover-mint-bg font-medium mt-3">
-                    Entregar orden
-                </button>
-            </div>
-        `;
-            } else {
-                card.innerHTML = `
-            <div class="text-center">
-                <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-utensils text-white text-xl"></i>
-                </div>
-                <h3 class="text-brown font-semibold text-lg">Mesa ${numeroMesa}</h3>
-                <p class="text-mint text-sm">Disponible</p>
-            </div>
-        `;
+            `;
+
+            let statusLabel = 'Disponible';
+            let statusHtml = '<span class="table-status">Disponible</span>';
+
+            if (estado === 'pendiente') {
+                statusLabel = 'En cocina';
+                statusHtml = '<span class="table-status">En cocina</span>';
+            } else if (estado === 'lista') {
+                statusLabel = 'Lista';
+                statusHtml = '<button class="btn-entregar btn-entregar-plan" type="button">Entregar orden</button>';
             }
 
-            // Mantener borde si está seleccionada
-            if (mesaActual === numeroMesa) {
-                card.style.border = "2px solid #70A38F";
-            } else {
-                card.style.border = "2px solid transparent";
-            }
+            card.setAttribute('aria-label', `Mesa ${numeroMesa} - ${statusLabel}`);
+            card.innerHTML = `
+                ${USER_IS_ADMIN ? '<div class="drag-handle" title="Arrastrar">⠿</div>' : ''}
+                <div class="table-content">
+                    <div class="table-label">${numeroMesa}</div>
+                    ${statusHtml}
+                </div>
+                ${chairs}
+            `;
         }
 
         function actualizarTodasLasMesas() {
@@ -398,6 +904,179 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             } catch (error) {
                 console.error("Error sincronizando estados de mesas:", error);
             }
+        }
+
+        function clampLayout(n, min, max) {
+            return Math.max(min, Math.min(max, n));
+        }
+
+        function getRestaurantFloorRect() {
+            const floor = document.getElementById('restaurant-floor');
+            return floor ? floor.getBoundingClientRect() : null;
+        }
+
+        function obtenerItemsLayoutActual() {
+            const floorRect = getRestaurantFloorRect();
+            if (!floorRect) return {};
+
+            const items = {};
+            document.querySelectorAll('#restaurant-floor .draggable').forEach(el => {
+                const id = el.dataset.id;
+                const rect = el.getBoundingClientRect();
+                const leftPx = rect.left - floorRect.left;
+                const topPx = rect.top - floorRect.top;
+                items[id] = {
+                    left: clampLayout((leftPx / floorRect.width) * 100, -2, 98),
+                    top: clampLayout((topPx / floorRect.height) * 100, -2, 98)
+                };
+            });
+
+            return items;
+        }
+
+        function aplicarPosicionesLayout(items) {
+            if (!items || typeof items !== 'object') return;
+
+            Object.entries(items).forEach(([id, pos]) => {
+                const el = document.querySelector(`#restaurant-floor .draggable[data-id="${id}"]`);
+                if (!el || typeof pos !== 'object') return;
+
+                if (typeof pos.left !== 'undefined') {
+                    el.style.left = `${clampLayout(Number(pos.left), -2, 98)}%`;
+                }
+                if (typeof pos.top !== 'undefined') {
+                    el.style.top = `${clampLayout(Number(pos.top), -2, 98)}%`;
+                }
+            });
+        }
+
+        async function guardarPosicionesLayout() {
+            if (!USER_IS_ADMIN) return;
+
+            const items = obtenerItemsLayoutActual();
+
+            try {
+                const resp = await fetch(LAYOUT_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        items
+                    })
+                });
+
+                const json = await resp.json();
+                if (!resp.ok || json.status !== 'OK') {
+                    throw new Error(json.message || `HTTP ${resp.status}`);
+                }
+
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom',
+                    icon: 'success',
+                    title: 'Posiciones guardadas',
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+            } catch (error) {
+                console.error('No se pudo guardar el layout compartido:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo guardar',
+                    text: error.message || 'Error guardando el layout compartido.'
+                });
+            }
+        }
+
+        async function cargarPosicionesLayout() {
+            try {
+                const resp = await fetch(`${LAYOUT_API_URL}?_=${Date.now()}`);
+                const json = await resp.json();
+
+                if (!resp.ok || json.status !== 'OK') {
+                    throw new Error(json.message || `HTTP ${resp.status}`);
+                }
+
+                aplicarPosicionesLayout(json.data || {});
+            } catch (error) {
+                console.warn('No se pudo cargar el layout compartido:', error);
+            }
+        }
+
+        async function restablecerPosicionesLayout() {
+            if (!USER_IS_ADMIN) return;
+
+            try {
+                const resp = await fetch(LAYOUT_API_URL, {
+                    method: 'DELETE'
+                });
+                const json = await resp.json();
+
+                if (!resp.ok || json.status !== 'OK') {
+                    throw new Error(json.message || `HTTP ${resp.status}`);
+                }
+
+                window.location.reload();
+            } catch (error) {
+                console.error('No se pudo restablecer el layout compartido:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo restablecer',
+                    text: error.message || 'Error restableciendo el layout compartido.'
+                });
+            }
+        }
+
+        function actualizarChipEdicion() {
+            const chip = document.getElementById('editLayoutChip');
+            if (!chip) return;
+
+            chip.classList.toggle('active', editLayoutMode);
+            chip.textContent = `Modo edición: ${editLayoutMode ? 'ON' : 'OFF'}`;
+        }
+
+        function onLayoutPointerDown(e) {
+            if (!USER_IS_ADMIN || !editLayoutMode) return;
+
+            const handle = e.target.closest('.drag-handle');
+            if (!handle) return;
+
+            const el = handle.closest('.draggable');
+            const floor = document.getElementById('restaurant-floor');
+            if (!el || !floor || !floor.contains(el)) return;
+
+            e.preventDefault();
+
+            const rect = el.getBoundingClientRect();
+            dragState = {
+                el,
+                pointerId: e.pointerId,
+                offsetX: e.clientX - rect.left,
+                offsetY: e.clientY - rect.top
+            };
+
+            el.classList.add('dragging');
+            el.setPointerCapture?.(e.pointerId);
+        }
+
+        function onLayoutPointerMove(e) {
+            if (!dragState || e.pointerId !== dragState.pointerId) return;
+
+            const floorRect = getRestaurantFloorRect();
+            if (!floorRect) return;
+
+            const x = e.clientX - floorRect.left - dragState.offsetX;
+            const y = e.clientY - floorRect.top - dragState.offsetY;
+
+            dragState.el.style.left = `${clampLayout((x / floorRect.width) * 100, -2, 98)}%`;
+            dragState.el.style.top = `${clampLayout((y / floorRect.height) * 100, -2, 98)}%`;
+        }
+
+        function onLayoutPointerUp(e) {
+            if (!dragState || e.pointerId !== dragState.pointerId) return;
+            dragState.el.classList.remove('dragging');
+            dragState = null;
         }
 
         async function mostrarProductos(slug, nombreCategoria = "Menú") {
@@ -517,10 +1196,150 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                 ordenActual.push({
                     nombre,
                     precio,
-                    cantidad: 1
+                    cantidad: 1,
+                    notas: []
                 });
             }
 
+            actualizarOrden();
+        }
+
+        function obtenerTotalNotas() {
+            return ordenActual.reduce((total, item) => total + ((item.notas || []).length), 0);
+        }
+
+        function escaparHtml(valor = '') {
+            return String(valor)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function actualizarResumenNotas() {
+            const resumen = document.getElementById('resumen-notas');
+            if (!resumen) return;
+
+            if (ordenActual.length === 0) {
+                resumen.textContent = 'Agrega productos para poder añadir notas específicas.';
+                return;
+            }
+
+            const totalNotas = obtenerTotalNotas();
+            resumen.textContent = totalNotas > 0 ?
+                `${totalNotas} nota${totalNotas === 1 ? '' : 's'} distribuida${totalNotas === 1 ? '' : 's'} en la orden.` :
+                'Puedes agregar notas separadas a cada producto de la orden.';
+        }
+
+        function abrirModalNotas() {
+            if (ordenActual.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Primero agrega productos',
+                    text: 'Necesitas al menos un producto en la orden para añadir notas.'
+                });
+                return;
+            }
+
+            const opciones = ordenActual.map((item, index) => {
+                const notas = item.notas || [];
+                return `
+                    <button type="button"
+                            class="w-full text-left border border-gray-200 rounded-xl p-3 hover:border-mint hover:bg-gray-50 transition-all duration-200"
+                            onclick="seleccionarProductoParaNotas(${index})">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="font-semibold text-brown">${escaparHtml(item.nombre)}</p>
+                                <p class="text-sm text-gray-500">Cantidad: ${item.cantidad}</p>
+                            </div>
+                            <span class="text-xs font-medium ${notas.length ? 'text-mint' : 'text-gray-400'}">
+                                ${notas.length} nota${notas.length === 1 ? '' : 's'}
+                            </span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            Swal.fire({
+                title: 'Agregar notas por producto',
+                html: `
+                    <div class="space-y-3 text-left">
+                        <p class="text-sm text-gray-500">Selecciona el producto al que quieres agregarle una nota.</p>
+                        <div class="space-y-2 max-h-80 overflow-y-auto pr-1">${opciones}</div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: 520
+            });
+        }
+
+        function seleccionarProductoParaNotas(index) {
+            const item = ordenActual[index];
+            if (!item) return;
+
+            Swal.fire({
+                title: `Nota para ${item.nombre}`,
+                html: `
+                    <div class="text-left space-y-3">
+                        <p class="text-sm text-gray-500">Escribe una nota específica para este producto.</p>
+                        <textarea id="nota-producto-input"
+                                  class="swal2-textarea !m-0 !w-full !min-h-[120px]"
+                                  placeholder="Ej: Sin cebolla, término medio, salsa aparte..."></textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Agregar nota',
+                cancelButtonText: 'Volver',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const nota = document.getElementById('nota-producto-input')?.value.trim() || '';
+                    if (!nota) {
+                        Swal.showValidationMessage('Escribe una nota antes de continuar.');
+                        return false;
+                    }
+                    return nota;
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    agregarNotaProducto(index, result.value);
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    abrirModalNotas();
+                }
+            });
+        }
+
+        function agregarNotaProducto(index, nota) {
+            const item = ordenActual[index];
+            if (!item) return;
+
+            if (!Array.isArray(item.notas)) {
+                item.notas = [];
+            }
+
+            item.notas.push(nota);
+            actualizarOrden();
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Nota agregada',
+                showConfirmButton: false,
+                timer: 1800
+            }).then(() => {
+                if (ordenActual.length > 1) {
+                    abrirModalNotas();
+                }
+            });
+        }
+
+        function eliminarNotaProducto(indexProducto, indexNota) {
+            const item = ordenActual[indexProducto];
+            if (!item || !Array.isArray(item.notas)) return;
+
+            item.notas.splice(indexNota, 1);
             actualizarOrden();
         }
 
@@ -538,23 +1357,48 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
                     </div>
                 `;
             } else {
-                ordenItems.innerHTML = ordenActual.map((item, index) => `
-                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                        <div class="flex-1">
-                            <p class="text-brown font-medium">${item.nombre}</p>
-                            <p class="text-mint text-sm">₡${item.precio.toLocaleString()} c/u</p>
+                ordenItems.innerHTML = ordenActual.map((item, index) => {
+                    const notas = Array.isArray(item.notas) ? item.notas : [];
+                    const notasHtml = notas.length ? `
+                        <div class="mt-3 space-y-2 border-t border-gray-200 pt-3">
+                            ${notas.map((nota, notaIndex) => `
+                                <div class="flex items-start justify-between gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
+                                    <div class="flex items-start gap-2 text-sm text-gray-700">
+                                        <i class="fas fa-note-sticky text-mint mt-1"></i>
+                                        <span>${escaparHtml(nota)}</span>
+                                    </div>
+                                    <button type="button"
+                                            onclick="eliminarNotaProducto(${index}, ${notaIndex})"
+                                            class="text-red-500 hover:text-red-700 text-xs font-medium whitespace-nowrap">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            `).join('')}
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="cambiarCantidad(${index}, -1)" class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-sm">-</button>
-                            <span class="text-brown font-medium w-8 text-center">${item.cantidad}</span>
-                            <button onclick="cambiarCantidad(${index}, 1)" class="w-6 h-6 custom-mint text-white rounded-full flex items-center justify-center text-sm">+</button>
+                    ` : '<p class="mt-3 text-xs text-gray-400">Sin notas para este producto.</p>';
+
+                    return `
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-brown font-medium">${escaparHtml(item.nombre)}</p>
+                                    <p class="text-mint text-sm">₡${item.precio.toLocaleString()} c/u</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="cambiarCantidad(${index}, -1)" class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-sm">-</button>
+                                    <span class="text-brown font-medium w-8 text-center">${item.cantidad}</span>
+                                    <button onclick="cambiarCantidad(${index}, 1)" class="w-6 h-6 custom-mint text-white rounded-full flex items-center justify-center text-sm">+</button>
+                                </div>
+                            </div>
+                            ${notasHtml}
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             totalOrden = ordenActual.reduce((total, item) => total + (item.precio * item.cantidad), 0);
             totalElement.textContent = `₡${totalOrden.toLocaleString()}`;
+            actualizarResumenNotas();
             actualizarBotones();
         }
 
@@ -634,10 +1478,12 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
         function actualizarBotones() {
             const eliminarBtn = document.getElementById('eliminar-orden');
             const enviarBtn = document.getElementById('enviar-cocina');
+            const gestionarNotasBtn = document.getElementById('gestionar-notas');
 
             const tieneOrden = ordenActual.length > 0 && mesaActual;
             if (eliminarBtn) eliminarBtn.disabled = !tieneOrden;
             if (enviarBtn) enviarBtn.disabled = !tieneOrden;
+            if (gestionarNotasBtn) gestionarNotasBtn.disabled = !tieneOrden;
         }
 
         function eliminarOrden() {
@@ -655,8 +1501,6 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             }).then((result) => {
                 if (result.isConfirmed) {
                     ordenActual = [];
-                    const notasField = document.getElementById('notas-orden');
-                    if (notasField) notasField.value = '';
                     actualizarOrden();
                     actualizarBotones();
 
@@ -705,12 +1549,16 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             if (!isConfirmed) return;
 
             const listaProductos = ordenActual
-                .map(item => `${item.nombre} x${item.cantidad}`)
+                .map(item => {
+                    const notas = Array.isArray(item.notas) ? item.notas.filter(Boolean) : [];
+                    const bloqueNotas = notas.length ? `\n  - Notas: ${notas.join(' | ')}` : '';
+                    return `${item.nombre} x${item.cantidad}${bloqueNotas}`;
+                })
                 .join("\n");
 
-
-            const notasField = document.getElementById('notas-orden');
-            const notas = notasField ? notasField.value.trim() : '';
+            const notas = ordenActual
+                .flatMap(item => (Array.isArray(item.notas) ? item.notas.map(nota => `${item.nombre}: ${nota}`) : []))
+                .join("\n");
 
             const data = {
                 mesa: mesaActual,
@@ -766,12 +1614,10 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
                     ordenActual = [];
                     mesaActual = null;
+                    document.querySelectorAll('.mesa-card').forEach(card => card.classList.remove('is-selected'));
 
                     const mesaActualSpan = document.getElementById("mesa-actual");
                     if (mesaActualSpan) mesaActualSpan.textContent = "No seleccionada";
-
-                    const notasField = document.getElementById('notas-orden');
-                    if (notasField) notasField.value = '';
 
                     actualizarOrden();
                     actualizarBotones();
@@ -807,7 +1653,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             activeBtn.classList.add('border-b-2', 'border-mint');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll('#navbar button[data-slug]').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const slug = btn.getAttribute('data-slug');
@@ -828,12 +1674,32 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
 
             const eliminarBtn = document.getElementById('eliminar-orden');
             const enviarBtn = document.getElementById('enviar-cocina');
+            const gestionarNotasBtn = document.getElementById('gestionar-notas');
+            const saveLayoutBtn = document.getElementById('saveLayoutBtn');
+            const resetLayoutBtn = document.getElementById('resetLayoutBtn');
+            const editLayoutChip = document.getElementById('editLayoutChip');
 
             if (eliminarBtn) eliminarBtn.addEventListener('click', eliminarOrden);
             if (enviarBtn) enviarBtn.addEventListener('click', enviarCocina);
+            if (gestionarNotasBtn) gestionarNotasBtn.addEventListener('click', abrirModalNotas);
+            if (saveLayoutBtn) saveLayoutBtn.addEventListener('click', guardarPosicionesLayout);
+            if (resetLayoutBtn) resetLayoutBtn.addEventListener('click', restablecerPosicionesLayout);
+            if (editLayoutChip) {
+                editLayoutChip.addEventListener('click', () => {
+                    editLayoutMode = !editLayoutMode;
+                    actualizarChipEdicion();
+                });
+            }
 
+            actualizarChipEdicion();
+            await cargarPosicionesLayout();
             actualizarTodasLasMesas();
             sincronizarEstadosMesas(false);
+
+            document.addEventListener('pointerdown', onLayoutPointerDown);
+            document.addEventListener('pointermove', onLayoutPointerMove);
+            document.addEventListener('pointerup', onLayoutPointerUp);
+            document.addEventListener('pointercancel', onLayoutPointerUp);
 
             setInterval(() => {
                 sincronizarEstadosMesas(true);
@@ -842,6 +1708,7 @@ verificarRol([1, 2]); // Admin(1) y Mesero(2)
             document.addEventListener('click', (e) => {
                 const botonEntregar = e.target.closest('.btn-entregar');
                 if (botonEntregar) return;
+                if (e.target.closest('.drag-handle')) return;
 
                 const card = e.target.closest('.mesa-card');
                 if (!card) return;

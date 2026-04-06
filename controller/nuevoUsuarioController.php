@@ -10,53 +10,52 @@ require_once __DIR__ . "/../model/Usuarios.php";
 
 verificarRol([1]); // Solo Admin
 
-// Variables para la vista
-$errors = [];
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: " . BASE_URL . "views/admin/nuevoUsuario.php");
+    exit;
+}
+
 $old = [
-    "nombre" => "",
-    "apellido" => "",
-    "email" => "",
-    "rol_id" => ""
+    "nombre" => trim($_POST["nombre"] ?? ""),
+    "apellido" => trim($_POST["apellido"] ?? ""),
+    "email" => trim($_POST["email"] ?? ""),
+    "rol_id" => trim((string)($_POST["rol_id"] ?? ""))
 ];
 
+$password  = $_POST["password"] ?? "";
+$password2 = $_POST["password2"] ?? "";
+
 try {
-    $roles = Usuarios::listarRoles();
-} catch (Throwable $e) {
-    $roles = [];
-    $errors[] = "Error cargando roles: " . $e->getMessage();
-}
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $old["nombre"] = $_POST["nombre"] ?? "";
-    $old["apellido"] = $_POST["apellido"] ?? "";
-    $old["email"] = $_POST["email"] ?? "";
-    $old["rol_id"] = $_POST["rol_id"] ?? "";
-
-    $password  = $_POST["password"] ?? "";
-    $password2 = $_POST["password2"] ?? "";
-
-    try {
-        if ($password !== $password2) {
-            throw new Exception("Las contraseñas no coinciden.");
-        }
-        if (strlen($password) < 6) {
-            throw new Exception("La contraseña debe tener al menos 6 caracteres.");
-        }
-
-        Usuarios::crear(
-            $old["nombre"],
-            $old["apellido"],
-            $old["email"],
-            $password,
-            (int)$old["rol_id"]
-        );
-
-        header("Location: " . BASE_URL . "views/admin/usuarios.php?created=1");
-        exit;
-    } catch (Throwable $e) {
-        $errors[] = $e->getMessage();
+    if ($old["nombre"] === "" || $old["apellido"] === "" || $old["email"] === "" || $old["rol_id"] === "") {
+        throw new Exception("Todos los campos obligatorios deben completarse.");
     }
-}
 
-// Renderizar la vista (solo HTML)
-require_once ROOT_PATH . "/views/admin/nuevoUsuario.php";
+    if ($password !== $password2) {
+        throw new Exception("Las contraseñas no coinciden.");
+    }
+
+    if (strlen($password) < 8) {
+        throw new Exception("La contraseña debe tener al menos 8 caracteres.");
+    }
+
+    Usuarios::crear(
+        $old["nombre"],
+        $old["apellido"],
+        $old["email"],
+        $password,
+        (int)$old["rol_id"]
+    );
+
+    $_SESSION["nuevo_usuario_success"] = "Usuario creado correctamente.";
+    header("Location: " . BASE_URL . "views/admin/usuarios.php?created=1");
+    exit;
+} catch (Throwable $e) {
+    $_SESSION["nuevo_usuario_errors"] = [$e->getMessage()];
+    $_SESSION["nuevo_usuario_old"] = $old;
+    header("Location: " . BASE_URL . "views/admin/nuevoUsuario.php");
+    exit;
+}

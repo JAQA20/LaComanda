@@ -137,6 +137,7 @@ try {
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                             </div>
+                            <div class="form-text">Mínimo 8 caracteres.</div>
                         </div>
 
                         <div class="col-md-6">

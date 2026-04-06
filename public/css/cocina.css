@@ -71,6 +71,51 @@
             transform: translateY(-1px);
         }
 
+        /* Empty state cocina */
+        .kitchen-empty-state {
+            padding: 3rem 2rem;
+            border-radius: 28px;
+            text-align: center;
+            border: 1px solid #eadfce;
+            background:
+                radial-gradient(circle at top, rgba(112, 163, 143, 0.14), transparent 38%),
+                linear-gradient(180deg, #fbf7f1 0%, #f5ede1 100%);
+        }
+
+        .kitchen-empty-icon-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .kitchen-empty-icon {
+            width: 84px;
+            height: 84px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffffff 0%, #efe5d7 100%);
+            color: #4a2d22;
+            font-size: 2rem;
+            box-shadow: 0 12px 30px rgba(74, 45, 34, 0.12);
+        }
+
+        .kitchen-empty-title {
+            margin: 0 0 .5rem;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #362018;
+        }
+
+        .kitchen-empty-text {
+            max-width: 520px;
+            margin: 0 auto;
+            font-size: .98rem;
+            line-height: 1.7;
+            color: rgba(54, 32, 24, 0.72);
+        }
+
         /* Transiciones suaves para modal */
         #order-detail-modal.hidden {
             display: none;

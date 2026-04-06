@@ -143,10 +143,24 @@ function obtenerPasoOrden($estado)
                 <h1 class="text-3xl font-semibold text-brown-dark">Órdenes pendientes</h1>
             </div>
 
+            <?php $ordenesPendientes = array_values(array_filter($ordenes, fn($o) => isset($o['estado']) && in_array($o['estado'], ['pendiente', 'lista']))); ?>
             <div id="pending-orders-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-                <?php foreach ($ordenes as $orden): ?>
-                    <?php if (isset($orden["estado"]) && in_array($orden["estado"], ["pendiente", "lista"])): ?>
+                <?php if (empty($ordenesPendientes)): ?>
+                    <div class="xl:col-span-2">
+                        <div class="kitchen-empty-state custom-shadow">
+                            <div class="kitchen-empty-icon-wrap">
+                                <div class="kitchen-empty-icon">
+                                    <i class="fa-solid fa-mug-hot"></i>
+                                </div>
+                            </div>
+                            <h3 class="kitchen-empty-title">No hay órdenes nuevas</h3>
+                            <p class="kitchen-empty-text">Todo al día en cocina. Cuando entre un nuevo pedido, aparecerá aquí automáticamente.</p>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <?php foreach ($ordenesPendientes as $orden): ?>
 
                         <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
 
@@ -289,7 +303,6 @@ function obtenerPasoOrden($estado)
 
                         </div>
 
-                    <?php endif; ?>
                 <?php endforeach; ?>
 
             </div>
@@ -460,6 +473,23 @@ function obtenerPasoOrden($estado)
             const grid = document.getElementById('pending-orders-grid');
             const pendientes = ordenes.filter(o => o.estado === 'pendiente' || o.estado === 'lista');
             const rolId = <?= isset($_SESSION["rol_id"]) ? (int)$_SESSION["rol_id"] : 0 ?>;
+
+            if (pendientes.length === 0) {
+                grid.innerHTML = `
+                    <div class="xl:col-span-2">
+                        <div class="kitchen-empty-state custom-shadow">
+                            <div class="kitchen-empty-icon-wrap">
+                                <div class="kitchen-empty-icon">
+                                    <i class="fa-solid fa-mug-hot"></i>
+                                </div>
+                            </div>
+                            <h3 class="kitchen-empty-title">No hay órdenes nuevas</h3>
+                            <p class="kitchen-empty-text">Todo al día en cocina. Cuando entre un nuevo pedido, aparecerá aquí automáticamente.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
 
             grid.innerHTML = pendientes.map(orden => {
                 const pasoActual = obtenerPasoOrdenFrontend(orden.estado || 'pendiente');
