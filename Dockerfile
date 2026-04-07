@@ -11,11 +11,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . /var/www/html/
-COPY railway/start.sh /usr/local/bin/railway-start.sh
 
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod +x /usr/local/bin/railway-start.sh
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
 
-CMD ["/usr/local/bin/railway-start.sh"]
+CMD ["apache2-foreground"]

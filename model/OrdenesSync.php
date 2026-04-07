@@ -50,6 +50,9 @@ class OrdenesSync
         if (!self::columnaExiste($conexion, 'ordenes', 'timestamp_unix')) {
             $conexion->query("ALTER TABLE ordenes ADD COLUMN timestamp_unix BIGINT NULL");
         }
+        if (!self::columnaExiste($conexion, 'ordenes', 'hora_lista')) {
+            $conexion->query("ALTER TABLE ordenes ADD COLUMN hora_lista DATETIME NULL");
+        }
 
         self::$schemaReady = true;
     }
@@ -157,6 +160,21 @@ class OrdenesSync
         return null;
     }
 
+    private static function fechaListaDesdeOrden($orden)
+    {
+        $hora = trim((string)($orden['hora_lista'] ?? ''));
+        if ($hora === '') {
+            return null;
+        }
+
+        if (preg_match('/^\d{2}:\d{2}$/', $hora) === 1) {
+            $baseTs = isset($orden['timestamp']) ? (int)$orden['timestamp'] : time();
+            return date('Y-m-d', $baseTs) . ' ' . $hora . ':00';
+        }
+
+        return null;
+    }
+
     public static function guardarEnBase($orden)
     {
         $conexion = Conexion::conectar();
@@ -171,11 +189,20 @@ class OrdenesSync
         $mesaId = self::resolverMesaId($conexion, $mesaNumero);
 
         $estadoTxt = strtolower(trim((string)($orden['estado'] ?? 'pendiente')));
-        $idEstado = $estadoTxt === 'entregada' ? 2 : 1;
+        if ($estadoTxt === 'entregada') {
+            $idEstado = 2;
+        } elseif ($estadoTxt === 'lista') {
+            $idEstado = 4;
+        } elseif ($estadoTxt === 'en_preparacion') {
+            $idEstado = 3;
+        } else {
+            $idEstado = 1;
+        }
 
         $timestampUnix = (int)($orden['timestamp'] ?? time());
         $fechaOrden = date('Y-m-d H:i:s', $timestampUnix);
         $horaEntrega = self::fechaEntregaDesdeOrden($orden);
+        $horaLista = self::fechaListaDesdeOrden($orden);
 
         $notas = app_normalize_text((string)($orden['notas'] ?? ''));
         $itemsTexto = app_normalize_text((string)($orden['items'] ?? ''));
@@ -209,7 +236,7 @@ class OrdenesSync
 
         $sql = "
             INSERT INTO ordenes
-                (numero_json, mesa_id, id_estado, total, id_usuario, timestamp, hora_entrega, notas, items_text, timestamp_unix)
+                (numero_json, mesa_id, id_estado, total, id_usuario, timestamp, hora_entrega, hora_lista, notas, items_text, timestamp_unix)
             VALUES
                 (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
@@ -218,6 +245,7 @@ class OrdenesSync
                 total = VALUES(total),
                 timestamp = VALUES(timestamp),
                 hora_entrega = VALUES(hora_entrega),
+                hora_lista = VALUES(hora_lista),
                 notas = VALUES(notas),
                 items_text = VALUES(items_text),
                 timestamp_unix = VALUES(timestamp_unix)
@@ -232,6 +260,7 @@ class OrdenesSync
             $total,
             $fechaOrden,
             $horaEntrega,
+            $horaLista,
             $notas,
             $itemsTexto,
             $timestampUnix
@@ -287,16 +316,56 @@ class OrdenesSync
         $stmt->execute();
     }
 
-    public static function marcarEntregadaPorNumero($numeroJson, $timestampEntrega = null)
+    public static function marcarEntregadaPorNumero($numero, $timestampEntrega = null)
     {
         $conexion = Conexion::conectar();
         self::asegurarSchema($conexion);
 
         $fechaEntrega = date('Y-m-d H:i:s', $timestampEntrega ? (int)$timestampEntrega : time());
-        $numero = (int)$numeroJson;
 
-        $stmt = $conexion->prepare("UPDATE ordenes SET id_estado = 2, hora_entrega = ? WHERE numero_json = ? LIMIT 1");
+        $sql = "
+            UPDATE ordenes
+            SET id_estado = 2, hora_entrega = ?
+            WHERE numero_json = ? AND id_estado = 4
+        ";
+
+        $stmt = $conexion->prepare($sql);
         $stmt->bind_param("si", $fechaEntrega, $numero);
         $stmt->execute();
     }
+
+    public static function marcarListaPorNumero($numero, $timestampLista = null)
+    {
+        $conexion = Conexion::conectar();
+        self::asegurarSchema($conexion);
+
+        $fechaLista = date('Y-m-d H:i:s', $timestampLista ? (int)$timestampLista : time());
+
+        $sql = "
+            UPDATE ordenes
+            SET id_estado = 4, hora_lista = ?
+            WHERE numero_json = ? AND id_estado = 3
+        ";
+
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("si", $fechaLista, $numero);
+        $stmt->execute();
+    }
+
+    public static function marcarEnPreparacionPorNumero($numero)
+    {
+        $conexion = Conexion::conectar();
+        self::asegurarSchema($conexion);
+
+        $sql = "
+            UPDATE ordenes
+            SET id_estado = 3
+            WHERE numero_json = ? AND id_estado = 1
+        ";
+
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("i", $numero);
+        $stmt->execute();
+    }
+
 }

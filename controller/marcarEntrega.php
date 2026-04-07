@@ -1,7 +1,11 @@
 <?php
 require_once __DIR__ . "/../config/rutas.php";
 require_once __DIR__ . "/../config/text.php";
+require_once __DIR__ . "/../middleware/auth.php";
+require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
+
+verificarRol([1, 4]); // Admin y Barista
 
 // require_once __DIR__ . "/../config/rutas.php";
 // $archivo = __DIR__ . "/ordenes.json";
@@ -32,7 +36,6 @@ require_once __DIR__ . "/../model/OrdenesSync.php";
 //     exit;
 // }
 
-require_once __DIR__ . "/../config/rutas.php";
 $archivo = __DIR__ . "/ordenes.json";
 
 // Leer órdenes
@@ -48,16 +51,30 @@ $ordenes = app_normalize_order_array($ordenes);
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $numero = intval($_POST["numero"] ?? 0);
+    $accion = $_POST["accion"] ?? "entrega";
 
     foreach ($ordenes as &$orden) {
         if (
             isset($orden["numero"], $orden["estado"]) &&
-            (int)$orden["numero"] === $numero &&
-            $orden["estado"] === "lista"
+            (int)$orden["numero"] === $numero
         ) {
-            $orden["estado"] = "entregada";
-            $orden["hora_entrega"] = date("H:i");
-            $orden["timestamp_entrega"] = time();
+            if ($accion === "preparacion" && $orden["estado"] === "pendiente") {
+                $orden["estado"] = "en_preparacion";
+                try {
+                    OrdenesSync::marcarEnPreparacionPorNumero($numero);
+                } catch (Throwable $e) {
+                    error_log("Error sincronizando preparación en MySQL: " . $e->getMessage());
+                }
+            } elseif ($accion === "entrega" && $orden["estado"] === "en_preparacion") {
+                $orden["estado"] = "entregada";
+                $orden["hora_entrega"] = date("H:i");
+                $orden["timestamp_entrega"] = time();
+                try {
+                    OrdenesSync::marcarEntregadaPorNumero($numero, time());
+                } catch (Throwable $e) {
+                    error_log("Error sincronizando entrega en MySQL: " . $e->getMessage());
+                }
+            }
             break;
         }
     }
@@ -66,13 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Guardar cambios en el archivo
     file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-    try {
-        OrdenesSync::marcarEntregadaPorNumero($numero, time());
-    } catch (Throwable $e) {
-        error_log("Error sincronizando entrega en MySQL (numero): " . $e->getMessage());
-    }
-    file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-    header("Location: " . BASE_URL . "views/cocina.php");
+    header("Location: " . BASE_URL . "views/barista.php");
     exit;
 }

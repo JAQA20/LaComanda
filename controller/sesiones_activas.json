@@ -22,5 +22,29 @@
         "ip": "192.168.65.1",
         "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/146.0.0.0 Safari\/537.36 Edg\/146.0.0.0",
         "pagina_actual": "\/public\/api\/ordenesAdminData.php"
+    },
+    {
+        "session_id": "2f899ba33a2570a32bbc10a2c9e5b20c",
+        "usuario_id": 2,
+        "nombre": "Mesero mesero",
+        "email": "mesero@proyecto.com",
+        "rol_id": 2,
+        "login_at": 1775550748,
+        "ultima_actividad": 1775551046,
+        "ip": "172.18.0.1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/146.0.0.0 Safari\/537.36",
+        "pagina_actual": "\/public\/api\/layoutMesas.php?_=1775551046809"
+    },
+    {
+        "session_id": "074a9d62b328cef6be6fe330456a5ae0",
+        "usuario_id": 3,
+        "nombre": "Cocina cocina",
+        "email": "cocina@proyecto.com",
+        "rol_id": 3,
+        "login_at": 1775550793,
+        "ultima_actividad": 1775551035,
+        "ip": "172.18.0.1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/145.0.0.0 Safari\/537.36 OPR\/129.0.0.0",
+        "pagina_actual": "\/views\/cocina.php"
     }
 ]
