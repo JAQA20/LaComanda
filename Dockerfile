@@ -12,8 +12,18 @@ RUN apt-get update && apt-get install -y \
 
 COPY . /var/www/html/
 
-RUN chown -R www-data:www-data /var/www/html
+# ========JARVIS UPDATE========
+# Railway estaba arrancando Apache directo con apache2-foreground, por eso nunca pasaba
+# por railway/start.sh y no se desactivaban los MPM sobrantes. Eso causaba:
+# "AH00534: apache2: Configuration error: More than one MPM loaded."
+#
+# Dejamos start.sh como entrypoint único para que:
+# - ajuste el puerto según Railway/Docker local
+# - desactive mpm_event/mpm_worker
+# - deje solo prefork habilitado antes de iniciar Apache
+RUN chmod +x /var/www/html/railway/start.sh \
+    && chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["/var/www/html/railway/start.sh"]
