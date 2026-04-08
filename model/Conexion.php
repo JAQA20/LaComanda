@@ -17,7 +17,7 @@ class Conexion
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
         $conexion = new mysqli($host, $user, $password, $database, $port);
-        $conexion->set_charset("utf8mb4");
+        $conexion->set_charset("utf8");
 
         return $conexion;
     }

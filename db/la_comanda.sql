@@ -18,8 +18,8 @@ SET CHARACTER SET utf8mb4;
 
 DROP DATABASE IF EXISTS la_comanda;
 CREATE DATABASE la_comanda
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_0900_ai_ci;
+  CHARACTER SET utf8
+  COLLATE utf8_unicode_ci;
 
 USE la_comanda;
 

@@ -25,6 +25,7 @@ try {
     ], JSON_UNESCAPED_UNICODE);
     exit;
 } catch (Throwable $e) {
+    error_log("Error in estadoMesasController.php: " . $e->getMessage() . " on line " . $e->getLine() . " in " . $e->getFile());
     http_response_code(500);
     echo json_encode([
         "status" => "ERROR",
