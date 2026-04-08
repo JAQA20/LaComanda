@@ -1,81 +1,197 @@
 <?php
-require_once __DIR__ . "../model/Conexion.php";
+require_once __DIR__ . "/Conexion.php";
 
-$ordenes = [];
+// ========JARVIS UPDATE========
+// Este archivo reemplaza el Barista.php legacy que usaba PDO, tablas inexistentes
+// y el diseño viejo del proyecto. A partir de ahora este es el módulo oficial de barista.
 
-// Pendientes - SOLO BEBIDAS (tipo_preparacion='barista')
-$stmt = $conexion->prepare("
-    SELECT DISTINCT o.id, o.mesa_id, o.id_estado, o.creado_en 
-    FROM ordenes o
-    JOIN orden_items oi ON o.id = oi.orden_id
-    JOIN productos p ON oi.producto_id = p.id
-    WHERE o.id_estado = 1 AND p.tipo_preparacion = 'barista'
-    ORDER BY o.creado_en ASC
-");
-$stmt->execute();
-$pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+class Barista
+{
+    // ========JARVIS UPDATE========
+    // Reescribí completo este modelo para que ahora sí sea el módulo propio de barista.
+    // Ya no usa PDO, ya no usa tablas viejas, ya no asume id_estado global ni items_text.
+    // Todo se calcula desde MySQL con detalle_orden y categorías de bebidas.
 
-foreach ($pendientes as $o) {
-    $items = [];
-    // Solo traer items que sean bebidas (barista)
-    $s2 = $conexion->prepare("
-        SELECT oi.cantidad, oi.precio_unitario, p.nombre 
-        FROM orden_items oi 
-        JOIN productos p ON oi.producto_id = p.id 
-        WHERE oi.orden_id = :id AND p.tipo_preparacion = 'barista'
-    ");
-    $s2->execute([':id' => $o['id']]);
-    $rows = $s2->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($rows as $r) {
-        $items[] = ['producto_id' => $r['nombre'], 'cantidad' => $r['cantidad'], 'precio' => $r['precio_unitario']];
+    private static function conexion(): mysqli
+    {
+        return Conexion::conectar();
     }
 
-    if (count($items) > 0) {
-        $ordenes[] = [
-            'id_orden' => $o['id'],
-            'mesa_id' => $o['mesa_id'],
-            'items' => $items,
-            'estado' => 'pendiente',
-            'creado_en' => $o['creado_en']
+    private static function queryBase(): string
+    {
+        return "
+            SELECT
+                o.id_orden,
+                o.numero_orden,
+                m.numero AS mesa_numero,
+                o.notas,
+                o.fecha_creacion,
+                o.fecha_entrega,
+                d.id_detalle,
+                d.cantidad,
+                d.estado_item,
+                d.fecha_inicio_preparacion,
+                d.fecha_lista,
+                d.fecha_entrega AS detalle_fecha_entrega,
+                p.nombre AS producto_nombre,
+                c.slug AS categoria_slug
+            FROM ordenes o
+            INNER JOIN mesas m ON m.id = o.mesa_id
+            INNER JOIN detalle_orden d ON d.id_orden = o.id_orden
+            INNER JOIN productos p ON p.id = d.id_producto
+            INNER JOIN categorias c ON c.id = p.categoria_id
+            WHERE c.slug IN ('cafes', 'bebidas')
+            ORDER BY o.fecha_creacion DESC, d.id_detalle ASC
+        ";
+    }
+
+    private static function agruparOrdenes(mysqli_result $result): array
+    {
+        $ordenes = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $idOrden = (int)$row['id_orden'];
+
+            if (!isset($ordenes[$idOrden])) {
+                $ordenes[$idOrden] = [
+                    'id_orden' => $idOrden,
+                    'numero' => (int)$row['numero_orden'],
+                    'mesa' => (string)$row['mesa_numero'],
+                    'notas' => (string)($row['notas'] ?? ''),
+                    'hora_entrega' => $row['fecha_entrega'] ? date('H:i', strtotime((string)$row['fecha_entrega'])) : null,
+                    'hora_lista' => null,
+                    'items' => [],
+                    'estados' => [],
+                ];
+            }
+
+            $fechaLista = $row['fecha_lista'] ? date('H:i', strtotime((string)$row['fecha_lista'])) : null;
+            if ($fechaLista !== null) {
+                $ordenes[$idOrden]['hora_lista'] = $fechaLista;
+            }
+
+            $ordenes[$idOrden]['items'][] = [
+                'detalle_id' => (int)$row['id_detalle'],
+                'nombre' => (string)$row['producto_nombre'],
+                'cantidad' => (int)$row['cantidad'],
+                'estado_item' => (string)$row['estado_item'],
+            ];
+            $ordenes[$idOrden]['estados'][] = (string)$row['estado_item'];
+        }
+
+        return $ordenes;
+    }
+
+    private static function clasificarOrden(array $orden): array
+    {
+        $estados = $orden['estados'] ?? [];
+        $todosEntregados = !empty($estados) && count(array_filter($estados, fn($e) => $e === 'entregado')) === count($estados);
+        $todosListosOEntregados = !empty($estados) && count(array_filter($estados, fn($e) => in_array($e, ['listo', 'entregado'], true))) === count($estados);
+        $algunoPreparacion = count(array_filter($estados, fn($e) => $e === 'en_preparacion')) > 0;
+
+        if ($todosEntregados) {
+            $orden['estado'] = 'entregada';
+        } elseif ($todosListosOEntregados) {
+            $orden['estado'] = 'lista';
+        } else {
+            $orden['estado'] = $algunoPreparacion ? 'en_preparacion' : 'pendiente';
+        }
+
+        unset($orden['estados']);
+        return $orden;
+    }
+
+    public static function obtenerPanel(): array
+    {
+        // ========JARVIS UPDATE========
+        // Método principal para la pantalla de barista.
+        // Devuelve pendientes y listas ya clasificados para que la vista no haga lógica pesada.
+        $conexion = self::conexion();
+        $result = $conexion->query(self::queryBase());
+        $ordenes = self::agruparOrdenes($result);
+
+        $pendientes = [];
+        $entregadas = [];
+
+        foreach ($ordenes as $orden) {
+            $orden = self::clasificarOrden($orden);
+            if (in_array(($orden['estado'] ?? ''), ['pendiente', 'en_preparacion', 'lista'], true)) {
+                $pendientes[] = $orden;
+            } elseif (($orden['estado'] ?? '') === 'entregada') {
+                $entregadas[] = $orden;
+            }
+        }
+
+        usort($pendientes, fn($a, $b) => $b['numero'] <=> $a['numero']);
+        usort($entregadas, fn($a, $b) => $b['numero'] <=> $a['numero']);
+
+        return [
+            'pendientes' => $pendientes,
+            'listas' => array_slice($entregadas, 0, 20),
         ];
     }
-}
 
-// Entregadas (últimas 20) - SOLO BEBIDAS
-$stmt = $conexion->prepare("
-    SELECT DISTINCT o.id, o.mesa_id, o.id_estado, o.hora_entrega 
-    FROM ordenes o
-    JOIN orden_items oi ON o.id = oi.orden_id
-    JOIN productos p ON oi.producto_id = p.id
-    WHERE o.id_estado = 4 AND p.tipo_preparacion = 'barista'
-    ORDER BY o.hora_entrega DESC LIMIT 20
-");
-$stmt->execute();
-$entregadas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($entregadas as $o) {
-    $items = [];
-    $s2 = $conexion->prepare("
-        SELECT oi.cantidad, oi.precio_unitario, p.nombre 
-        FROM orden_items oi 
-        JOIN productos p ON oi.producto_id = p.id 
-        WHERE oi.orden_id = :id AND p.tipo_preparacion = 'barista'
-    ");
-    $s2->execute([':id' => $o['id']]);
-    $rows = $s2->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($rows as $r) {
-        $items[] = ['producto_id' => $r['nombre'], 'cantidad' => $r['cantidad'], 'precio' => $r['precio_unitario']];
+    // ========JARVIS UPDATE========
+    // Devuelve la misma estructura visual de cocina para reutilizar la pantalla,
+    // pero filtrando solo ítems del área barista.
+    public static function obtenerOrdenesVista(): array
+    {
+        $panel = self::obtenerPanel();
+        return array_merge($panel['pendientes'], $panel['listas']);
     }
 
-    if (count($items) > 0) {
-        $ordenes[] = [
-            'id_orden' => $o['id'],
-            'mesa_id' => $o['mesa_id'],
-            'items' => $items,
-            'estado' => 'entregada',
-            'hora_entrega' => $o['hora_entrega']
-        ];
+    public static function marcarEnPreparacion(int $numeroOrden): void
+    {
+        $conexion = self::conexion();
+        $conexion->begin_transaction();
+
+        try {
+            $fechaAhora = date('Y-m-d H:i:s');
+            $stmt = $conexion->prepare(
+                "UPDATE detalle_orden d
+                 INNER JOIN ordenes o ON o.id_orden = d.id_orden
+                 INNER JOIN productos p ON p.id = d.id_producto
+                 INNER JOIN categorias c ON c.id = p.categoria_id
+                 SET d.estado_item = 'en_preparacion',
+                     d.fecha_inicio_preparacion = COALESCE(d.fecha_inicio_preparacion, ?)
+                 WHERE o.numero_orden = ?
+                   AND c.slug IN ('cafes', 'bebidas')
+                   AND d.estado_item = 'pendiente'"
+            );
+            $stmt->bind_param('si', $fechaAhora, $numeroOrden);
+            $stmt->execute();
+            $conexion->commit();
+        } catch (Throwable $e) {
+            $conexion->rollback();
+            throw $e;
+        }
+    }
+
+    public static function marcarLista(int $numeroOrden): void
+    {
+        $conexion = self::conexion();
+        $conexion->begin_transaction();
+
+        try {
+            $fechaAhora = date('Y-m-d H:i:s');
+            $stmt = $conexion->prepare(
+                "UPDATE detalle_orden d
+                 INNER JOIN ordenes o ON o.id_orden = d.id_orden
+                 INNER JOIN productos p ON p.id = d.id_producto
+                 INNER JOIN categorias c ON c.id = p.categoria_id
+                 SET d.estado_item = 'listo',
+                     d.fecha_lista = ?,
+                     d.fecha_inicio_preparacion = COALESCE(d.fecha_inicio_preparacion, ?)
+                 WHERE o.numero_orden = ?
+                   AND c.slug IN ('cafes', 'bebidas')
+                   AND d.estado_item IN ('pendiente', 'en_preparacion')"
+            );
+            $stmt->bind_param('ssi', $fechaAhora, $fechaAhora, $numeroOrden);
+            $stmt->execute();
+            $conexion->commit();
+        } catch (Throwable $e) {
+            $conexion->rollback();
+            throw $e;
+        }
     }
 }
-
-echo json_encode($ordenes);

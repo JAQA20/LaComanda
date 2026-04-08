@@ -65,7 +65,7 @@ require_once __DIR__ . "/../../config/rutas.php";
                         id="enviar-cocina"
                         class="w-full py-3 custom-mint text-white rounded-xl hover-mint-bg transition-all duration-200 font-medium disabled:opacity-50"
                         disabled>
-                        Enviar a cocina
+                        Enviar orden
                     </button>
                 </div>
             </div>

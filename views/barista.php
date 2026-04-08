@@ -2,90 +2,71 @@
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../config/rutas.php";
-require_once __DIR__ . "/../model/OrdenesSync.php";
+require_once __DIR__ . "/../model/Barista.php";
 
 verificarRol([1, 4]); // Admin(1) y Barista(4)
 
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
+header("Content-Type: text/html; charset=UTF-8");
 
-$conexion = Conexion::conectar();
-$ordenes = [];
+// ========JARVIS UPDATE========
+// La vista de barista ahora replica la estructura visual de cocina,
+// pero mantiene su propio flujo y endpoints separados.
+$baristaData = Barista::obtenerPanel();
+$bebidasPendientes = $baristaData['pendientes'];
+$bebidasEntregadas = $baristaData['listas'];
+$ordenes = array_merge($bebidasPendientes, $bebidasEntregadas);
 
-$sql = "
-    SELECT
-        o.id_orden,
-        o.mesa_id,
-        o.id_estado,
-        o.hora_entrega,
-        o.timestamp,
-        o.items_text
-    FROM ordenes o
-    ORDER BY o.timestamp ASC
-";
+function stepCircleClass($activo, $completado = false)
+{
+    if ($completado) return "bg-mint-green text-white";
+    if ($activo) return "bg-brown-dark text-white";
+    return "bg-gray-300 text-white";
+}
 
-$result = $conexion->query($sql);
+function stepTextClass($activo, $completado = false)
+{
+    if ($completado || $activo) return "text-brown-dark font-semibold";
+    return "text-gray-400";
+}
 
-while ($row = $result->fetch_assoc()) {
-    $items = [];
-    $itemsTexto = trim((string)($row['items_text'] ?? ''));
+function stepLineClass($completado = false)
+{
+    return $completado ? "bg-mint-green" : "bg-gray-300";
+}
 
-    if ($itemsTexto !== '') {
-        $lineas = preg_split('/\r\n|\r|\n/', $itemsTexto);
-        foreach ($lineas as $linea) {
-            $linea = trim((string)$linea);
-            if ($linea === '') {
-                continue;
-            }
-
-            $cantidad = 1;
-            $nombre = $linea;
-
-            if (preg_match('/^(.*?)\s*x\s*(\d+)$/u', $linea, $m)) {
-                $nombre = trim($m[1]);
-                $cantidad = (int)$m[2];
-            }
-
-            $items[] = [
-                'producto_id' => $nombre,
-                'cantidad' => $cantidad,
-            ];
-        }
+function obtenerPasoOrden($estado)
+{
+    switch ($estado) {
+        case "pendiente":
+            return 1;
+        case "en_preparacion":
+            return 2;
+        case "lista":
+            return 3;
+        case "entregada":
+            return 4;
+        default:
+            return 1;
     }
-
-    $estado = ((int)$row['id_estado'] === 2) ? 'entregada' : 'pendiente';
-
-    $ordenes[] = [
-        'id_orden' => $row['id_orden'],
-        'mesa_id' => $row['mesa_id'],
-        'items' => $items,
-        'estado' => $estado,
-        'hora_entrega' => $row['hora_entrega'],
-        'creado_en' => $row['timestamp'],
-    ];
 }
 ?>
-
 <!DOCTYPE html>
-<html>
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barista - La Comanda</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        window.FontAwesomeConfig = {
-            autoReplaceSvg: 'nest'
-        };
+        window.FontAwesomeConfig = { autoReplaceSvg: 'nest' };
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/cocina.css">
-
-
     <script>
         tailwind.config = {
             theme: {
@@ -103,53 +84,38 @@ while ($row = $result->fetch_assoc()) {
             }
         }
     </script>
-
 </head>
-
 <body class="bg-white font-montserrat">
-
     <nav class="w-full bg-brown-dark text-beige-light px-6 py-4 flex items-center justify-between shadow-md">
         <div class="text-xl font-semibold tracking-wide">
             <div class="flex items-center">
                 <img class="h-10 w-10 object-contain mr-3" src="<?= BASE_URL ?>public/img/logotipo2.PNG" alt="Logo Cafetería Toscana" />
-                <span class="text-beige text-xl font-semibold">☕ Barista - Toscana</span>
+                <span class="text-beige-light text-xl font-semibold">Cafetería Toscana</span>
             </div>
         </div>
-
         <div class="flex items-center space-x-6 text-beige-light">
             <button class="hover:text-mint-green transition-colors">
-                <a href="<?= BASE_URL ?>public/api/logout.php" class="text-sm font-medium">
-                    Salir
-                </a>
+                <a href="<?= BASE_URL ?>public/api/logout.php" class="text-sm font-medium">Salir</a>
             </button>
         </div>
     </nav>
 
-    <div id="barista-main" class="flex h-screen">
-
+    <div id="kitchen-main" class="flex h-screen">
         <div id="delivered-orders-panel" class="w-[30%] bg-beige-light p-6 overflow-y-auto">
             <div id="delivered-header" class="mb-6">
-                <h2 class="text-2xl font-semibold text-brown-dark mb-2">Bebidas listas</h2>
+                <h2 class="text-2xl font-semibold text-brown-dark mb-2">Órdenes entregadas</h2>
                 <p class="text-sm text-brown-dark opacity-70">Últimos 20 registros</p>
             </div>
-
             <div id="delivered-list" class="space-y-4">
-                <?php
-                $entregadas_filtered = array_filter($ordenes, fn($o) => isset($o['estado']) && $o['estado'] === 'entregada');
-                $entregadas_filtered = array_slice($entregadas_filtered, -20);
-
-                foreach ($entregadas_filtered as $orden):
-                ?>
+                <?php foreach ($bebidasEntregadas as $orden): ?>
                     <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-brown-dark">
-                                Orden #<?php echo htmlspecialchars($orden["id_orden"] ?? "N/A"); ?>
-                            </span>
+                            <span class="text-sm font-medium text-brown-dark">Orden #<?= htmlspecialchars((string)$orden['numero']) ?></span>
                             <i class="fa-solid fa-check text-mint-green"></i>
                         </div>
                         <div class="text-xs text-brown-dark opacity-70">
-                            <div>Mesa <?php echo htmlspecialchars($orden["mesa_id"] ?? "N/A"); ?></div>
-                            <div><?php echo isset($orden["hora_entrega"]) ? date('H:i', strtotime((string)$orden["hora_entrega"])) : "--:--"; ?></div>
+                            <div>Mesa <?= htmlspecialchars((string)$orden['mesa']) ?></div>
+                            <div><?= htmlspecialchars((string)($orden['hora_lista'] ?? $orden['hora_entrega'] ?? '--:--')) ?></div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -157,139 +123,305 @@ while ($row = $result->fetch_assoc()) {
         </div>
 
         <div id="pending-orders-panel" class="w-[70%] bg-white p-8 overflow-y-auto">
-
             <div id="pending-header" class="mb-8">
                 <h1 class="text-3xl font-semibold text-brown-dark">Bebidas pendientes</h1>
             </div>
 
             <div id="pending-orders-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <?php if (empty($bebidasPendientes)): ?>
+                    <div class="xl:col-span-2">
+                        <div class="kitchen-empty-state custom-shadow">
+                            <div class="kitchen-empty-icon-wrap"><div class="kitchen-empty-icon"><i class="fa-solid fa-mug-hot"></i></div></div>
+                            <h3 class="kitchen-empty-title">No hay bebidas nuevas</h3>
+                            <p class="kitchen-empty-text">Todo al día en barista. Cuando entre una nueva bebida, aparecerá aquí automáticamente.</p>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
-                <?php foreach ($ordenes as $orden): ?>
-                    <?php if (isset($orden["estado"]) && $orden["estado"] === "pendiente"): ?>
-
-                        <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-gray-100">
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <h3 class="text-xl font-semibold text-brown-dark">
-                                        Orden #<?php echo htmlspecialchars($orden["id_orden"] ?? "N/A"); ?>
-                                    </h3>
-                                    <p class="text-sm text-brown-dark opacity-70">
-                                        Mesa <?php echo htmlspecialchars($orden["mesa_id"] ?? "N/A"); ?>
-                                    </p>
+                <?php foreach ($bebidasPendientes as $orden): ?>
+                    <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <?php $pasoActual = obtenerPasoOrden($orden['estado'] ?? 'pendiente'); ?>
+                            <div class="mb-6 w-full">
+                                <div class="flex items-center justify-between gap-2 flex-wrap">
+                                    <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 1, $pasoActual > 1) ?>"><?= $pasoActual > 1 ? '✓' : '1' ?></div><span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 1, $pasoActual > 1) ?>">Pedido</span></div>
+                                    <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 1) ?>"></div>
+                                    <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 2, $pasoActual > 2) ?>"><?= $pasoActual > 2 ? '✓' : '2' ?></div><span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 2, $pasoActual > 2) ?>">En barista</span></div>
+                                    <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 2) ?>"></div>
+                                    <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 3, $pasoActual > 3) ?>"><?= $pasoActual > 3 ? '✓' : '3' ?></div><span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 3, $pasoActual > 3) ?>">Lista</span></div>
+                                    <div class="flex-1 h-1 rounded <?= stepLineClass($pasoActual > 3) ?>"></div>
+                                    <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm <?= stepCircleClass($pasoActual === 4, false) ?>"><?= $pasoActual === 4 ? '✓' : '4' ?></div><span class="mt-2 text-xs text-center <?= stepTextClass($pasoActual === 4, false) ?>">Entregada</span></div>
                                 </div>
                             </div>
-
-                            <div class="products-list mb-6">
-                                <h4 class="text-sm font-medium text-brown-dark mb-3">Bebidas:</h4>
-
-                                <div class="space-y-2">
-                                    <?php
-                                    $items = $orden["items"] ?? [];
-                                    foreach ($items as $item):
-                                        $cantidad = isset($item['cantidad']) ? $item['cantidad'] : 1;
-                                        $nombre = isset($item['producto_id']) ? $item['producto_id'] : 'Desconocida';
-                                    ?>
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-brown-dark"><?php echo htmlspecialchars($nombre); ?></span>
-                                            <span class="text-brown-dark font-medium">x<?php echo $cantidad; ?></span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-
-                            <form action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST">
-                                <input type="hidden" name="numero" value="<?php echo htmlspecialchars($orden['id_orden'] ?? ''); ?>">
-                                <button type="submit"
-                                    class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">
-                                    ✓ Bebidas listas
-                                </button>
-                            </form>
-
                         </div>
 
-                    <?php endif; ?>
+                        <div class="mb-4">
+                            <h3 class="text-xl font-semibold text-brown-dark">Orden #<?= htmlspecialchars((string)$orden['numero']) ?></h3>
+                            <p class="text-sm text-brown-dark opacity-70">Mesa <?= htmlspecialchars((string)$orden['mesa']) ?></p>
+                        </div>
+
+                        <div class="products-list mb-6">
+                            <h4 class="text-sm font-medium text-brown-dark mb-3">Bebidas:</h4>
+                            <div class="space-y-2">
+                                <?php foreach (($orden['items'] ?? []) as $item): ?>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-brown-dark"><?= htmlspecialchars((string)$item['nombre']) ?></span>
+                                        <span class="text-brown-dark font-medium">x<?= htmlspecialchars((string)$item['cantidad']) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <?php $tieneNotas = !empty(trim((string)($orden['notas'] ?? ''))); ?>
+                        <div class="notes-section mb-6 p-3 rounded-lg <?= $tieneNotas ? 'bg-yellow-50 border border-yellow-200' : 'bg-red-50 border border-red-200' ?>">
+                            <div class="flex items-start">
+                                <?php if ($tieneNotas): ?>
+                                    <i class="fas fa-sticky-note text-yellow-600 mt-1 mr-2 flex-shrink-0"></i>
+                                    <div class="flex-1"><h5 class="text-sm font-semibold text-yellow-900">Notas especiales:</h5><p class="text-sm text-yellow-800 mt-1"><?= htmlspecialchars((string)$orden['notas']) ?></p></div>
+                                <?php else: ?>
+                                    <i class="fas fa-exclamation-triangle text-red-600 mt-1 mr-2 flex-shrink-0"></i>
+                                    <div class="flex-1"><h5 class="text-sm font-semibold text-red-900">⚠ Sin notas especiales</h5><p class="text-sm text-red-800 mt-1">Verificar si el cliente dejó instrucciones para sus bebidas</p></div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <button class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn" data-orden-numero="<?= htmlspecialchars((string)$orden['numero']) ?>"><i class="fas fa-expand"></i>Ver detalles completos</button>
+
+                        <?php if (($orden['estado'] ?? '') === 'pendiente'): ?>
+                            <form action="<?= BASE_URL ?>public/api/baristaAccion.php" method="POST">
+                                <input type="hidden" name="numero" value="<?= htmlspecialchars((string)$orden['numero']) ?>">
+                                <input type="hidden" name="accion" value="preparacion">
+                                <button type="submit" class="w-full bg-brown-dark hover:bg-[#4a2d22] text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar en preparación</button>
+                            </form>
+                        <?php else: ?>
+                            <form action="<?= BASE_URL ?>public/api/baristaAccion.php" method="POST">
+                                <input type="hidden" name="numero" value="<?= htmlspecialchars((string)$orden['numero']) ?>">
+                                <input type="hidden" name="accion" value="lista">
+                                <button type="submit" class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar como lista</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
                 <?php endforeach; ?>
-
             </div>
-
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <div id="order-detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="sticky top-0 bg-brown-dark text-beige-light p-6 flex items-center justify-between z-10">
+                <div>
+                    <h2 class="text-2xl font-semibold" id="modal-orden-numero">Orden #</h2>
+                    <p class="text-sm opacity-80" id="modal-orden-mesa">Mesa: </p>
+                </div>
+                <button id="close-modal-btn" class="text-beige-light hover:text-white text-2xl transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold text-brown-dark mb-4 flex items-center"><i class="fas fa-mug-hot mr-2"></i>Bebidas a preparar</h3>
+                    <div id="modal-productos-list" class="space-y-3 bg-beige-light p-4 rounded-xl"></div>
+                </div>
+                <div id="modal-notas-section" class="mb-6"></div>
+                <div class="border-t pt-6">
+                    <button type="button" id="close-modal-btn-bottom" class="w-full bg-gray-300 hover:bg-gray-400 text-brown-dark font-medium py-3 rounded-xl transition-colors duration-200">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let refreshInterval;
+        let modalOpen = false;
+        let selectedOrderNumber = null;
+        let currentPendientes = <?= json_encode($bebidasPendientes, JSON_UNESCAPED_UNICODE) ?>;
+        let currentEntregadas = <?= json_encode($bebidasEntregadas, JSON_UNESCAPED_UNICODE) ?>;
+        let refreshInterval = null;
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text ?? '';
+            return div.innerHTML;
+        }
+
+        function obtenerPasoOrdenFrontend(estado) {
+            switch (estado) {
+                case 'pendiente': return 1;
+                case 'en_preparacion': return 2;
+                case 'lista': return 3;
+                case 'entregada': return 4;
+                default: return 1;
+            }
+        }
+
+        function stepCircleClassJs(activo, completado = false) {
+            if (completado) return "bg-mint-green text-white";
+            if (activo) return "bg-brown-dark text-white";
+            return "bg-gray-300 text-white";
+        }
+
+        function stepTextClassJs(activo, completado = false) {
+            if (completado || activo) return "text-brown-dark font-semibold";
+            return "text-gray-400";
+        }
+
+        function stepLineClassJs(completado = false) {
+            return completado ? "bg-mint-green" : "bg-gray-300";
+        }
+
+        function renderListas(ordenes) {
+            const container = document.getElementById('delivered-list');
+            container.innerHTML = ordenes.map(orden => `
+                <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-brown-dark">Orden #${escapeHtml(orden.numero)}</span>
+                        <i class="fa-solid fa-check text-mint-green"></i>
+                    </div>
+                    <div class="text-xs text-brown-dark opacity-70">
+                        <div>Mesa ${escapeHtml(orden.mesa)}</div>
+                        <div>${escapeHtml(orden.hora_lista || orden.hora_entrega || '--:--')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderNotas(notas) {
+            const tieneNotas = notas && notas.trim() !== '';
+            if (tieneNotas) {
+                return `<div class="notes-section mb-6 p-3 rounded-lg bg-yellow-50 border border-yellow-200"><div class="flex items-start"><i class="fas fa-sticky-note text-yellow-600 mt-1 mr-2 flex-shrink-0"></i><div class="flex-1"><h5 class="text-sm font-semibold text-yellow-900">Notas especiales:</h5><p class="text-sm text-yellow-800 mt-1">${escapeHtml(notas)}</p></div></div></div>`;
+            }
+            return `<div class="notes-section mb-6 p-3 rounded-lg bg-red-50 border border-red-200"><div class="flex items-start"><i class="fas fa-exclamation-triangle text-red-600 mt-1 mr-2 flex-shrink-0"></i><div class="flex-1"><h5 class="text-sm font-semibold text-red-900">⚠ Sin notas especiales</h5><p class="text-sm text-red-800 mt-1">Verificar si el cliente dejó instrucciones para sus bebidas</p></div></div></div>`;
+        }
+
+        function renderPendientes(ordenes) {
+            const grid = document.getElementById('pending-orders-grid');
+            if (!ordenes.length) {
+                grid.innerHTML = `<div class="xl:col-span-2"><div class="kitchen-empty-state custom-shadow"><div class="kitchen-empty-icon-wrap"><div class="kitchen-empty-icon"><i class="fa-solid fa-mug-hot"></i></div></div><h3 class="kitchen-empty-title">No hay bebidas nuevas</h3><p class="kitchen-empty-text">Todo al día en barista. Cuando entre una nueva bebida, aparecerá aquí automáticamente.</p></div></div>`;
+                return;
+            }
+
+            grid.innerHTML = ordenes.map(orden => {
+                const pasoActual = obtenerPasoOrdenFrontend(orden.estado || 'pendiente');
+                return `
+                    <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
+                        <div class="flex items-center justify-between mb-4"><div class="mb-6 w-full"><div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 1, pasoActual > 1)}">${pasoActual > 1 ? '✓' : '1'}</div><span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 1, pasoActual > 1)}">Pedido</span></div>
+                            <div class="flex-1 h-1 rounded ${stepLineClassJs(pasoActual > 1)}"></div>
+                            <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 2, pasoActual > 2)}">${pasoActual > 2 ? '✓' : '2'}</div><span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 2, pasoActual > 2)}">En barista</span></div>
+                            <div class="flex-1 h-1 rounded ${stepLineClassJs(pasoActual > 2)}"></div>
+                            <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 3, pasoActual > 3)}">${pasoActual > 3 ? '✓' : '3'}</div><span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 3, pasoActual > 3)}">Lista</span></div>
+                            <div class="flex-1 h-1 rounded ${stepLineClassJs(pasoActual > 3)}"></div>
+                            <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 4, false)}">${pasoActual === 4 ? '✓' : '4'}</div><span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 4, false)}">Entregada</span></div>
+                        </div></div></div>
+                        <div class="mb-4"><h3 class="text-xl font-semibold text-brown-dark">Orden #${escapeHtml(orden.numero)}</h3><p class="text-sm text-brown-dark opacity-70">Mesa ${escapeHtml(orden.mesa)}</p></div>
+                        <div class="products-list mb-6"><h4 class="text-sm font-medium text-brown-dark mb-3">Bebidas:</h4><div class="space-y-2">${(orden.items || []).map(item => `<div class="flex justify-between text-sm"><span class="text-brown-dark">${escapeHtml(item.nombre)}</span><span class="text-brown-dark font-medium">x${escapeHtml(item.cantidad)}</span></div>`).join('')}</div></div>
+                        ${renderNotas(orden.notas || '')}
+                        <button class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn" data-orden-numero="${escapeHtml(orden.numero)}"><i class="fas fa-expand"></i>Ver detalles completos</button>
+                        <form action="<?= BASE_URL ?>public/api/baristaAccion.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><input type="hidden" name="accion" value="${orden.estado === 'pendiente' ? 'preparacion' : 'lista'}"><button type="submit" class="w-full ${orden.estado === 'pendiente' ? 'bg-brown-dark hover:bg-[#4a2d22]' : 'bg-mint-green hover:bg-mint-hover'} text-white font-medium py-3 rounded-xl transition-colors duration-200">${orden.estado === 'pendiente' ? 'Marcar en preparación' : 'Marcar como lista'}</button></form>
+                    </div>`;
+            }).join('');
+            bindExpandButtons();
+        }
+
+        function bindExpandButtons() {
+            document.querySelectorAll('.expand-order-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const numeroOrden = this.getAttribute('data-orden-numero');
+                    const orden = [...currentPendientes, ...currentEntregadas].find(o => String(o.numero) === String(numeroOrden));
+                    if (orden) openOrderModal(orden.numero, orden.mesa, orden.items || [], orden.notas || '');
+                });
+            });
+        }
+
+        function openOrderModal(numeroOrden, mesa, itemsDetalle, notas) {
+            const modal = document.getElementById('order-detail-modal');
+            modalOpen = true;
+            selectedOrderNumber = numeroOrden;
+            document.getElementById('modal-orden-numero').textContent = `Orden #${numeroOrden}`;
+            document.getElementById('modal-orden-mesa').textContent = `Mesa: ${mesa}`;
+            const productosList = document.getElementById('modal-productos-list');
+            productosList.innerHTML = '';
+            (itemsDetalle || []).forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex justify-between items-center py-2 px-3 bg-white rounded border border-beige-light';
+                itemDiv.innerHTML = `<span class="font-medium text-brown-dark">${escapeHtml(item.nombre)}</span><span class="bg-brown-dark text-white px-3 py-1 rounded-full font-semibold">x${escapeHtml(item.cantidad)}</span>`;
+                productosList.appendChild(itemDiv);
+            });
+            const notasSection = document.getElementById('modal-notas-section');
+            notasSection.innerHTML = notas && notas.trim() !== ''
+                ? `<div class="p-4 rounded-xl bg-yellow-50 border border-yellow-200"><h3 class="text-lg font-semibold text-yellow-900 mb-2 flex items-center"><i class="fas fa-sticky-note mr-2"></i>Notas especiales</h3><p class="text-yellow-800 whitespace-pre-wrap">${escapeHtml(notas)}</p></div>`
+                : `<div class="p-4 rounded-xl bg-orange-50 border border-orange-200"><h3 class="text-lg font-semibold text-orange-900 mb-2 flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i>⚠ Sin notas especiales</h3><p class="text-orange-800">Verificar si el cliente dejó instrucciones para sus bebidas</p></div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-detail-modal').classList.add('hidden');
+            modalOpen = false;
+            selectedOrderNumber = null;
+        }
+
+        async function fetchBaristaEstado() {
+            try {
+                const response = await fetch('<?= BASE_URL ?>public/api/baristaEstado.php', { cache: 'no-store' });
+                const data = await response.json();
+                if (!data.ok) return;
+                currentPendientes = data.pendientes || [];
+                currentEntregadas = data.listas || [];
+                renderPendientes(currentPendientes);
+                renderListas(currentEntregadas);
+
+                if (modalOpen && selectedOrderNumber !== null) {
+                    const ordenActualizada = [...currentPendientes, ...currentEntregadas].find(o => String(o.numero) === String(selectedOrderNumber));
+                    if (ordenActualizada) {
+                        openOrderModal(ordenActualizada.numero, ordenActualizada.mesa, ordenActualizada.items || [], ordenActualizada.notas || '');
+                    } else {
+                        closeOrderModal();
+                    }
+                }
+            } catch (error) {
+                console.error('Error actualizando barista:', error);
+            }
+        }
 
         document.addEventListener('submit', async function(e) {
-            if (!e.target.action.includes('marcarEntrega.php')) return;
-
+            if (!e.target.action.includes('baristaAccion.php')) return;
             e.preventDefault();
-
             clearInterval(refreshInterval);
-
             const form = e.target;
             const numero = form.querySelector('input[name="numero"]').value;
+            const accion = form.querySelector('input[name="accion"]').value;
             const btn = form.querySelector('button[type="submit"]');
-            const card = form.closest('.pending-order-card');
-
             btn.disabled = true;
             btn.textContent = 'Procesando...';
 
             try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form)
-                });
-
-                const text = await response.text();
-                let data = {};
-                try {
-                    data = JSON.parse(text);
-                } catch (_) {
-                    data = { status: 'OK' };
-                }
-
-                if (data.status === 'OK' || response.ok) {
-                    card.style.transition = 'all 0.5s ease';
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.95)';
-
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Bebida lista',
-                        text: 'Orden #' + numero + ' marcada como lista',
-                        timer: 1000,
-                        showConfirmButton: false
-                    });
-
-                    setTimeout(() => {
-                        location.href = location.href.split('?')[0] + '?t=' + Date.now();
-                    }, 500);
+                const response = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+                const data = await response.json();
+                if (data.status === 'OK') {
+                    await Swal.fire({ icon: 'success', title: accion === 'preparacion' ? 'Bebida en preparación' : 'Bebida lista', text: 'Orden #' + numero + ' actualizada correctamente', timer: 1000, showConfirmButton: false });
+                    await fetchBaristaEstado();
+                    startAutoRefresh();
                 } else {
                     throw new Error(data.message || 'Error desconocido');
                 }
             } catch (error) {
                 btn.disabled = false;
-                btn.textContent = '✓ Bebidas listas';
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'Error al marcar bebida como lista'
-                });
-
+                btn.textContent = accion === 'preparacion' ? 'Marcar en preparación' : 'Marcar como lista';
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Error al actualizar bebidas' });
                 startAutoRefresh();
             }
         });
 
         function startAutoRefresh() {
-            refreshInterval = setInterval(() => {
-                location.href = location.href.split('?')[0] + '?t=' + Date.now();
-            }, 5000);
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            refreshInterval = setInterval(fetchBaristaEstado, 5000);
         }
 
+        document.querySelectorAll('#close-modal-btn, #close-modal-btn-bottom').forEach(btn => btn.addEventListener('click', closeOrderModal));
+        document.getElementById('order-detail-modal').addEventListener('click', function(e) { if (e.target === this) closeOrderModal(); });
+        renderPendientes(currentPendientes);
+        renderListas(currentEntregadas);
+        bindExpandButtons();
         startAutoRefresh();
     </script>
-
 </body>
-
 </html>

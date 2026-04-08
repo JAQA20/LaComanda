@@ -1,722 +1,21 @@
-<?php
-require_once __DIR__ . "/../config/env.php";
-app_configure_errors();
-require_once __DIR__ . "/../middleware/auth.php";
-require_once __DIR__ . "/../middleware/roles.php";
-require_once __DIR__ . "/../config/rutas.php";
-
-verificarRol([1, 2]); // Admin(1) y Mesero(2)
-
-$isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
-?>
-
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Comanda</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        window.FontAwesomeConfig = {
-            autoReplaceSvg: 'nest'
-        };
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
-    <a href="../config/rutas.php"></a>
-
-    <style>
-        :root {
-            --floor-shell-bg: #fffdf8;
-            --floor-panel-bg: linear-gradient(180deg, rgba(112, 163, 143, 0.12), rgba(139, 69, 19, 0.06));
-            --floor-stroke: rgba(139, 69, 19, 0.12);
-            --floor-text: #4a2c17;
-            --floor-muted: #7b6a5f;
-            --floor-wood-1: #d7b188;
-            --floor-wood-2: #c49667;
-            --table-free-1: #8fd2b7;
-            --table-free-2: #70a38f;
-            --table-pending-1: #a06b45;
-            --table-pending-2: #8b4513;
-            --table-ready-1: #4ade80;
-            --table-ready-2: #16a34a;
-            --table-selected: #f59e0b;
-            --chair: #97b7e6;
-            --floor-shell-padding: clamp(.8rem, 1.4vw, 1.15rem);
-            --floor-canvas-padding: clamp(.45rem, 1.1vw, .9rem);
-            --floor-gap: clamp(.65rem, 1vw, .85rem);
-            --control-gap: clamp(.55rem, 1vw, .75rem);
-            --control-font: clamp(.78rem, .92vw, .92rem);
-        }
-
-        .floor-shell {
-            background: var(--floor-shell-bg);
-            border: 1px solid rgba(139, 69, 19, 0.08);
-            border-radius: 24px;
-            padding: var(--floor-shell-padding);
-            box-shadow: 0 20px 40px rgba(74, 44, 23, 0.08);
-        }
-
-        .floor-layout {
-            display: grid;
-            gap: var(--floor-gap);
-        }
-
-        .floor-legend-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .5rem .65rem;
-            align-items: center;
-        }
-
-        .floor-legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-            padding: clamp(.35rem, .8vw, .45rem) clamp(.6rem, 1vw, .8rem);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, .72);
-            border: 1px solid rgba(139, 69, 19, .08);
-            color: var(--floor-text);
-            font-size: clamp(.74rem, .88vw, .85rem);
-            font-weight: 700;
-        }
-
-        .sw {
-            width: 12px;
-            height: 12px;
-            border-radius: 999px;
-            display: inline-block;
-            flex: 0 0 auto;
-        }
-
-        .sw.libre {
-            background: linear-gradient(180deg, var(--table-free-1), var(--table-free-2));
-        }
-
-        .sw.pendiente {
-            background: linear-gradient(180deg, var(--table-pending-1), var(--table-pending-2));
-        }
-
-        .sw.lista {
-            background: linear-gradient(180deg, var(--table-ready-1), var(--table-ready-2));
-        }
-
-        .sw.kitchen {
-            background: linear-gradient(135deg, #8b5cf6, #60a5fa);
-        }
-
-        .floor-canvas {
-            border-radius: 20px;
-            border: 1px solid var(--floor-stroke);
-            background: rgba(255, 255, 255, .45);
-            padding: var(--floor-canvas-padding);
-            overflow: hidden;
-        }
-
-        .restaurant-plan {
-            width: 100%;
-            aspect-ratio: 1280 / 700;
-            min-height: clamp(430px, 62vh, 760px);
-            position: relative;
-            border-radius: 18px;
-            overflow: hidden;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .05));
-            container-type: inline-size;
-            --plan-unit: clamp(8px, 1.18cqi, 13px);
-            --table-square-size: clamp(74px, calc(var(--plan-unit) * 7.6), 94px);
-            --table-rect-width: clamp(132px, calc(var(--plan-unit) * 13.2), 164px);
-            --table-rect-height: clamp(74px, calc(var(--plan-unit) * 7.6), 94px);
-            --table-radius: clamp(14px, calc(var(--plan-unit) * 1.4), 18px);
-            --table-shadow: 0 clamp(12px, calc(var(--plan-unit) * 1.45), 18px) clamp(22px, calc(var(--plan-unit) * 2.8), 35px) rgba(74, 44, 23, .16);
-            --table-label-size: clamp(1rem, calc(var(--plan-unit) * 1.1), 1.2rem);
-            --table-status-size: clamp(.66rem, calc(var(--plan-unit) * .62), .78rem);
-            --table-status-padding-y: clamp(.24rem, calc(var(--plan-unit) * .18), .32rem);
-            --table-status-padding-x: clamp(.45rem, calc(var(--plan-unit) * .42), .6rem);
-            --table-content-gap: clamp(.22rem, calc(var(--plan-unit) * .2), .36rem);
-            --chair-width: clamp(18px, calc(var(--plan-unit) * 1.75), 22px);
-            --chair-height: clamp(11px, calc(var(--plan-unit) * 1.1), 14px);
-            --chairs-inset: clamp(-20px, calc(var(--plan-unit) * -2), -28px);
-            --kitchen-width: clamp(190px, calc(var(--plan-unit) * 21), 260px);
-            --kitchen-height: clamp(152px, calc(var(--plan-unit) * 17), 210px);
-            --drag-handle-size: clamp(34px, calc(var(--plan-unit) * 3), 42px);
-            --drag-handle-offset: clamp(7px, calc(var(--plan-unit) * .7), 10px);
-            --drag-handle-radius: clamp(10px, calc(var(--plan-unit) * .8), 12px);
-            --drag-handle-font: clamp(.95rem, calc(var(--plan-unit) * .9), 1.15rem);
-        }
-
-        .floor-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--control-gap);
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .floor-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--control-gap);
-        }
-
-        .floor-btn {
-            border: 1px solid rgba(139, 69, 19, .14);
-            padding: clamp(.75rem, .95vw, .95rem) clamp(1rem, 1.4vw, 1.2rem);
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: var(--control-font);
-            min-height: 46px;
-            cursor: pointer;
-            transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-        }
-
-        .floor-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(74, 44, 23, .12);
-        }
-
-        .floor-btn.primary {
-            background: linear-gradient(135deg, #70a38f, #8fd2b7);
-            color: #fff;
-        }
-
-        .floor-btn.ghost {
-            background: transparent;
-            color: var(--floor-text);
-        }
-
-        .floor-edit-wrap {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: .55rem .75rem;
-        }
-
-        .floor-chip {
-            align-self: flex-start;
-            border: 1px solid rgba(112, 163, 143, .25);
-            background: rgba(112, 163, 143, .12);
-            color: var(--floor-text);
-            font-size: clamp(.78rem, .9vw, .86rem);
-            font-weight: 800;
-            padding: clamp(.58rem, .9vw, .7rem) clamp(.85rem, 1.2vw, 1rem);
-            border-radius: 999px;
-            min-height: 44px;
-            cursor: pointer;
-        }
-
-        .floor-chip.active {
-            background: rgba(112, 163, 143, .2);
-        }
-
-        .floor-hint {
-            color: var(--floor-muted);
-            font-size: .82rem;
-        }
-
-        .floor-controls-note {
-            width: 100%;
-            color: var(--floor-muted);
-            font-size: .78rem;
-        }
-
-        .restaurant-floor {
-            position: absolute;
-            inset: 0;
-            margin: clamp(.2rem, .55vw, .35rem);
-            border-radius: 16px;
-            background: linear-gradient(0deg, rgba(0, 0, 0, .08), rgba(0, 0, 0, .08)), repeating-linear-gradient(90deg, rgba(255, 255, 255, .08) 0px, rgba(255, 255, 255, .08) 18px, rgba(255, 255, 255, .03) 18px, rgba(255, 255, 255, .03) 36px), linear-gradient(180deg, var(--floor-wood-1), var(--floor-wood-2));
-            box-shadow: inset 0 0 0 1px rgba(74, 44, 23, .14);
-        }
-
-        .draggable {
-            position: absolute;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .drag-handle {
-            position: absolute;
-            left: var(--drag-handle-offset);
-            top: var(--drag-handle-offset);
-            width: var(--drag-handle-size);
-            height: var(--drag-handle-size);
-            border-radius: var(--drag-handle-radius);
-            background: rgba(255, 255, 255, .9);
-            display: grid;
-            place-items: center;
-            color: #3b2415;
-            font-size: var(--drag-handle-font);
-            font-weight: 900;
-            box-shadow: 0 10px 20px rgba(74, 44, 23, .18);
-            cursor: grab;
-            z-index: 2;
-        }
-
-        .layout-readonly .drag-handle {
-            display: none;
-        }
-
-        .dragging .drag-handle {
-            cursor: grabbing;
-        }
-
-        .dragging {
-            filter: brightness(1.04);
-        }
-
-        .kitchen {
-            width: var(--kitchen-width);
-            height: var(--kitchen-height);
-            border-radius: clamp(16px, calc(var(--plan-unit) * 1.5), 18px);
-            background: linear-gradient(180deg, #3d4f77, #253552);
-            border: 1px solid rgba(255, 255, 255, .18);
-            box-shadow: 0 clamp(12px, calc(var(--plan-unit) * 1.5), 18px) clamp(22px, calc(var(--plan-unit) * 2.8), 35px) rgba(0, 0, 0, .18);
-            overflow: hidden;
-        }
-
-        .kitchen::after {
-            content: 'Cocina';
-            position: absolute;
-            right: clamp(10px, calc(var(--plan-unit) * .9), 12px);
-            top: clamp(8px, calc(var(--plan-unit) * .7), 10px);
-            color: rgba(255, 255, 255, .88);
-            font-size: clamp(.7rem, calc(var(--plan-unit) * .72), .82rem);
-            font-weight: 900;
-            letter-spacing: .04em;
-        }
-
-        .kitchen .burners {
-            position: absolute;
-            left: clamp(10px, calc(var(--plan-unit) * 1.1), 14px);
-            top: clamp(34px, calc(var(--plan-unit) * 3.7), 44px);
-            width: clamp(52px, calc(var(--plan-unit) * 5.4), 66px);
-            height: clamp(104px, calc(var(--plan-unit) * 12), 150px);
-            background: rgba(255, 255, 255, .08);
-            border: 1px solid rgba(255, 255, 255, .12);
-            border-radius: clamp(12px, calc(var(--plan-unit) * 1.1), 14px);
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: clamp(7px, calc(var(--plan-unit) * .75), 10px);
-            padding: clamp(9px, calc(var(--plan-unit) * .9), 12px);
-            pointer-events: none;
-        }
-
-        .kitchen .burners span {
-            width: clamp(14px, calc(var(--plan-unit) * 1.45), 18px);
-            height: clamp(14px, calc(var(--plan-unit) * 1.45), 18px);
-            border-radius: 999px;
-            background: rgba(0, 0, 0, .22);
-            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .25);
-            justify-self: center;
-            align-self: center;
-        }
-
-        .kitchen .prep {
-            position: absolute;
-            left: clamp(76px, calc(var(--plan-unit) * 8), 98px);
-            top: clamp(48px, calc(var(--plan-unit) * 5), 60px);
-            width: clamp(94px, calc(var(--plan-unit) * 11.8), 145px);
-            height: clamp(58px, calc(var(--plan-unit) * 7.5), 92px);
-            background: rgba(255, 255, 255, .1);
-            border: 1px solid rgba(255, 255, 255, .12);
-            border-radius: clamp(12px, calc(var(--plan-unit) * 1.3), 16px);
-        }
-
-        .kitchen .prep::before,
-        .kitchen .prep::after {
-            content: '';
-            position: absolute;
-            top: clamp(10px, calc(var(--plan-unit) * 1.25), 16px);
-            width: clamp(11px, calc(var(--plan-unit) * 1.3), 16px);
-            height: clamp(11px, calc(var(--plan-unit) * 1.3), 16px);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, .86);
-        }
-
-        .kitchen .prep::before {
-            left: clamp(20px, calc(var(--plan-unit) * 2.4), 30px);
-        }
-
-        .kitchen .prep::after {
-            left: clamp(58px, calc(var(--plan-unit) * 7), 88px);
-        }
-
-        .kitchen .sinks {
-            position: absolute;
-            left: clamp(76px, calc(var(--plan-unit) * 8), 98px);
-            bottom: clamp(12px, calc(var(--plan-unit) * 1.5), 18px);
-            display: flex;
-            gap: clamp(8px, calc(var(--plan-unit) * .9), 12px);
-        }
-
-        .sink {
-            width: clamp(40px, calc(var(--plan-unit) * 5), 62px);
-            height: clamp(25px, calc(var(--plan-unit) * 3.1), 38px);
-            border-radius: clamp(10px, calc(var(--plan-unit) * 1.1), 14px);
-            background: rgba(255, 255, 255, .08);
-            border: 1px solid rgba(255, 255, 255, .12);
-            position: relative;
-        }
-
-        .sink::before {
-            content: '';
-            position: absolute;
-            left: clamp(7px, calc(var(--plan-unit) * .8), 10px);
-            top: clamp(6px, calc(var(--plan-unit) * .8), 10px);
-            width: clamp(11px, calc(var(--plan-unit) * 1.45), 18px);
-            height: clamp(10px, calc(var(--plan-unit) * 1.3), 16px);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, .88);
-        }
-
-        .sink::after {
-            content: '';
-            position: absolute;
-            right: clamp(7px, calc(var(--plan-unit) * .8), 10px);
-            top: clamp(9px, calc(var(--plan-unit) * 1), 14px);
-            width: clamp(10px, calc(var(--plan-unit) * 1.3), 16px);
-            height: clamp(4px, calc(var(--plan-unit) * .45), 6px);
-            border-radius: 999px;
-            background: rgba(0, 0, 0, .35);
-            transform: rotate(20deg);
-        }
-
-        .table {
-            display: grid;
-            place-items: center;
-            color: #1f2937;
-            font-weight: 900;
-            border: 1px solid rgba(74, 44, 23, .14);
-            box-shadow: var(--table-shadow);
-            cursor: pointer;
-            overflow: visible;
-        }
-
-        .table.square {
-            width: var(--table-square-size);
-            height: var(--table-square-size);
-            border-radius: var(--table-radius);
-        }
-
-        .table.rect {
-            width: var(--table-rect-width);
-            height: var(--table-rect-height);
-            border-radius: var(--table-radius);
-        }
-
-        .table.state-libre {
-            background: linear-gradient(180deg, var(--table-free-1), var(--table-free-2));
-        }
-
-        .table.state-pendiente {
-            background: linear-gradient(180deg, var(--table-pending-1), var(--table-pending-2));
-            color: #fff7ed;
-        }
-
-        .table.state-lista {
-            background: linear-gradient(180deg, var(--table-ready-1), var(--table-ready-2));
-            color: white;
-        }
-
-        .table.is-selected {
-            box-shadow: inset 0 0 0 clamp(3px, calc(var(--plan-unit) * .34), 4px) var(--table-selected), var(--table-shadow);
-        }
-
-        .table-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--table-content-gap);
-            text-align: center;
-            padding: clamp(.6rem, calc(var(--plan-unit) * .62), .78rem) clamp(.32rem, calc(var(--plan-unit) * .28), .42rem);
-        }
-
-        .table-label {
-            font-size: var(--table-label-size);
-            line-height: 1;
-            font-weight: 900;
-        }
-
-        .table-status {
-            font-size: var(--table-status-size);
-            font-weight: 800;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            background: rgba(255, 255, 255, .22);
-            padding: var(--table-status-padding-y) var(--table-status-padding-x);
-            border-radius: 999px;
-        }
-
-        .btn-entregar-plan {
-            border: 0;
-            background: rgba(255, 255, 255, .92);
-            color: #166534;
-            font-size: clamp(.69rem, calc(var(--plan-unit) * .62), .78rem);
-            font-weight: 900;
-            border-radius: 999px;
-            padding: clamp(.38rem, calc(var(--plan-unit) * .34), .48rem) clamp(.7rem, calc(var(--plan-unit) * .62), .9rem);
-            min-height: 36px;
-            cursor: pointer;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, .14);
-        }
-
-        .chairs {
-            position: absolute;
-            inset: var(--chairs-inset);
-            pointer-events: none;
-            opacity: .95;
-        }
-
-        .chair {
-            position: absolute;
-            width: var(--chair-width);
-            height: var(--chair-height);
-            border-radius: clamp(6px, calc(var(--plan-unit) * .6), 8px);
-            background: linear-gradient(180deg, var(--chair), #6f90c0);
-            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .08);
-        }
-
-        .c-top {
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .c-bottom {
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .c-left {
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%) rotate(90deg);
-        }
-
-        .c-right {
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%) rotate(90deg);
-        }
-
-        .c-top2 {
-            top: 0;
-            left: 35%;
-            transform: translateX(-50%);
-        }
-
-        .c-top3 {
-            top: 0;
-            left: 65%;
-            transform: translateX(-50%);
-        }
-
-        .c-bottom2 {
-            bottom: 0;
-            left: 35%;
-            transform: translateX(-50%);
-        }
-
-        .c-bottom3 {
-            bottom: 0;
-            left: 65%;
-            transform: translateX(-50%);
-        }
-
-        @media (max-width: 1180px) {
-            .restaurant-plan {
-                min-height: clamp(440px, 68vh, 760px);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .restaurant-plan {
-                --plan-unit: clamp(8px, 1.35cqi, 13px);
-            }
-
-            .floor-controls {
-                align-items: stretch;
-            }
-
-            .floor-actions,
-            .floor-edit-wrap {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 1024px) and (orientation: portrait) {
-            .restaurant-plan {
-                aspect-ratio: 4 / 5;
-                min-height: clamp(560px, 72vh, 900px);
-                --plan-unit: clamp(9px, 1.65cqi, 14px);
-            }
-        }
-
-        @media (max-width: 1024px) and (orientation: landscape) {
-            .restaurant-plan {
-                aspect-ratio: 1280 / 760;
-                min-height: clamp(430px, 62vh, 680px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .floor-controls {
-                flex-direction: column;
-            }
-
-            .floor-actions .floor-btn,
-            .floor-edit-wrap .floor-chip {
-                flex: 1 1 auto;
-                justify-content: center;
-                text-align: center;
-            }
-
-            .floor-hint,
-            .floor-controls-note {
-                font-size: .78rem;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .restaurant-plan {
-                aspect-ratio: 4 / 5;
-                min-height: clamp(460px, 68vh, 780px);
-                --plan-unit: clamp(8px, 1.9cqi, 13px);
-            }
-
-            .floor-legend-bar {
-                gap: .45rem;
-            }
-        }
-    </style>
-
-</head>
-
-<body class="custom-beige min-h-screen">
-
-    <!-- Navbar -->
-    <?php require_once ROOT_PATH . '/views/layout/navbar.php'; ?>
-
-    <!-- Main Content -->
-    <div class="pt-20 min-h-screen">
-        <div class="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col xl:flex-row gap-6 items-start">
-
-                <!-- Content Area -->
-                <main id="content-area" class="w-full flex-1 min-w-0">
-
-                    <!-- Mesas View -->
-                    <div id="mesas-view" class="block">
-                        <h1 class="text-brown text-3xl font-bold mb-6">Mesas disponibles</h1>
-
-                        <section class="floor-shell">
-                            <div class="floor-layout">
-                                <div class="floor-legend-bar" aria-label="Leyenda de estados de mesa">
-                                    <div class="floor-legend-item"><span class="sw libre"></span> Disponible</div>
-                                    <div class="floor-legend-item"><span class="sw pendiente"></span> En cocina</div>
-                                    <div class="floor-legend-item"><span class="sw lista"></span> Lista para entregar</div>
-                                    <!-- <div class="floor-legend-item"><span class="sw kitchen"></span> Cocina movible</div> -->
-                                </div>
-
-                                <div class="floor-canvas">
-                                    <div class="restaurant-plan">
-                                        <div class="restaurant-floor <?= $isAdminLayout ? '' : 'layout-readonly' ?>" id="restaurant-floor">
-                                            <div class="draggable kitchen" data-id="kitchen" style="left: 2%; top: 2%;">
-                                                <?php if ($isAdminLayout): ?>
-                                                    <div class="drag-handle" title="Arrastrar">⠿</div>
-                                                <?php endif; ?>
-                                                <div class="burners" aria-hidden="true">
-                                                    <span></span><span></span>
-                                                    <span></span><span></span>
-                                                    <span></span><span></span>
-                                                    <span></span><span></span>
-                                                </div>
-                                                <div class="prep" aria-hidden="true"></div>
-                                                <div class="sinks" aria-hidden="true">
-                                                    <div class="sink"></div>
-                                                    <div class="sink"></div>
-                                                </div>
-                                            </div>
-
-                                            <div class="draggable mesa-card table square" data-id="t1" data-mesa="1" data-shape="square" style="left: 34%; top: 9%;"></div>
-                                            <div class="draggable mesa-card table square" data-id="t2" data-mesa="2" data-shape="square" style="left: 47%; top: 9%;"></div>
-                                            <div class="draggable mesa-card table rect" data-id="t3" data-mesa="3" data-shape="rect" style="left: 63%; top: 8%;"></div>
-                                            <div class="draggable mesa-card table square" data-id="t4" data-mesa="4" data-shape="square" style="left: 34%; top: 26%;"></div>
-                                            <div class="draggable mesa-card table square" data-id="t5" data-mesa="5" data-shape="square" style="left: 47%; top: 26%;"></div>
-                                            <div class="draggable mesa-card table rect" data-id="t6" data-mesa="6" data-shape="rect" style="left: 75%; top: 31%;"></div>
-                                            <div class="draggable mesa-card table square" data-id="t7" data-mesa="7" data-shape="square" style="left: 34%; top: 47%;"></div>
-                                            <div class="draggable mesa-card table square" data-id="t8" data-mesa="8" data-shape="square" style="left: 47%; top: 47%;"></div>
-                                            <div class="draggable mesa-card table rect" data-id="t9" data-mesa="9" data-shape="rect" style="left: 19%; top: 72%;"></div>
-                                            <div class="draggable mesa-card table square" data-id="t10" data-mesa="10" data-shape="square" style="left: 34%; top: 73%;"></div>
-                                            <div class="draggable mesa-card table square" data-id="t11" data-mesa="11" data-shape="square" style="left: 47%; top: 73%;"></div>
-                                            <div class="draggable mesa-card table rect" data-id="t12" data-mesa="12" data-shape="rect" style="left: 63%; top: 72%;"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <?php if ($isAdminLayout): ?>
-                                    <div class="floor-controls">
-                                        <div class="floor-actions">
-                                            <button class="floor-btn primary" id="saveLayoutBtn" type="button">Guardar posiciones</button>
-                                            <button class="floor-btn ghost" id="resetLayoutBtn" type="button">Restablecer</button>
-                                        </div>
-
-                                        <div class="floor-edit-wrap">
-                                            <button class="floor-chip active" id="editLayoutChip" type="button">Modo edición: ON</button>
-                                            <span class="floor-hint">Desactívalo para evitar mover el plano por accidente.</span>
-                                        </div>
-
-                                        <div class="floor-controls-note">Selecciona mesas desde el croquis y usa el asa ⠿ para mover mesas y cocina. Las posiciones ahora se guardan de forma compartida para todo el equipo.</div>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </section>
-                    </div>
-
-                    <!-- Menu Views -->
-                    <div id="menu-view" class="hidden">
-                        <h1 id="menu-title" class="text-brown text-3xl font-bold mb-8">Menú</h1>
-                        <div id="productos-grid" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
-                        </div>
-                    </div>
-
-                </main>
-
-                <!-- Sidebar - Orden Actual -->
-                <?php require_once ROOT_PATH . '/views/layout/ordenActual.php'; ?>
-
-            </div>
-        </div>
-        <a href="../controller/listarProductosController.php"></a>
-    </div>
-
-    <!-- Footer -->
-    <?php require_once ROOT_PATH . '/views/layout/footer.php'; ?>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        const BASE_URL = "<?= BASE_URL ?>";
-        const LAYOUT_API_URL = `${BASE_URL}public/api/layoutMesas.php`;
-        const USER_IS_ADMIN = <?= $isAdminLayout ? 'true' : 'false' ?>;
-        let mesaActual = null;
-        let ordenActual = [];
-        let totalOrden = 0;
-        let dragState = null;
-        let editLayoutMode = USER_IS_ADMIN;
-
-        // Estado visual por mesa: libre | pendiente | lista
+// ========JARVIS UPDATE========
+// Lógica extraída desde views/index.php para aligerar la vista.
+// Requiere window.INDEX_CONFIG definido por la vista PHP.
+
+const { BASE_URL, LAYOUT_API_URL, USER_IS_ADMIN } = window.INDEX_CONFIG;
+
+let mesaActual = null;
+let ordenActual = [];
+let totalOrden = 0;
+let dragState = null;
+        // ========JARVIS UPDATE========
+        // Admin puede editar el layout, pero el modo edición inicia en OFF.
+        let editLayoutMode = false;
+
+        // ========JARVIS UPDATE========
+        // Estado visual por mesa ahora contempla sub-órdenes separadas:
+        // cocina y barista. Se guarda un objeto por mesa con estado general y
+        // estados por área para poder notificar y entregar cada parte por separado.
         let mesaEstados = JSON.parse(localStorage.getItem('mesaEstados') || '{}');
 
         function guardarEstadoMesas() {
@@ -774,17 +73,36 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             aplicarSeleccionMesa(numeroMesa);
         }
 
+        function normalizarEstadoMesaPayload(payload) {
+            if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+                const simple = String(payload || 'libre');
+                return {
+                    general: simple === 'lista' ? 'lista' : (simple === 'pendiente' ? 'pendiente' : 'libre'),
+                    cocina: simple === 'libre' ? null : simple,
+                    barista: null,
+                    estado: simple
+                };
+            }
+            return {
+                general: payload.general || 'libre',
+                cocina: payload.cocina ?? null,
+                barista: payload.barista ?? null,
+                estado: payload.estado || payload.general || 'libre'
+            };
+        }
+
         function actualizarEstadoMesa(numeroMesa) {
             numeroMesa = String(numeroMesa);
 
             const card = document.querySelector(`.mesa-card[data-mesa="${numeroMesa}"]`);
             if (!card) return;
 
-            const estado = mesaEstados[numeroMesa] || "libre";
+            const estadoMesa = normalizarEstadoMesaPayload(mesaEstados[numeroMesa]);
+            const estado = estadoMesa.general || 'libre';
             const shape = card.dataset.shape || 'square';
             const isRect = shape === 'rect';
 
-            card.className = `draggable mesa-card table ${shape} state-${estado}`;
+            card.className = `draggable mesa-card table ${shape} state-${(estado === 'parcial_lista' ? 'lista' : estado)}`;
             card.dataset.mesa = numeroMesa;
             card.classList.toggle('is-selected', mesaActual === numeroMesa);
 
@@ -801,20 +119,38 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 </div>
             `;
 
+            const badges = [];
+            if (estadoMesa.cocina === 'lista') {
+                badges.push('<span class="table-notification-badge badge-kitchen" title="Comida lista">🍽</span>');
+            }
+            if (estadoMesa.barista === 'lista') {
+                badges.push('<span class="table-notification-badge badge-barista" title="Bebidas listas">☕</span>');
+            }
+
             let statusLabel = 'Disponible';
             let statusHtml = '<span class="table-status">Disponible</span>';
 
             if (estado === 'pendiente') {
-                statusLabel = 'En cocina';
-                statusHtml = '<span class="table-status">En cocina</span>';
+                statusLabel = 'En preparación';
+                statusHtml = '<span class="table-status">En preparación</span>';
+            } else if (estado === 'parcial_lista') {
+                statusLabel = 'Parcialmente lista';
+                if (estadoMesa.cocina === 'lista' && estadoMesa.barista !== 'lista') {
+                    statusHtml = '<button class="btn-entregar btn-entregar-plan" type="button">Entregar comida</button>';
+                } else if (estadoMesa.barista === 'lista' && estadoMesa.cocina !== 'lista') {
+                    statusHtml = '<button class="btn-entregar btn-entregar-plan" type="button">Entregar bebida</button>';
+                } else {
+                    statusHtml = '<button class="btn-entregar btn-entregar-plan" type="button">Entregar sub-orden</button>';
+                }
             } else if (estado === 'lista') {
                 statusLabel = 'Lista';
-                statusHtml = '<button class="btn-entregar btn-entregar-plan" type="button">Entregar orden</button>';
+                statusHtml = '<button class="btn-entregar btn-entregar-plan" type="button">Entregar Orden</button>';
             }
 
             card.setAttribute('aria-label', `Mesa ${numeroMesa} - ${statusLabel}`);
             card.innerHTML = `
                 ${USER_IS_ADMIN ? '<div class="drag-handle" title="Arrastrar">⠿</div>' : ''}
+                <div class="table-notification-stack">${badges.join('')}</div>
                 <div class="table-content">
                     <div class="table-label">${numeroMesa}</div>
                     ${statusHtml}
@@ -830,13 +166,23 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             });
         }
 
-        function mostrarToastMesaLista(numeroMesa) {
+        function mostrarToastMesaLista(numeroMesa, area) {
             const toastEl = document.getElementById('toastMesaLista');
             const toastBody = document.getElementById('toastMesaListaBody');
 
             if (!toastEl || !toastBody) return;
 
-            toastBody.textContent = `La orden de la Mesa ${numeroMesa} está lista para entregar.`;
+            toastEl.classList.remove('text-bg-success', 'text-bg-dark');
+
+            if (area === 'barista') {
+                // ========JARVIS UPDATE========
+                // Barista ahora usa también notificación verde, igual que cocina.
+                toastEl.classList.add('text-bg-success');
+                toastBody.textContent = `Bebida(s) lista(s) en Mesa ${numeroMesa}.`;
+            } else {
+                toastEl.classList.add('text-bg-success');
+                toastBody.textContent = `La comida de la Mesa ${numeroMesa} está lista para entregar.`;
+            }
 
             const toast = new bootstrap.Toast(toastEl, {
                 delay: 4000
@@ -874,18 +220,16 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                     ...mesaEstados
                 };
 
-                // Normalizar: si una mesa no viene en la respuesta, queda libre
                 const estadosNormalizados = {};
                 document.querySelectorAll('.mesa-card').forEach(card => {
                     const mesa = card.getAttribute('data-mesa');
                     if (!mesa) return;
-
-                    const estado = nuevosEstados[mesa];
-                    if (estado === "pendiente" || estado === "lista") {
-                        estadosNormalizados[mesa] = estado;
-                    } else {
-                        estadosNormalizados[mesa] = "libre";
-                    }
+                    estadosNormalizados[mesa] = normalizarEstadoMesaPayload(nuevosEstados[mesa] || {
+                        general: 'libre',
+                        cocina: null,
+                        barista: null,
+                        estado: 'libre'
+                    });
                 });
 
                 mesaEstados = estadosNormalizados;
@@ -894,8 +238,15 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
 
                 if (mostrarNotificacion) {
                     Object.keys(mesaEstados).forEach(mesa => {
-                        if (mesaEstados[mesa] === "lista" && estadosAnteriores[mesa] !== "lista") {
-                            mostrarToastMesaLista(mesa);
+                        const actual = normalizarEstadoMesaPayload(mesaEstados[mesa]);
+                        const anterior = normalizarEstadoMesaPayload(estadosAnteriores[mesa]);
+
+                        if (actual.cocina === 'lista' && anterior.cocina !== 'lista') {
+                            mostrarToastMesaLista(mesa, 'cocina');
+                            reproducirSonidoNotificacion();
+                        }
+                        if (actual.barista === 'lista' && anterior.barista !== 'lista') {
+                            mostrarToastMesaLista(mesa, 'barista');
                             reproducirSonidoNotificacion();
                         }
                     });
@@ -1030,10 +381,24 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
 
         function actualizarChipEdicion() {
             const chip = document.getElementById('editLayoutChip');
+            const floor = document.getElementById('restaurant-floor');
+            const saveBtn = document.getElementById('saveLayoutBtn');
+            const resetBtn = document.getElementById('resetLayoutBtn');
             if (!chip) return;
 
             chip.classList.toggle('active', editLayoutMode);
             chip.textContent = `Modo edición: ${editLayoutMode ? 'ON' : 'OFF'}`;
+
+            if (floor) {
+                floor.classList.toggle('layout-readonly', !editLayoutMode);
+            }
+
+            [saveBtn, resetBtn].forEach(btn => {
+                if (!btn) return;
+                btn.disabled = !editLayoutMode;
+                btn.classList.toggle('opacity-50', !editLayoutMode);
+                btn.classList.toggle('cursor-not-allowed', !editLayoutMode);
+            });
         }
 
         function onLayoutPointerDown(e) {
@@ -1403,26 +768,76 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
         }
 
         async function entregarOrden(numeroMesa) {
+            const estadoMesa = normalizarEstadoMesaPayload(mesaEstados[String(numeroMesa)]);
+            const opciones = [];
+
+            if (estadoMesa.barista === 'lista') {
+                opciones.push({
+                    value: 'barista',
+                    label: 'Entregar bebida(s)'
+                });
+            }
+            if (estadoMesa.cocina === 'lista') {
+                opciones.push({
+                    value: 'cocina',
+                    label: 'Entregar comida'
+                });
+            }
+
+            if (!opciones.length) {
+                await Swal.fire({
+                    icon: 'info',
+                    title: 'Nada listo aún',
+                    text: 'Todavía no hay sub-órdenes listas para entregar en esta mesa.'
+                });
+                return;
+            }
+
+            const ambasListas = estadoMesa.cocina === 'lista' && estadoMesa.barista === 'lista';
+            let area = opciones[0].value;
+
+            if (!ambasListas && opciones.length > 1) {
+                const {
+                    value: seleccion
+                } = await Swal.fire({
+                    title: `Mesa ${numeroMesa}`,
+                    input: 'radio',
+                    inputOptions: Object.fromEntries(opciones.map(o => [o.value, o.label])),
+                    inputValue: area,
+                    confirmButtonText: 'Continuar',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancelar',
+                    inputValidator: (value) => !value ? 'Selecciona qué parte vas a entregar.' : null
+                });
+                if (!seleccion) return;
+                area = seleccion;
+            }
+
             const {
                 isConfirmed
             } = await Swal.fire({
-                title: `¿Marcar la orden de la Mesa ${numeroMesa} como ENTREGADA?`,
-                icon: "question",
+                title: ambasListas ?
+                    `¿Entregar la orden completa de la Mesa ${numeroMesa}?` :
+                    `¿Entregar ${area === 'barista' ? 'las bebida(s)' : 'la comida'} de la Mesa ${numeroMesa}?`,
+                icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: "Sí, entregar",
-                cancelButtonText: "Cancelar",
+                confirmButtonText: 'Sí, entregar',
+                cancelButtonText: 'Cancelar',
                 reverseButtons: true
             });
-
             if (!isConfirmed) return;
 
             try {
-                const respuesta = await fetch("<?= BASE_URL ?>public/api/entregarOrden.php", {
+                const body = ambasListas ?
+                    `mesa=${encodeURIComponent(numeroMesa)}&area=${encodeURIComponent('barista')}` :
+                    `mesa=${encodeURIComponent(numeroMesa)}&area=${encodeURIComponent(area)}`;
+
+                const respuesta = await fetch(`${BASE_URL}public/api/entregarOrden.php`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
                     },
-                    body: `mesa=${encodeURIComponent(numeroMesa)}`
+                    body
                 });
 
                 if (!respuesta.ok) {
@@ -1432,37 +847,46 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 }
 
                 const result = await respuesta.json();
-                console.log("Resultado entregarOrden:", result);
 
                 if (result.status === "OK") {
-                    mesaEstados[numeroMesa] = "libre";
-                    guardarEstadoMesas();
-                    actualizarEstadoMesa(numeroMesa);
+                    if (ambasListas) {
+                        const respuestaCocina = await fetch(`${BASE_URL}public/api/entregarOrden.php`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `mesa=${encodeURIComponent(numeroMesa)}&area=${encodeURIComponent('cocina')}`
+                        });
+
+                        if (!respuestaCocina.ok) {
+                            throw new Error(`HTTP ${respuestaCocina.status} al entregar cocina`);
+                        }
+                    }
 
                     await Swal.fire({
                         position: "center",
                         icon: "success",
-                        html: `<strong>Mesa ${numeroMesa}</strong><br>Orden marcada como ENTREGADA`,
+                        html: ambasListas ?
+                            `<strong>Mesa ${numeroMesa}</strong><br>Orden completa entregada` :
+                            `<strong>Mesa ${numeroMesa}</strong><br>${area === 'barista' ? 'Bebida(s)' : 'Comida'} entregada(s)`,
                         showConfirmButton: false,
                         timer: 2000
                     });
 
                     sincronizarEstadosMesas(false);
-
                 } else {
                     await Swal.fire({
                         icon: "error",
                         title: "Oops...",
-                        text: result.message || "No se pudo entregar la orden"
+                        text: result.message || "No se pudo entregar la sub-orden"
                     });
                 }
-
             } catch (error) {
                 console.error("Error en entregarOrden:", error);
                 await Swal.fire({
                     icon: "error",
                     title: "Oops...",
-                    text: error.message || "Error al entregar la orden"
+                    text: error.message || "Error al entregar la sub-orden"
                 });
             }
         }
@@ -1541,7 +965,7 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 text: "Esta acción enviará la orden a cocina.",
                 icon: "question",
                 showCancelButton: true,
-                confirmButtonText: "Enviar a cocina",
+                confirmButtonText: "Enviar orden",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             });
@@ -1575,7 +999,7 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                     didOpen: () => Swal.showLoading()
                 });
 
-                const respuesta = await fetch("<?= BASE_URL ?>public/api/guardarOrden.php", {
+                const respuesta = await fetch(`${BASE_URL}public/api/guardarOrden.php`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -1594,7 +1018,12 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                     console.log("mesaActual antes de actualizar estado:", mesaActual);
                     console.log("mesaEstados antes:", mesaEstados);
 
-                    mesaEstados[mesaActual] = "pendiente";
+                    mesaEstados[mesaActual] = {
+                        general: 'pendiente',
+                        cocina: 'pendiente',
+                        barista: 'pendiente',
+                        estado: 'pendiente'
+                    };
                     console.log("mesaEstados después:", mesaEstados);
 
                     guardarEstadoMesas();
@@ -1622,7 +1051,7 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                     actualizarOrden();
                     actualizarBotones();
 
-                    window.location.href = "<?= BASE_URL ?>index.php";
+                    window.location.href = `${BASE_URL}index.php`;
 
                 } else {
                     await Swal.fire({
@@ -1682,8 +1111,14 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             if (eliminarBtn) eliminarBtn.addEventListener('click', eliminarOrden);
             if (enviarBtn) enviarBtn.addEventListener('click', enviarCocina);
             if (gestionarNotasBtn) gestionarNotasBtn.addEventListener('click', abrirModalNotas);
-            if (saveLayoutBtn) saveLayoutBtn.addEventListener('click', guardarPosicionesLayout);
-            if (resetLayoutBtn) resetLayoutBtn.addEventListener('click', restablecerPosicionesLayout);
+            if (saveLayoutBtn) saveLayoutBtn.addEventListener('click', () => {
+                if (!editLayoutMode) return;
+                guardarPosicionesLayout();
+            });
+            if (resetLayoutBtn) resetLayoutBtn.addEventListener('click', () => {
+                if (!editLayoutMode) return;
+                restablecerPosicionesLayout();
+            });
             if (editLayoutChip) {
                 editLayoutChip.addEventListener('click', () => {
                     editLayoutMode = !editLayoutMode;
@@ -1716,14 +1151,22 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 const mesa = card.getAttribute('data-mesa');
                 if (!mesa) return;
 
-                const estadoMesa = mesaEstados[mesa] || "libre";
+                const estadoMesaObj = normalizarEstadoMesaPayload(mesaEstados[mesa]);
+                const estadoMesa = estadoMesaObj.general || 'libre';
 
-                if ((estadoMesa === "pendiente" || estadoMesa === "lista") && mesaActual !== mesa) {
+                if ((estadoMesa === "pendiente" || estadoMesa === "lista" || estadoMesa === 'parcial_lista') && mesaActual !== mesa) {
+                    let texto = `La Mesa ${mesa} tiene una orden en preparación.`;
+                    if (estadoMesaObj.cocina === 'lista' && estadoMesaObj.barista === 'lista') {
+                        texto = `La Mesa ${mesa} tiene comida y bebida listas para entregar.`;
+                    } else if (estadoMesaObj.cocina === 'lista') {
+                        texto = `La Mesa ${mesa} tiene la comida lista para entregar.`;
+                    } else if (estadoMesaObj.barista === 'lista') {
+                        texto = `La Mesa ${mesa} tiene las bebida(s) listas para entregar.`;
+                    }
                     Swal.fire({
                         icon: "info",
                         title: "Mesa ocupada",
-                        text: estadoMesa === "lista" ?
-                            `La Mesa ${mesa} tiene una orden lista para entregar.` : `La Mesa ${mesa} tiene una orden en cocina.`
+                        text: texto
                     });
                     return;
                 }
@@ -1746,21 +1189,4 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 entregarOrden(mesa);
             });
         });
-    </script>
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-        <div id="toastMesaLista" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="toastMesaListaBody">
-                    La orden está lista para entregar.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
-            </div>
-        </div>
-    </div>
-    <audio id="audio-notificacion" preload="auto">
-        <source src="<?= BASE_URL ?>public/sounds/notificacion.mp3" type="audio/mpeg">
-    </audio>
-
-</body>
-
-</html>
+    

@@ -1,13 +1,15 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
 
-require_once __DIR__ . "/../config/text.php";
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
+require_once __DIR__ . "/../model/OrdenesSync.php";
+
+// ========JARVIS UPDATE========
+// Este controlador deja de leer/escribir ordenes.json.
+// Ahora entrega la última orden activa de la mesa para el usuario actual usando MySQL.
 
 verificarRol([1, 2]);
-
-$archivo = __DIR__ . "/ordenes.json";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
@@ -18,9 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$mesa = $_POST["mesa"] ?? null;
-
-if (!$mesa) {
+$mesa = isset($_POST["mesa"]) ? (int)$_POST["mesa"] : 0;
+$area = isset($_POST["area"]) ? trim((string)$_POST["area"]) : '';
+if ($mesa <= 0) {
     http_response_code(400);
     echo json_encode([
         "status" => "ERROR",
@@ -29,58 +31,27 @@ if (!$mesa) {
     exit;
 }
 
-if (!file_exists($archivo)) {
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$usuarioId = isset($_SESSION["usuario_id"]) ? (int)$_SESSION["usuario_id"] : null;
+
+try {
+    OrdenesSync::entregarOrdenPorMesaUsuario($mesa, $usuarioId, $area);
+
+    echo json_encode([
+        "status" => "OK",
+        "message" => "Sub-orden entregada correctamente",
+        "mesa" => (string)$mesa,
+        "area" => $area
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+} catch (Throwable $e) {
+    http_response_code(400);
     echo json_encode([
         "status" => "ERROR",
-        "message" => "No existe el archivo de órdenes"
+        "message" => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
-
-$ordenes = json_decode(file_get_contents($archivo), true);
-
-if (!is_array($ordenes)) {
-    $ordenes = [];
-}
-
-$ordenes = app_normalize_order_array($ordenes);
-
-$usuarioId = $_SESSION["usuario_id"] ?? null;
-$actualizada = false;
-
-// Buscar la última orden de ESA mesa, de ESE usuario, que esté en lista
-for ($i = count($ordenes) - 1; $i >= 0; $i--) {
-    $orden = $ordenes[$i];
-
-    if (
-        isset($orden["mesa"], $orden["estado"]) &&
-        (string)$orden["mesa"] === (string)$mesa &&
-        (string)$orden["estado"] === "lista" &&
-        (($orden["usuario_id"] ?? null) == $usuarioId)
-    ) {
-        $ordenes[$i]["estado"] = "entregada";
-        $ordenes[$i]["hora_entrega"] = date("H:i");
-        $actualizada = true;
-        break;
-    }
-}
-
-if (!$actualizada) {
-    echo json_encode([
-        "status" => "ERROR",
-        "message" => "No se encontró una orden en estado lista para esa mesa"
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-file_put_contents(
-    $archivo,
-    json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-);
-
-echo json_encode([
-    "status" => "OK",
-    "message" => "Orden entregada correctamente",
-    "mesa" => (string)$mesa
-], JSON_UNESCAPED_UNICODE);
-exit;

@@ -1,12 +1,14 @@
 <?php
 require_once __DIR__ . "/Conexion.php";
 
+// ========JARVIS UPDATE========
+// Este modelo se ajusta al schema nuevo. Ya no depende de timestamp/id_estado
+// del diseño viejo. El estado general de cada orden se calcula desde detalle_orden.
 
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
-
-
 header("Expires: 0");
+
 $ordenes = [];
 $total_ordenes = 0;
 $total_vendido = 0;
@@ -14,15 +16,25 @@ $entregadas = 0;
 $pendientes = 0;
 
 try {
-
-    $sql = "SELECT 
-                id_orden,
-                total,
-                timestamp AS fecha,
-                id_estado
-            FROM ordenes
-            ORDER BY timestamp DESC
-            LIMIT 100";
+    $sql = "
+        SELECT
+            o.id_orden,
+            o.numero_orden,
+            o.total,
+            o.fecha_creacion AS fecha,
+            CASE
+                WHEN COUNT(d.id_detalle) = 0 THEN 'sin_items'
+                WHEN SUM(CASE WHEN d.estado_item = 'entregado' THEN 1 ELSE 0 END) = COUNT(d.id_detalle) THEN 'entregada'
+                WHEN SUM(CASE WHEN d.estado_item = 'listo' THEN 1 ELSE 0 END) = COUNT(d.id_detalle) THEN 'lista'
+                WHEN SUM(CASE WHEN d.estado_item = 'en_preparacion' THEN 1 ELSE 0 END) > 0 THEN 'en_preparacion'
+                ELSE 'pendiente'
+            END AS estado_general
+        FROM ordenes o
+        LEFT JOIN detalle_orden d ON d.id_orden = o.id_orden
+        GROUP BY o.id_orden, o.numero_orden, o.total, o.fecha_creacion
+        ORDER BY o.fecha_creacion DESC
+        LIMIT 100
+    ";
 
     $stmt = $conexion->prepare($sql);
     $stmt->execute();
@@ -37,15 +49,7 @@ try {
     exit;
 }
 
-//Para debug (ayuda a ver la estructura de datos que se obtiene de la BD)
-// echo "<pre>";
-// print_r($ordenes);
-// echo "</pre>";
-// exit;
-
-
-
 $total_ordenes = count($ordenes);
 $total_vendido = array_sum(array_column($ordenes, 'total'));
-$entregadas = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'entregada') !== false));
-$pendientes = count(array_filter($ordenes, fn($o) => strpos(strtolower($o['estado']), 'pendiente') !== false));
+$entregadas = count(array_filter($ordenes, fn($o) => ($o['estado_general'] ?? '') === 'entregada'));
+$pendientes = count(array_filter($ordenes, fn($o) => in_array(($o['estado_general'] ?? ''), ['pendiente', 'en_preparacion', 'lista'], true)));

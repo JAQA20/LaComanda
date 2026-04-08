@@ -1,7 +1,12 @@
 #!/bin/sh
 set -e
 
-PORT_TO_USE="${PORT:-8080}"
+# ========JARVIS UPDATE========
+# Este script ahora soporta ambos entornos:
+# 1) Railway: si la plataforma inyecta la variable PORT, Apache usará ese puerto.
+# 2) Docker local: si PORT no existe, Apache usará 80 dentro del contenedor.
+#    Esto evita el choque que teníamos con docker-compose, donde el mapeo es 8080:80.
+PORT_TO_USE="${PORT:-80}"
 
 sed -i "s/^Listen 80$/Listen ${PORT_TO_USE}/" /etc/apache2/ports.conf
 sed -i "s/<VirtualHost \*:80>/<VirtualHost *:${PORT_TO_USE}>/" /etc/apache2/sites-available/000-default.conf

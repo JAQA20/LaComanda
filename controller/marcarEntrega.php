@@ -1,78 +1,34 @@
 <?php
 require_once __DIR__ . "/../config/rutas.php";
-require_once __DIR__ . "/../config/text.php";
+require_once __DIR__ . "/../middleware/auth.php";
+require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
 
-// require_once __DIR__ . "/../config/rutas.php";
-// $archivo = __DIR__ . "/ordenes.json";
+// ========JARVIS UPDATE========
+// Este controlador deja de tocar el archivo JSON.
+// Ahora marca la orden completa como entregada en MySQL y libera la mesa.
+// Se mantiene desde cocina/admin para no romper el flujo actual mientras
+// migramos barista y la entrega final completa.
 
-// // Leer ordenes
-// $ordenes = file_exists($archivo)
-//     ? json_decode(file_get_contents($archivo), true)
-//     : [];
+verificarRol([1, 3]);
 
-// if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-//     $numero = intval($_POST["numero"]);
-
-//     // Buscar la orden y marcarla como entregada
-//     foreach ($ordenes as &$orden) {
-//         if ($orden["numero"] == $numero) {
-//             $orden["estado"] = "entregada";
-//             $orden["hora_entrega"] = date("H:i");
-//             break;
-//         }
-//     }
-
-//     // Guardar cambios en el archivo
-//     file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT));
-
-//     // Volver a la vista de cocina
-//     header("Location: " . BASE_URL . "views/cocina.php");
-//     exit;
-// }
-
-require_once __DIR__ . "/../config/rutas.php";
-$archivo = __DIR__ . "/ordenes.json";
-
-// Leer órdenes
-$ordenes = file_exists($archivo)
-    ? json_decode(file_get_contents($archivo), true)
-    : [];
-
-if (!is_array($ordenes)) {
-    $ordenes = [];
-}
-
-$ordenes = app_normalize_order_array($ordenes);
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $numero = intval($_POST["numero"] ?? 0);
-
-    foreach ($ordenes as &$orden) {
-        if (
-            isset($orden["numero"], $orden["estado"]) &&
-            (int)$orden["numero"] === $numero &&
-            $orden["estado"] === "lista"
-        ) {
-            $orden["estado"] = "entregada";
-            $orden["hora_entrega"] = date("H:i");
-            $orden["timestamp_entrega"] = time();
-            break;
-        }
-    }
-    unset($orden);
-
-    // Guardar cambios en el archivo
-    file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-    try {
-        OrdenesSync::marcarEntregadaPorNumero($numero, time());
-    } catch (Throwable $e) {
-        error_log("Error sincronizando entrega en MySQL (numero): " . $e->getMessage());
-    }
-    file_put_contents($archivo, json_encode($ordenes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: " . BASE_URL . "views/cocina.php");
     exit;
 }
+
+$numero = isset($_POST["numero"]) ? (int)$_POST["numero"] : 0;
+
+if ($numero <= 0) {
+    header("Location: " . BASE_URL . "views/cocina.php");
+    exit;
+}
+
+try {
+    OrdenesSync::marcarOrdenEntregada($numero);
+} catch (Throwable $e) {
+    error_log("marcarEntrega ERROR: " . $e->getMessage());
+}
+
+header("Location: " . BASE_URL . "views/cocina.php");
+exit;

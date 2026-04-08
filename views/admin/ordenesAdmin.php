@@ -84,9 +84,17 @@ function obtenerClaseEstado(string $estado): string
                             <p class="text-sm text-brownSoft">Visualiza el detalle general del historial registrado.</p>
                         </div>
 
-                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F5EEE5] text-sm font-medium text-brownDark">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                            Actualización automática
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                            <div class="relative">
+                                <!-- ========JARVIS UPDATE========
+                                     Búsqueda por número de orden igual al patrón de otros listados admin. -->
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-brownSoft"></i>
+                                <input id="buscar-orden-input" type="text" placeholder="Buscar por fecha, # de orden o usuario" class="pl-10 pr-4 py-2 rounded-full border border-[#e8dccb] bg-white text-sm text-brownDark focus:outline-none focus:ring-2 focus:ring-mintGreen">
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F5EEE5] text-sm font-medium text-brownDark">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                Actualización automática
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -157,6 +165,8 @@ function obtenerClaseEstado(string $estado): string
                             <thead class="bg-[#5D4037] text-white">
                                 <tr>
                                     <th class="px-5 py-3 text-left text-sm font-semibold">Producto</th>
+                                    <th class="px-5 py-3 text-left text-sm font-semibold">Área</th>
+                                    <th class="px-5 py-3 text-left text-sm font-semibold">Estado sub-orden</th>
                                     <th class="px-5 py-3 text-left text-sm font-semibold">Cantidad</th>
                                     <th class="px-5 py-3 text-left text-sm font-semibold">Precio unitario</th>
                                     <th class="px-5 py-3 text-left text-sm font-semibold">Subtotal</th>
@@ -164,6 +174,17 @@ function obtenerClaseEstado(string $estado): string
                             </thead>
                             <tbody id="modal-items-body" class="divide-y divide-[#f1e8dc]"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-[#FCFAF7] rounded-2xl p-5 border border-[#f1e8dc]">
+                        <div class="text-sm font-semibold text-brownDark mb-2">Estado sub-orden cocina</div>
+                        <p id="modal-subestado-cocina" class="text-brownSoft">No aplica</p>
+                    </div>
+                    <div class="bg-[#FCFAF7] rounded-2xl p-5 border border-[#f1e8dc]">
+                        <div class="text-sm font-semibold text-brownDark mb-2">Estado sub-orden barista</div>
+                        <p id="modal-subestado-barista" class="text-brownSoft">No aplica</p>
                     </div>
                 </div>
 
@@ -178,6 +199,7 @@ function obtenerClaseEstado(string $estado): string
     <script>
         const API_ORDENES = "<?= BASE_URL ?>public/api/ordenesAdminData.php";
         const tablaBody = document.getElementById("tabla-ordenes-body");
+        const buscarOrdenInput = document.getElementById("buscar-orden-input");
 
         const modalOrden = document.getElementById("modal-orden");
         const cerrarModalOrdenBtn = document.getElementById("cerrar-modal-orden");
@@ -188,6 +210,10 @@ function obtenerClaseEstado(string $estado): string
         const modalTotal = document.getElementById("modal-total");
         const modalItemsBody = document.getElementById("modal-items-body");
         const modalNotas = document.getElementById("modal-notas");
+        const modalSubestadoCocina = document.getElementById("modal-subestado-cocina");
+        const modalSubestadoBarista = document.getElementById("modal-subestado-barista");
+
+        let ordenesCache = [];
 
         function formatearColones(valor) {
             return "₡" + Number(valor || 0).toLocaleString("es-CR", {
@@ -232,18 +258,22 @@ function obtenerClaseEstado(string $estado): string
             modalEstado.textContent = capitalizarEstado(String(orden.estado_normalizado ?? 'pendiente'));
             modalTotal.textContent = formatearColones(orden.total ?? 0);
             modalNotas.textContent = String(orden.notas ?? 'Sin notas');
+            modalSubestadoCocina.textContent = capitalizarEstado(String(orden.estado_subordenes?.cocina ?? 'no_aplica'));
+            modalSubestadoBarista.textContent = capitalizarEstado(String(orden.estado_subordenes?.barista ?? 'no_aplica'));
 
             const items = Array.isArray(orden.items_detalle) ? orden.items_detalle : [];
             if (items.length === 0) {
                 modalItemsBody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="px-5 py-8 text-center text-brownSoft">No hay detalle de productos disponible.</td>
+                        <td colspan="6" class="px-5 py-8 text-center text-brownSoft">No hay detalle de productos disponible.</td>
                     </tr>
                 `;
             } else {
                 modalItemsBody.innerHTML = items.map(item => `
                     <tr>
                         <td class="px-5 py-4 font-medium text-brownDark">${escapeHtml(String(item.nombre ?? 'N/A'))}</td>
+                        <td class="px-5 py-4 text-brownSoft">${escapeHtml(String(item.area ?? 'N/A')).replace('cocina', 'Cocina').replace('barista', 'Barista')}</td>
+                        <td class="px-5 py-4 text-brownSoft">${escapeHtml(capitalizarEstado(String(item.estado_item ?? 'pendiente')))}</td>
                         <td class="px-5 py-4 text-brownSoft">${escapeHtml(String(item.cantidad ?? 0))}</td>
                         <td class="px-5 py-4 text-brownSoft">${formatearColones(item.precio_unitario ?? 0)}</td>
                         <td class="px-5 py-4 font-semibold text-mintGreen">${formatearColones(item.subtotal ?? 0)}</td>
@@ -330,6 +360,30 @@ function obtenerClaseEstado(string $estado): string
             }).join("");
         }
 
+        function aplicarFiltroOrdenes() {
+            const termino = (buscarOrdenInput?.value || '').trim().toLowerCase();
+            const filtradas = !termino
+                ? ordenesCache
+                : ordenesCache.filter(orden => {
+                    const numero = String(orden.id_mostrado ?? '').toLowerCase();
+                    const fecha = String(orden.fecha_formateada ?? '').toLowerCase();
+                    const usuario = String(orden.usuario_nombre ?? '').toLowerCase();
+                    return numero.includes(termino) || fecha.includes(termino) || usuario.includes(termino);
+                });
+            renderTabla(filtradas);
+
+            document.querySelectorAll('#tabla-ordenes-body tr[data-orden]').forEach(fila => {
+                fila.addEventListener('click', () => {
+                    try {
+                        const orden = JSON.parse(decodeURIComponent(fila.dataset.orden || ''));
+                        abrirModalOrden(orden);
+                    } catch (e) {
+                        console.error('Error leyendo detalle de orden:', e);
+                    }
+                });
+            });
+        }
+
         let cargando = false;
 
         async function cargarOrdenes() {
@@ -355,18 +409,8 @@ function obtenerClaseEstado(string $estado): string
                     throw new Error("Respuesta inválida del backend");
                 }
 
-                renderTabla(data.ordenes || []);
-
-                document.querySelectorAll('#tabla-ordenes-body tr[data-orden]').forEach(fila => {
-                    fila.addEventListener('click', () => {
-                        try {
-                            const orden = JSON.parse(decodeURIComponent(fila.dataset.orden || ''));
-                            abrirModalOrden(orden);
-                        } catch (e) {
-                            console.error('Error leyendo detalle de orden:', e);
-                        }
-                    });
-                });
+                ordenesCache = data.ordenes || [];
+                aplicarFiltroOrdenes();
             } catch (error) {
                 console.error("Error cargando órdenes:", error);
 
@@ -388,6 +432,8 @@ function obtenerClaseEstado(string $estado): string
                 cerrarModalOrden();
             }
         });
+
+        buscarOrdenInput?.addEventListener('input', aplicarFiltroOrdenes);
 
         cargarOrdenes();
         setInterval(cargarOrdenes, 5000);

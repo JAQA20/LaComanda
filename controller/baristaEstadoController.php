@@ -3,20 +3,21 @@ header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
-require_once __DIR__ . "/../model/OrdenesSync.php";
+require_once __DIR__ . "/../model/Barista.php";
 
 // ========JARVIS UPDATE========
-// Este endpoint ya no lee controller/ordenes.json.
-// Ahora obtiene las órdenes de cocina desde MySQL usando el modelo nuevo.
+// Endpoint de lectura para barista.
+// Ahora depende del modelo Barista.php para dejar este módulo completamente separado
+// de cocina y del resto del flujo operativo.
 
-verificarRol([1, 3]);
+verificarRol([1, 4]);
 
 try {
-    $ordenes = OrdenesSync::obtenerOrdenesCocina();
-
+    $payload = Barista::obtenerPanel();
     echo json_encode([
         "ok" => true,
-        "ordenes" => $ordenes
+        "pendientes" => $payload['pendientes'],
+        "listas" => $payload['listas']
     ], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     http_response_code(500);
