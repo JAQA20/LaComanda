@@ -4,7 +4,6 @@ require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
 
-// ========JARVIS UPDATE========
 // Este controlador deja de tocar el archivo JSON.
 // Ahora marca la orden completa como entregada en MySQL y libera la mesa.
 // Se mantiene desde cocina/admin para no romper el flujo actual mientras

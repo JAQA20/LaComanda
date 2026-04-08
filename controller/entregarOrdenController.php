@@ -5,7 +5,6 @@ require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
 
-// ========JARVIS UPDATE========
 // Este controlador deja de leer/escribir ordenes.json.
 // Ahora entrega la última orden activa de la mesa para el usuario actual usando MySQL.
 

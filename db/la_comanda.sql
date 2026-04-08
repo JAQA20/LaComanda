@@ -1,12 +1,10 @@
 -- =========================================
 -- LA COMANDA - MySQL Schema limpio para migración 100% DB
 -- =========================================
--- ========JARVIS UPDATE========
 -- Archivo limpiado para servir como nueva base oficial de MySQL.
 -- Eliminé rastros del flujo híbrido con JSON y preparé el esquema
 -- para trabajar órdenes 100% desde base de datos.
 --
--- ========JARVIS UPDATE========
 -- Se fuerza utf8mb4 desde el inicio del script porque en Docker/MySQL
 -- la importación automática del seed estaba entrando con latin1 y eso
 -- corrompía tildes/acentos (ej: CafÃ©) cada vez que se recreaba la base.
@@ -70,7 +68,6 @@ CREATE TABLE layout_configs (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ---------- Catálogo ----------
--- ========JARVIS UPDATE========
 -- Se mantiene el catálogo actual, pero ahora queda como base del ruteo
 -- cocina/barista por categoría. La regla acordada es:
 --   - barista: 'cafes' y 'bebidas'
@@ -98,7 +95,6 @@ CREATE TABLE productos (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ---------- Órdenes (cabecera) ----------
--- ========JARVIS UPDATE========
 -- Cambios principales sobre la tabla ordenes:
 -- 1) Eliminé columnas heredadas del flujo con JSON.
 -- 2) numero_json fue reemplazado por numero_orden.
@@ -125,7 +121,6 @@ CREATE TABLE ordenes (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ---------- Detalle de órdenes (estado por ítem) ----------
--- ========JARVIS UPDATE========
 -- Esta tabla se convirtió en el centro del flujo operativo.
 -- Cambios principales:
 -- 1) Se agregó estado_item para manejar el avance por producto.
@@ -157,7 +152,6 @@ CREATE TABLE detalle_orden (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ---------- Vista auxiliar para ruteo de preparación ----------
--- ========JARVIS UPDATE========
 -- Agregué esta vista para simplificar consultas futuras.
 -- Sirve para que cocina y barista no tengan que repetir joins grandes.
 -- También deja calculada el área de preparación según categoría.
@@ -192,7 +186,6 @@ INNER JOIN productos p ON p.id = d.id_producto
 INNER JOIN categorias c ON c.id = p.categoria_id;
 
 -- ---------- Datos iniciales ----------
--- ========JARVIS UPDATE========
 -- Limpié los seeds duplicados que venían en el archivo original.
 -- Dejé una sola carga coherente de usuarios, categorías y productos.
 INSERT INTO roles(nombre) VALUES
@@ -264,7 +257,6 @@ JOIN (
     UNION ALL SELECT 'comidas', 'Tostada de Aguacate', 4300.00, 'fa-bread-slice'
     UNION ALL SELECT 'comidas', 'Bowl de Yogurt y Frutas', 3600.00, 'fa-bowl-food'
 
-    -- ========JARVIS UPDATE========
     -- Especialidades se deja yendo a cocina porque la regla acordada fue:
     -- solo 'cafes' y 'bebidas' van a barista.
     -- Si después quieren refinar esto, aquí es uno de los puntos a revisar.

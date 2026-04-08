@@ -4,7 +4,6 @@ header("Content-Type: application/json; charset=utf-8");
 require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
 
-// ========JARVIS UPDATE========
 // Este controlador deja de leer controller/ordenes.json.
 // Ahora calcula el estado de las mesas desde MySQL según las órdenes del usuario actual.
 

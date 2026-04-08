@@ -11,7 +11,6 @@ header("Pragma: no-cache");
 header("Expires: 0");
 header("Content-Type: text/html; charset=UTF-8");
 
-// ========JARVIS UPDATE========
 // La vista de barista ahora replica la estructura visual de cocina,
 // pero mantiene su propio flujo y endpoints separados.
 $baristaData = Barista::obtenerPanel();

@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
 
-# ========JARVIS UPDATE========
 # Este script ahora soporta ambos entornos:
 # 1) Railway: si la plataforma inyecta la variable PORT, Apache usará ese puerto.
 # 2) Docker local: si PORT no existe, Apache usará 80 dentro del contenedor.

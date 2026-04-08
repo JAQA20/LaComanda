@@ -5,7 +5,6 @@ require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/Barista.php";
 
-// ========JARVIS UPDATE========
 // Endpoint de lectura para barista.
 // Ahora depende del modelo Barista.php para dejar este módulo completamente separado
 // de cocina y del resto del flujo operativo.

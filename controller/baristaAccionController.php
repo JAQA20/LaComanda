@@ -6,7 +6,6 @@ require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/Barista.php";
 require_once __DIR__ . "/../config/rutas.php";
 
-// ========JARVIS UPDATE========
 // Endpoint de acciones de barista.
 // Ahora usa el modelo Barista.php para que este módulo quede realmente separado.
 

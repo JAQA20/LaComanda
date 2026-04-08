@@ -1,13 +1,11 @@
 <?php
 require_once __DIR__ . "/Conexion.php";
 
-// ========JARVIS UPDATE========
 // Este archivo reemplaza el Barista.php legacy que usaba PDO, tablas inexistentes
 // y el diseño viejo del proyecto. A partir de ahora este es el módulo oficial de barista.
 
 class Barista
 {
-    // ========JARVIS UPDATE========
     // Reescribí completo este modelo para que ahora sí sea el módulo propio de barista.
     // Ya no usa PDO, ya no usa tablas viejas, ya no asume id_estado global ni items_text.
     // Todo se calcula desde MySQL con detalle_orden y categorías de bebidas.
@@ -103,7 +101,6 @@ class Barista
 
     public static function obtenerPanel(): array
     {
-        // ========JARVIS UPDATE========
         // Método principal para la pantalla de barista.
         // Devuelve pendientes y listas ya clasificados para que la vista no haga lógica pesada.
         $conexion = self::conexion();
@@ -131,7 +128,6 @@ class Barista
         ];
     }
 
-    // ========JARVIS UPDATE========
     // Devuelve la misma estructura visual de cocina para reutilizar la pantalla,
     // pero filtrando solo ítems del área barista.
     public static function obtenerOrdenesVista(): array

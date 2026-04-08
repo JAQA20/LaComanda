@@ -7,7 +7,6 @@ require_once __DIR__ . "/../../model/Conexion.php";
 
 verificarRol([1]);
 
-// ========JARVIS UPDATE========
 // Este endpoint deja de leer controller/ordenes.json.
 // Ahora construye el historial administrativo 100% desde MySQL, manteniendo
 // la forma de salida que las vistas admin ya esperan.

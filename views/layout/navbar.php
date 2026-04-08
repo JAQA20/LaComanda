@@ -68,8 +68,6 @@ $categorias = Categorias::listarActivas();
                 <?php endif; ?>
 
                 <?php if ((isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 4) || (isset($_SESSION["rol_id"]) && (int)$_SESSION["rol_id"] === 1)): ?>
-                    <!-- ========JARVIS UPDATE======== -->
-                    <!-- Se agrega acceso directo al módulo de barista ahora que ya quedó separado. -->
                     <li>
                         <a class="dropdown-item" href="<?= BASE_URL ?>views/barista.php">
                             <i class="fas fa-mug-hot me-2"></i> Barista

@@ -1,4 +1,3 @@
-// ========JARVIS UPDATE========
 // Lógica extraída desde views/index.php para aligerar la vista.
 // Requiere window.INDEX_CONFIG definido por la vista PHP.
 
@@ -8,11 +7,9 @@ let mesaActual = null;
 let ordenActual = [];
 let totalOrden = 0;
 let dragState = null;
-        // ========JARVIS UPDATE========
         // Admin puede editar el layout, pero el modo edición inicia en OFF.
         let editLayoutMode = false;
 
-        // ========JARVIS UPDATE========
         // Estado visual por mesa ahora contempla sub-órdenes separadas:
         // cocina y barista. Se guarda un objeto por mesa con estado general y
         // estados por área para poder notificar y entregar cada parte por separado.
@@ -175,7 +172,6 @@ let dragState = null;
             toastEl.classList.remove('text-bg-success', 'text-bg-dark');
 
             if (area === 'barista') {
-                // ========JARVIS UPDATE========
                 // Barista ahora usa también notificación verde, igual que cocina.
                 toastEl.classList.add('text-bg-success');
                 toastBody.textContent = `Bebida(s) lista(s) en Mesa ${numeroMesa}.`;

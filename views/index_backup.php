@@ -470,7 +470,6 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             box-shadow: 0 8px 16px rgba(0, 0, 0, .14);
         }
 
-        /* ========JARVIS UPDATE========
            Indicadores por sub-orden sobre cada mesa. */
         .table-notification-stack {
             position: absolute;
@@ -509,7 +508,6 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             font-size: .72rem;
         }
 
-        /* ========JARVIS UPDATE========
            Ambos badges se dejan rojos como pidió Javi. El icono diferencia
            cocina vs barista, y la posición queda por fuera/encima de la mesa. */
         .badge-kitchen {
@@ -725,8 +723,6 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                                         </div>
 
                                         <div class="floor-edit-wrap">
-                                            <!-- ========JARVIS UPDATE========
-                                                 El modo edición ahora inicia apagado para evitar cambios accidentales. -->
                                             <button class="floor-chip" id="editLayoutChip" type="button">Modo edición: OFF</button>
                                             <span class="floor-hint">Desactívalo para evitar mover el plano por accidente.</span>
                                         </div>
@@ -768,11 +764,9 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
         let ordenActual = [];
         let totalOrden = 0;
         let dragState = null;
-        // ========JARVIS UPDATE========
         // Admin puede editar el layout, pero el modo edición inicia en OFF.
         let editLayoutMode = false;
 
-        // ========JARVIS UPDATE========
         // Estado visual por mesa ahora contempla sub-órdenes separadas:
         // cocina y barista. Se guarda un objeto por mesa con estado general y
         // estados por área para poder notificar y entregar cada parte por separado.

@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
 
 COPY . /var/www/html/
 
-# ========JARVIS UPDATE========
 # Railway estaba arrancando Apache directo con apache2-foreground, por eso nunca pasaba
 # por railway/start.sh y no se desactivaban los MPM sobrantes. Eso causaba:
 # "AH00534: apache2: Configuration error: More than one MPM loaded."

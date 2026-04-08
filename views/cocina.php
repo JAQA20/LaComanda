@@ -7,7 +7,6 @@ require_once __DIR__ . "/../model/OrdenesSync.php";
 
 verificarRol([1, 3]); // Admin(1) y Cocina(3)
 
-// ========JARVIS UPDATE========
 // Esta vista deja de leer controller/ordenes.json.
 // Ahora consume MySQL por medio del modelo y usa el endpoint AJAX nuevo
 // para refrescar la pantalla periódicamente.
@@ -245,7 +244,6 @@ function obtenerPasoOrden($estado)
     </div>
 
     <script>
-        // ========JARVIS UPDATE========
         // El frontend ahora trabaja con órdenes servidas desde MySQL.
         // Se conserva la UX anterior, pero la fuente de datos ya no es JSON.
         let modalOpen = false;

@@ -6,7 +6,6 @@ app_configure_errors();
 header("Content-Type: application/json; charset=utf-8");
 require_once __DIR__ . "/../model/OrdenesSync.php";
 
-// ========JARVIS UPDATE========
 // Este controlador deja de trabajar con controller/ordenes.json.
 // Ahora recibe la orden del frontend y la persiste directamente en MySQL.
 
@@ -45,7 +44,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ========JARVIS UPDATE========
 // Se normaliza el payload esperado desde el frontend para insertarlo en el schema nuevo.
 $data["mesa"] = isset($data["mesa"]) ? (string)$data["mesa"] : "0";
 $data["items"] = isset($data["items"]) ? app_normalize_text((string)$data["items"]) : "";

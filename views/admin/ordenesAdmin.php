@@ -86,8 +86,6 @@ function obtenerClaseEstado(string $estado): string
 
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <div class="relative">
-                                <!-- ========JARVIS UPDATE========
-                                     Búsqueda por número de orden igual al patrón de otros listados admin. -->
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-brownSoft"></i>
                                 <input id="buscar-orden-input" type="text" placeholder="Buscar por fecha, # de orden o usuario" class="pl-10 pr-4 py-2 rounded-full border border-[#e8dccb] bg-white text-sm text-brownDark focus:outline-none focus:ring-2 focus:ring-mintGreen">
                             </div>

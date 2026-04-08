@@ -4,7 +4,6 @@ require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
 require_once __DIR__ . "/../config/rutas.php";
 
-// ========JARVIS UPDATE========
 // Cocina ahora usa un endpoint por acciones igual que barista:
 // preparacion | lista. La entrega final sigue siendo responsabilidad del mesero.
 //

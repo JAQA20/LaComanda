@@ -1,4 +1,3 @@
-/* ========JARVIS UPDATE========
    Estilos extraídos desde views/index.php para aligerar la vista.
 */
 
@@ -439,7 +438,6 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, .14);
         }
 
-        /* ========JARVIS UPDATE========
            Indicadores por sub-orden sobre cada mesa. */
         .table-notification-stack {
             position: absolute;
@@ -478,7 +476,6 @@
             font-size: .72rem;
         }
 
-        /* ========JARVIS UPDATE========
            Ambos badges se dejan rojos como pidió Javi. El icono diferencia
            cocina vs barista, y la posición queda por fuera/encima de la mesa. */
         .badge-kitchen {

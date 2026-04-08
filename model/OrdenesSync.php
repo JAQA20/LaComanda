@@ -4,7 +4,6 @@ require_once __DIR__ . "/../config/text.php";
 
 class OrdenesSync
 {
-    // ========JARVIS UPDATE========
     // Este modelo deja de sincronizar JSON -> MySQL.
     // A partir de aquí la orden se crea directamente en la base de datos
     // usando el schema nuevo: ordenes como cabecera y detalle_orden como
@@ -104,7 +103,6 @@ class OrdenesSync
         return (int)($row['siguiente'] ?? 1);
     }
 
-    // ========JARVIS UPDATE========
     // guardarEnBase ahora crea la cabecera y los detalles directamente en MySQL.
     // Devuelve el número de orden generado para que el controlador lo responda al frontend.
     public static function guardarEnBase(array $orden): int
@@ -190,7 +188,6 @@ class OrdenesSync
                 $stmtDetalle->execute();
             }
 
-            // ========JARVIS UPDATE========
             // Se marca la mesa como ocupada apenas la orden queda creada.
             $stmtMesa = $conexion->prepare("UPDATE mesas SET estado = 'ocupada' WHERE id = ?");
             $stmtMesa->bind_param("i", $mesaId);
@@ -204,7 +201,6 @@ class OrdenesSync
         }
     }
 
-    // ========JARVIS UPDATE========
     // Consultas auxiliares para cocina. Se agrupan items por orden y se calcula
     // un estado visible para la pantalla de cocina usando solo productos del área cocina.
     public static function obtenerOrdenesCocina(): array
@@ -295,7 +291,6 @@ class OrdenesSync
         return $salida;
     }
 
-    // ========JARVIS UPDATE========
     // Cocina ahora sigue el mismo flujo de barista:
     // pendiente -> en_preparacion -> lista -> entregada por mesero.
     public static function marcarOrdenCocinaEnPreparacion(int $numeroOrden): void
@@ -358,7 +353,6 @@ class OrdenesSync
         }
     }
 
-    // ========JARVIS UPDATE========
     // La entrega sigue siendo a nivel de orden completa. Esto nos permite mantener
     // el flujo actual mientras luego migramos barista y la entrega final completa.
     public static function marcarOrdenEntregada(int $numeroOrden): void
@@ -406,7 +400,6 @@ class OrdenesSync
         }
     }
 
-    // ========JARVIS UPDATE========
     // Devuelve el estado visible de las mesas para el mesero actual.
     // El criterio sigue siendo similar al flujo viejo:
     // - pendiente: existe una orden del usuario con items no listos
@@ -478,7 +471,6 @@ class OrdenesSync
         return $estadoPorMesa;
     }
 
-    // ========JARVIS UPDATE========
     // Entrega por sub-orden: cocina o barista. La orden general queda entregada
     // solo cuando ambas áreas ya fueron entregadas.
     public static function entregarOrdenPorMesaUsuario(int $mesaNumero, ?int $usuarioId, ?string $area = null): void
@@ -570,7 +562,6 @@ class OrdenesSync
         }
     }
 
-    // ========JARVIS UPDATE========
     // Estado visible por área para manejar sub-órdenes de cocina y barista.
     private static function resolverEstadoSuborden(array $estados): ?string
     {

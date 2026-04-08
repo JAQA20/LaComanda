@@ -5,7 +5,6 @@ require_once __DIR__ . "/../middleware/auth.php";
 require_once __DIR__ . "/../middleware/roles.php";
 require_once __DIR__ . "/../model/OrdenesSync.php";
 
-// ========JARVIS UPDATE========
 // Este endpoint ya no lee controller/ordenes.json.
 // Ahora obtiene las órdenes de cocina desde MySQL usando el modelo nuevo.
 

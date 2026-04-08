@@ -34,8 +34,6 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
 
         <link rel="stylesheet" href="<?= BASE_URL ?>public/css/index.css">
 
-
-
 </head>
 
 <body class="custom-beige min-h-screen">
@@ -108,8 +106,6 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                                         </div>
 
                                         <div class="floor-edit-wrap">
-                                            <!-- ========JARVIS UPDATE========
-                                                 El modo edición ahora inicia apagado para evitar cambios accidentales. -->
                                             <button class="floor-chip" id="editLayoutChip" type="button">Modo edición: OFF</button>
                                             <span class="floor-hint">Desactívalo para evitar mover el plano por accidente.</span>
                                         </div>

@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . "/Conexion.php";
 
-// ========JARVIS UPDATE========
 // Este modelo se ajusta al schema nuevo. Ya no depende de timestamp/id_estado
 // del diseño viejo. El estado general de cada orden se calcula desde detalle_orden.
 
