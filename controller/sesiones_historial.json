@@ -1,28 +1,3 @@
 [
-    {
-        "session_id": "9b067f77b71064f1abde437ed9226e44",
-        "usuario_id": 26,
-        "nombre": "Galaxy Tab",
-        "email": "galaxytab@proyecto.com",
-        "rol_id": 2,
-        "login_at": 1774001673,
-        "ultima_actividad": 1774003298,
-        "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Linux; Android 10; K) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/146.0.0.0 Safari\/537.36",
-        "pagina_actual": "\/public\/api\/layoutMesas.php?_=1774003298276",
-        "logout_at": 1774003303
-    },
-    {
-        "session_id": "nbtm7463hciu61ok7b5nes1c80",
-        "usuario_id": 27,
-        "nombre": "Mesero mesero",
-        "email": "mesero@proyecto.com",
-        "rol_id": 2,
-        "login_at": 1774058995,
-        "ultima_actividad": 1774259225,
-        "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/146.0.0.0 Safari\/537.36 Edg\/146.0.0.0",
-        "pagina_actual": "\/public\/api\/layoutMesas.php?_=1774259225370",
-        "logout_at": 1774259247
-    }
+    
 ]

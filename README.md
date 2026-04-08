@@ -33,7 +33,7 @@ Verifica que esté instalado y cual version se instalo ejecutando:
 
 **docker --version**
 
-y 
+y
 **docker compose version**
 
 2️⃣ Git
@@ -101,18 +101,17 @@ Ir al navegador:
 
 http://localhost:8080
 Usuarios de prueba
-Rol	Email	Password
-Admin	admin@proyecto.com
-	Admin123!
-Mesero	mesero@proyecto.com
-	Mesero123!
-Cocina	cocina@proyecto.com
-	Cocina123!
-Barista	barista@lacomanda.com
-	Barista123!
+Rol Email Password
+Admin admin@proyecto.com
+Admin123!
+Mesero mesero@proyecto.com
+Mesero123!
+Cocina cocina@proyecto.com
+Cocina123!
+Barista barista@lacomanda.com
+Barista123!
 
-
-Comandos útiles: 
+Comandos útiles:
 Iniciar contenedores
 **docker compose up**
 Reconstruir contenedores
@@ -122,7 +121,7 @@ Detener contenedores
 Reiniciar base de datos
 **docker compose down -v**
 **docker compose up --build**
-Inicalizar MySQL en Docker: 
+Inicalizar MySQL en Docker:
 **docker exec -it la-comanda-db mysql -u root -p**
 Esto inicializa MySQL dentro del contenedor y permite hacer consultas
 
@@ -153,4 +152,3 @@ No requiere instalar XAMPP
 Permite replicar fácilmente el entorno de desarrollo
 
 Equipo de desarrollo
-
