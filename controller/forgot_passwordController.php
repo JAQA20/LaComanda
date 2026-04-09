@@ -97,9 +97,7 @@ try {
     $message .= "Usa este enlace (expira en 60 minutos):\n{$resetLink}\n\n";
     $message .= "Si no solicitaste este cambio, puedes ignorar este mensaje.\n";
 
-    $logoUrl = $appUrl !== ''
-        ? $appUrl . '/public/img/logotipo1.PNG'
-        : (($scheme ?? 'http') . '://' . ($host ?? 'localhost') . ($basePath ?? '') . '/public/img/logotipo1.PNG');
+    $logoUrl = 'https://lacomanda-cafeteriatoscana.up.railway.app/public/img/logotipo1.PNG';
 
     $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
     $safeResetLink = htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8');

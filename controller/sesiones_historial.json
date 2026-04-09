@@ -1,2 +1,15 @@
 [
+    {
+        "session_id": "78735e747c6443b042168498781612d4",
+        "usuario_id": 1,
+        "nombre": "Admin admin",
+        "email": "admin@proyecto.com",
+        "rol_id": 1,
+        "login_at": 1775680907,
+        "ultima_actividad": 1775682526,
+        "ip": "192.168.65.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/146.0.0.0 Safari\/537.36 Edg\/146.0.0.0",
+        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1775682526838",
+        "logout_at": 1775682528
+    }
 ]
