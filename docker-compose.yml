@@ -2,6 +2,7 @@ services:
   web:
     build: .
     container_name: la-comanda-web
+    command: ["sh", "/var/www/html/railway/start.sh"]
     ports:
       - "8080:80"
     env_file:

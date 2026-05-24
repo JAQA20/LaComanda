@@ -75,18 +75,13 @@ try {
     $stmtInsert->bind_param("is", $uid, $tokenStored);
     $stmtInsert->execute();
 
+    $baseUrl = 'https://lacomanda-cafeteriatoscana.up.railway.app';
+    
     $appUrl = rtrim((string)app_env('APP_URL', ''), '/');
     if ($appUrl !== '') {
         $resetLink = $appUrl . '/views/resetPassword.php?token=' . urlencode($tokenPlain);
     } else {
-        $forwardedProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
-        $https = $_SERVER['HTTPS'] ?? '';
-        $scheme = ($forwardedProto === 'https' || (!empty($https) && $https !== 'off')) ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-        $basePath = preg_replace('#/public/api$#', '', rtrim($scriptDir, '/'));
-        $basePath = preg_replace('#/controller$#', '', $basePath);
-        $resetLink = $scheme . '://' . $host . $basePath . '/views/resetPassword.php?token=' . urlencode($tokenPlain);
+        $resetLink = $baseUrl . '/views/resetPassword.php?token=' . urlencode($tokenPlain);
     }
 
     $subject = "Recuperar contraseña - La Comanda";
@@ -97,7 +92,7 @@ try {
     $message .= "Usa este enlace (expira en 60 minutos):\n{$resetLink}\n\n";
     $message .= "Si no solicitaste este cambio, puedes ignorar este mensaje.\n";
 
-    $logoUrl = 'https://lacomanda-cafeteriatoscana.up.railway.app/public/img/logotipo1.PNG';
+    $logoUrl = $baseUrl . '/public/img/logotipo1.PNG';
 
     $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
     $safeResetLink = htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8');
