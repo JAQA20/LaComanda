@@ -1,26 +1,14 @@
 [
     {
-        "session_id": "51b0d53cdbcc37d327127ca0eaed5531",
+        "session_id": "f212c0a1dd795ee22fa7afc80bba1ea4",
         "usuario_id": 1,
         "nombre": "Admin admin",
         "email": "admin@proyecto.com",
         "rol_id": 1,
-        "login_at": 1779327314,
-        "ultima_actividad": 1779331562,
+        "login_at": 1781140966,
+        "ultima_actividad": 1781227019,
         "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/148.0.0.0 Safari\/537.36 Edg\/148.0.0.0",
-        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1779331562176"
-    },
-    {
-        "session_id": "9a565a9b53afd329ba4950b055f08f0d",
-        "usuario_id": 1,
-        "nombre": "Admin admin",
-        "email": "admin@proyecto.com",
-        "rol_id": 1,
-        "login_at": 1779329059,
-        "ultima_actividad": 1779329259,
-        "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/605.1.15 (KHTML, like Gecko) Version\/26.4 Safari\/605.1.15",
-        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1779329259879"
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
+        "pagina_actual": "\/public\/api\/obtenerOrdenes.php"
     }
 ]
