@@ -422,5 +422,6 @@ function obtenerPasoOrden($estado)
         bindExpandButtons();
         startAutoRefresh();
     </script>
+    <script src="<?= BASE_URL ?>public/js/session-sync.js"></script>
 </body>
 </html>

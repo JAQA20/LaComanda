@@ -8,6 +8,8 @@ verificarRol([1]);
 
 $usuarios = Usuarios::listar();
 $sesionesActivas = SesionesActivas::listarActivas();
+$editarUsuarioSuccess = $_SESSION["editar_usuario_success"] ?? null;
+unset($_SESSION["editar_usuario_success"]);
 ?>
 
 <!DOCTYPE html>
@@ -259,6 +261,18 @@ $sesionesActivas = SesionesActivas::listarActivas();
 
     <!-- SweetAlert2 para confirmación de eliminación -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php if (!empty($editarUsuarioSuccess)): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Cambios guardados',
+                text: <?= json_encode($editarUsuarioSuccess) ?>,
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#70A38F'
+            });
+        </script>
+    <?php endif; ?>
 
     <!-- Script propio -->
     <script src="<?= BASE_URL ?>public/js/admin-usuarios.js"></script>

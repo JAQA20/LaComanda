@@ -89,3 +89,4 @@ $categorias = Categorias::listarActivas();
 
     </div>
 </nav>
+<script src="<?= BASE_URL ?>public/js/session-sync.js"></script>

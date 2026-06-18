@@ -121,6 +121,7 @@ $rutaActual = $_SERVER["REQUEST_URI"];
             </div>
         </div>
     </nav>
+    <script src="<?= BASE_URL ?>public/js/session-sync.js"></script>
 
 </body>
 

@@ -699,6 +699,7 @@ $submensaje = $usuarioAutenticado
 
         </section>
     </main>
+    <script src="<?= BASE_URL ?>public/js/session-sync.js"></script>
 </body>
 
 </html>

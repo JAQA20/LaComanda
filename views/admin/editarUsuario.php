@@ -5,13 +5,19 @@ require_once __DIR__ . "/../../middleware/roles.php";
 require_once __DIR__ . "/../../model/Usuarios.php";
 
 verificarRol([1]); // solo Admin
-// if (session_status() === PHP_SESSION_NONE) {
-//     session_start();
-// }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $errors = [];
 $roles = [];
 $usuario = null;
+$flashErrors = $_SESSION["editar_usuario_errors"] ?? [];
+unset($_SESSION["editar_usuario_errors"]);
+
+if (isset($_GET["error"]) && $_GET["error"] !== "") {
+    $flashErrors[] = (string)$_GET["error"];
+}
 
 $id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 if ($id <= 0) {
@@ -137,7 +143,7 @@ try {
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                             </div>
-                            <div class="form-text">Mínimo 8 caracteres.</div>
+                            <div class="form-text">Mínimo 8 caracteres. Déjala vacía si no deseas cambiarla.</div>
                         </div>
 
                         <div class="col-md-6">
@@ -168,6 +174,57 @@ try {
     <?php require_once __DIR__ . "/../layout/footer.php"; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php if (!empty($flashErrors)): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo actualizar la contraseña',
+                html: <?= json_encode('<div style="text-align:left;"><ul style="margin:0;padding-left:1.25rem;">' . implode('', array_map(static fn($err) => '<li>' . htmlspecialchars($err, ENT_QUOTES, 'UTF-8') . '</li>', $flashErrors)) . '</ul></div>') ?>,
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#70A38F'
+            });
+        </script>
+    <?php endif; ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form[action$="public/api/editarUsuario.php"]');
+            const password = document.getElementById('password');
+            const password2 = document.querySelector('input[name="password2"]');
+
+            if (!form || !password || !password2) return;
+
+            form.addEventListener('submit', (event) => {
+                const nueva = password.value;
+                const confirmacion = password2.value;
+                const quiereCambiar = nueva.trim() !== '' || confirmacion.trim() !== '';
+                const errores = [];
+
+                if (!quiereCambiar) return;
+
+                if (nueva !== confirmacion) {
+                    errores.push('Las contraseñas no coinciden.');
+                }
+
+                if (nueva.length < 8) {
+                    errores.push('La contraseña debe tener al menos 8 caracteres.');
+                }
+
+                if (errores.length === 0) return;
+
+                event.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'La contraseña no cumple los criterios',
+                    html: `<div style="text-align:left;"><ul style="margin:0;padding-left:1.25rem;">${errores.map(error => `<li>${error}</li>`).join('')}</ul></div>`,
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#70A38F'
+                });
+            });
+        });
+    </script>
     <script src="<?= BASE_URL ?>public/js/togglePassword.js"></script>
 
 </body>

@@ -460,5 +460,6 @@ function obtenerPasoOrden($estado)
         bindExpandButtons();
         setInterval(fetchOrdenes, 5000);
     </script>
+    <script src="<?= BASE_URL ?>public/js/session-sync.js"></script>
 </body>
 </html>

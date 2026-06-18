@@ -157,6 +157,12 @@ require_once __DIR__ . '/../config/rutas.php';
     ?>
 
     <script src="<?= BASE_URL ?>public/js/togglePassword.js"></script>
+    <script src="<?= BASE_URL ?>public/js/session-sync.js"></script>
+    <script>
+        if (window.LaComandaSessionSync) {
+            window.LaComandaSessionSync.clearLogout();
+        }
+    </script>
     <script>
         // Efectos de carga
         const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');

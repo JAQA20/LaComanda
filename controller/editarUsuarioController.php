@@ -80,6 +80,10 @@ require_once __DIR__ . "/../model/Usuarios.php";
 
 verificarRol([1]); // Solo Admin
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: " . BASE_URL . "views/admin/usuarios.php");
     exit;
@@ -119,9 +123,14 @@ try {
 
     Usuarios::actualizar($id, $nombre, $apellido, $email, $rol_id, $passToUpdate);
 
+    $_SESSION["editar_usuario_success"] = $passToUpdate !== null
+        ? "La contraseña del usuario se actualizó correctamente."
+        : "El usuario se actualizó correctamente.";
+
     header("Location: " . BASE_URL . "views/admin/usuarios.php?success=usuario_actualizado");
     exit;
 } catch (Throwable $e) {
-    header("Location: " . BASE_URL . "views/admin/editarUsuario.php?id=" . $id . "&error=" . urlencode($e->getMessage()));
+    $_SESSION["editar_usuario_errors"] = [$e->getMessage()];
+    header("Location: " . BASE_URL . "views/admin/editarUsuario.php?id=" . $id);
     exit;
 }
