@@ -9,45 +9,42 @@ require_once __DIR__ . "/../config/rutas.php";
 require_once __DIR__ . "/../model/Productos.php";
 verificarRol([1]);
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-$errors = [];
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: " . BASE_URL . "views/admin/nuevoProducto.php");
+    exit;
+}
+
 $old = [
-    "categoria_id" => "",
-    "nombre" => "",
-    "precio" => "",
-    "icono" => "fa-mug-hot",
-    "activo" => "1"
+    "categoria_id" => trim($_POST["categoria_id"] ?? ""),
+    "nombre" => trim($_POST["nombre"] ?? ""),
+    "precio" => trim($_POST["precio"] ?? ""),
+    "icono" => trim($_POST["icono"] ?? "fa-mug-hot"),
+    "activo" => isset($_POST["activo"]) ? "1" : "0"
 ];
 
 try {
-    $categorias = Productos::listarCategoriasActivas();
-} catch (Throwable $e) {
-    $categorias = [];
-    $errors[] = "Error cargando categorías: " . $e->getMessage();
-}
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $old["categoria_id"] = $_POST["categoria_id"] ?? "";
-    $old["nombre"] = $_POST["nombre"] ?? "";
-    $old["precio"] = $_POST["precio"] ?? "";
-    $old["icono"] = $_POST["icono"] ?? "fa-mug-hot";
-    $old["activo"] = isset($_POST["activo"]) ? "1" : "0";
-
-    try {
-        Productos::crear(
-            (int)$old["categoria_id"],
-            $old["nombre"],
-            (int)$old["precio"],
-            $old["icono"],
-            (int)$old["activo"]
-        );
-
-        header("Location: " . BASE_URL . "views/admin/productos.php?created=1");
-        exit;
-    } catch (Throwable $e) {
-        $errors[] = $e->getMessage();
+    if ($old["categoria_id"] === "" || $old["nombre"] === "" || $old["precio"] === "") {
+        throw new Exception("Todos los campos obligatorios deben completarse.");
     }
-}
 
-// Render vista HTML
-require_once __DIR__ . "/../views/admin/nuevoProducto.php";
+    Productos::crear(
+        (int)$old["categoria_id"],
+        $old["nombre"],
+        (int)$old["precio"],
+        $old["icono"],
+        (int)$old["activo"]
+    );
+
+    $_SESSION["nuevo_producto_success"] = "Producto creado correctamente.";
+    header("Location: " . BASE_URL . "views/admin/productos.php?created=1");
+    exit;
+} catch (Throwable $e) {
+    $_SESSION["nuevo_producto_errors"] = [$e->getMessage()];
+    $_SESSION["nuevo_producto_old"] = $old;
+    header("Location: " . BASE_URL . "views/admin/nuevoProducto.php");
+    exit;
+}

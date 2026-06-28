@@ -5,14 +5,19 @@ require_once __DIR__ . "/../../config/rutas.php";
 require_once __DIR__ . "/../../model/Productos.php";
 verificarRol([1]);
 
-$errors = [];
-$old = [
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$errors = $_SESSION["nuevo_producto_errors"] ?? [];
+$old = $_SESSION["nuevo_producto_old"] ?? [
     "categoria_id" => "",
     "nombre" => "",
     "precio" => "",
     "icono" => "fa-mug-hot",
     "activo" => "1"
 ];
+unset($_SESSION["nuevo_producto_errors"], $_SESSION["nuevo_producto_old"]);
 
 try {
     $categorias = Productos::listarCategoriasActivas();
@@ -60,16 +65,7 @@ try {
                 </a>
             </div>
 
-            <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger">
-                    <div class="fw-semibold mb-1">Revisa lo siguiente:</div>
-                    <ul class="mb-0">
-                        <?php foreach ($errors as $err): ?>
-                            <li><?= htmlspecialchars($err) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
+
 
             <div class="card card-comanda shadow-sm">
                 <div class="card-body p-4 p-md-5">
@@ -149,6 +145,18 @@ try {
     <?php require_once __DIR__ . "/../layout/footer.php"; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php if (!empty($errors)): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo crear el producto',
+                html: <?= json_encode('<div style="text-align:left;"><ul style="margin:0;padding-left:1.25rem;">' . implode('', array_map(static fn($err) => '<li>' . htmlspecialchars($err, ENT_QUOTES, 'UTF-8') . '</li>', $errors)) . '</ul></div>') ?>,
+                confirmButtonText: 'Entendido'
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>
