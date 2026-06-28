@@ -5,11 +5,11 @@
         "nombre": "Admin admin",
         "email": "admin@proyecto.com",
         "rol_id": 1,
-        "login_at": 1781737402,
-        "ultima_actividad": 1781738172,
+        "login_at": 1782608942,
+        "ultima_actividad": 1782610657,
         "ip": "192.168.65.1",
         "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
-        "pagina_actual": "\/public\/api\/usuariosConectados.php",
-        "logout_at": 1781738175
+        "pagina_actual": "\/public\/api\/obtenerOrdenes.php",
+        "logout_at": 1782610660
     }
 ]

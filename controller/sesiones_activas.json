@@ -1,14 +1,38 @@
 [
     {
         "session_id": "f212c0a1dd795ee22fa7afc80bba1ea4",
+        "usuario_id": 3,
+        "nombre": "Cocina cocina",
+        "email": "cocina@proyecto.com",
+        "rol_id": 3,
+        "login_at": 1782610668,
+        "ultima_actividad": 1782611663,
+        "ip": "192.168.65.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
+        "pagina_actual": "\/public\/api\/obtenerOrdenes.php"
+    },
+    {
+        "session_id": "f4a92a9163ba55e1022c47661e33f36f",
+        "usuario_id": 4,
+        "nombre": "Barista barista",
+        "email": "barista@lacomanda.com",
+        "rol_id": 4,
+        "login_at": 1782610966,
+        "ultima_actividad": 1782611660,
+        "ip": "192.168.65.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36",
+        "pagina_actual": "\/public\/api\/baristaEstado.php"
+    },
+    {
+        "session_id": "9ce7a2af26206cfcc1d46e474448c196",
         "usuario_id": 1,
         "nombre": "Admin admin",
         "email": "admin@proyecto.com",
         "rol_id": 1,
-        "login_at": 1782608942,
-        "ultima_actividad": 1782610021,
+        "login_at": 1782611128,
+        "ultima_actividad": 1782611664,
         "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
-        "pagina_actual": "\/public\/api\/obtenerOrdenes.php"
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/605.1.15 (KHTML, like Gecko) Version\/26.5 Safari\/605.1.15",
+        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1782611664596"
     }
 ]

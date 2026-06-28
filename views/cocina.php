@@ -105,7 +105,7 @@ function obtenerPasoOrden($estado)
                 $entregadas = array_slice($entregadas, 0, 20);
                 foreach ($entregadas as $orden):
                 ?>
-                    <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card">
+                    <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card cursor-pointer hover:bg-gray-50 transition-colors expand-order-btn" data-orden-numero="<?= htmlspecialchars((string)$orden['numero']) ?>">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-sm font-medium text-brown-dark">Orden #<?= htmlspecialchars((string)$orden['numero']) ?></span>
                             <i class="fa-solid fa-check text-mint-green"></i>
@@ -138,6 +138,15 @@ function obtenerPasoOrden($estado)
 
                 <?php foreach ($ordenesPendientes as $orden): ?>
                     <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
+                        <?php if (($orden['estado'] ?? '') === 'lista'): ?>
+                            <div class="bg-blue-50 text-blue-800 text-sm font-semibold px-4 py-2 rounded-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-clock"></i> Esperando para su entrega
+                            </div>
+                        <?php elseif (($orden['estado'] ?? '') === 'en_preparacion'): ?>
+                            <div class="bg-orange-50 text-orange-800 text-sm font-semibold px-4 py-2 rounded-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-fire"></i> En preparación
+                            </div>
+                        <?php endif; ?>
                         <div class="flex items-center justify-between mb-4">
                             <?php $pasoActual = obtenerPasoOrden($orden['estado'] ?? 'pendiente'); ?>
                             <div class="mb-6 w-full">
@@ -217,8 +226,11 @@ function obtenerPasoOrden($estado)
         <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="sticky top-0 bg-brown-dark text-beige-light p-6 flex items-center justify-between z-10">
                 <div>
-                    <h2 class="text-2xl font-semibold" id="modal-orden-numero">Orden #</h2>
-                    <p class="text-sm opacity-80" id="modal-orden-mesa">Mesa: </p>
+                    <div class="flex items-center">
+                        <h2 class="text-2xl font-semibold" id="modal-orden-numero">Orden #</h2>
+                        <span id="modal-orden-estado" class="ml-3 text-xs px-2 py-1 rounded text-white font-medium"></span>
+                    </div>
+                    <p class="text-sm opacity-80 mt-1" id="modal-orden-mesa">Mesa: </p>
                 </div>
                 <button id="close-modal-btn" class="text-beige-light hover:text-white text-2xl transition-colors"><i class="fas fa-times"></i></button>
             </div>
@@ -285,7 +297,7 @@ function obtenerPasoOrden($estado)
             const deliveredList = document.getElementById('delivered-list');
             const entregadas = ordenes.filter(o => o.estado === 'entregada').slice(0, 20);
             deliveredList.innerHTML = entregadas.map(orden => `
-                <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card">
+                <div class="delivered-card bg-white rounded-xl p-4 custom-shadow order-card cursor-pointer hover:bg-gray-50 transition-colors expand-order-btn" data-orden-numero="${escapeHtml(orden.numero)}">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm font-medium text-brown-dark">Orden #${escapeHtml(orden.numero)}</span>
                         <i class="fa-solid fa-check text-mint-green"></i>
@@ -329,6 +341,8 @@ function obtenerPasoOrden($estado)
                 const pasoActual = obtenerPasoOrdenFrontend(orden.estado || 'pendiente');
                 return `
                     <div class="pending-order-card bg-white rounded-xl p-6 custom-shadow order-card border border-black-100">
+                        ${orden.estado === 'lista' ? '<div class="bg-blue-50 text-blue-800 text-sm font-semibold px-4 py-2 rounded-lg mb-4 flex items-center gap-2"><i class="fas fa-clock"></i> Esperando para su entrega</div>' : ''}
+                        ${orden.estado === 'en_preparacion' ? '<div class="bg-orange-50 text-orange-800 text-sm font-semibold px-4 py-2 rounded-lg mb-4 flex items-center gap-2"><i class="fas fa-fire"></i> En preparación</div>' : ''}
                         <div class="flex items-center justify-between mb-4"><div class="mb-6 w-full"><div class="flex items-center justify-between gap-2 flex-wrap">
                             <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 1, pasoActual > 1)}">${pasoActual > 1 ? '✓' : '1'}</div><span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 1, pasoActual > 1)}">Pedido</span></div>
                             <div class="flex-1 h-1 rounded ${stepLineClassJs(pasoActual > 1)}"></div>
@@ -347,27 +361,35 @@ function obtenerPasoOrden($estado)
                         ${rolId === 1 && orden.estado === 'lista' ? `<form action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><button type="submit" class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar como entregada</button></form>` : ''}
                     </div>`;
             }).join('');
-            bindExpandButtons();
         }
 
-        function bindExpandButtons() {
-            document.querySelectorAll('.expand-order-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const numeroOrden = this.getAttribute('data-orden-numero');
-                    const orden = currentOrders.find(o => String(o.numero) === String(numeroOrden));
-                    if (orden) {
-                        openOrderModal(orden.numero, orden.mesa, orden.items_detalle || [], orden.notas || '');
-                    }
-                });
-            });
-        }
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.expand-order-btn');
+            if (btn) {
+                const numeroOrden = btn.getAttribute('data-orden-numero');
+                const orden = currentOrders.find(o => String(o.numero) === String(numeroOrden));
+                if (orden) {
+                    openOrderModal(orden.numero, orden.mesa, orden.items_detalle || [], orden.notas || '', orden.estado);
+                }
+            }
+        });
 
-        function openOrderModal(numeroOrden, mesa, itemsDetalle, notas) {
+        function openOrderModal(numeroOrden, mesa, itemsDetalle, notas, estado = 'pendiente') {
             const modal = document.getElementById('order-detail-modal');
             modalOpen = true;
             selectedOrderNumber = numeroOrden;
             document.getElementById('modal-orden-numero').textContent = `Orden #${numeroOrden}`;
             document.getElementById('modal-orden-mesa').textContent = `Mesa: ${mesa}`;
+
+            const estadoSpan = document.getElementById('modal-orden-estado');
+            let estadoFormat = 'Pendiente';
+            let bgClass = 'bg-gray-500';
+            if (estado === 'en_preparacion') { estadoFormat = 'En preparación'; bgClass = 'bg-orange-500'; }
+            else if (estado === 'lista') { estadoFormat = 'Lista'; bgClass = 'bg-blue-500'; }
+            else if (estado === 'entregada') { estadoFormat = 'Entregada'; bgClass = 'bg-mint-green'; }
+            
+            estadoSpan.className = `ml-3 text-xs px-2 py-1 rounded text-white font-medium ${bgClass}`;
+            estadoSpan.textContent = estadoFormat;
             const numeroInput = document.getElementById('modal-orden-numero-input');
             if (numeroInput) numeroInput.value = numeroOrden;
 
@@ -404,7 +426,7 @@ function obtenerPasoOrden($estado)
                 if (modalOpen && selectedOrderNumber !== null) {
                     const ordenActualizada = currentOrders.find(o => String(o.numero) === String(selectedOrderNumber));
                     if (ordenActualizada) {
-                        openOrderModal(ordenActualizada.numero, ordenActualizada.mesa, ordenActualizada.items_detalle || [], ordenActualizada.notas || '');
+                        openOrderModal(ordenActualizada.numero, ordenActualizada.mesa, ordenActualizada.items_detalle || [], ordenActualizada.notas || '', ordenActualizada.estado);
                     } else {
                         closeOrderModal();
                     }
@@ -422,8 +444,13 @@ function obtenerPasoOrden($estado)
             const numero = form.querySelector('input[name="numero"]').value;
             const accion = form.querySelector('input[name="accion"]').value;
             const btn = form.querySelector('button[type="submit"]');
-            btn.disabled = true;
-            btn.textContent = 'Procesando...';
+            
+            if (accion === 'lista') {
+                btn.style.display = 'none';
+            } else {
+                btn.disabled = true;
+                btn.textContent = 'Procesando...';
+            }
 
             try {
                 const response = await fetch(form.action, {
@@ -445,8 +472,12 @@ function obtenerPasoOrden($estado)
                     throw new Error(data.message || 'Error desconocido');
                 }
             } catch (error) {
-                btn.disabled = false;
-                btn.textContent = accion === 'preparacion' ? 'Marcar en preparación' : 'Marcar como lista';
+                if (accion === 'lista') {
+                    btn.style.display = '';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Marcar en preparación';
+                }
                 Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Error al actualizar cocina' });
             }
         });
@@ -457,7 +488,6 @@ function obtenerPasoOrden($estado)
 
         renderDeliveredOrders(currentOrders);
         renderPendingOrders(currentOrders);
-        bindExpandButtons();
         setInterval(fetchOrdenes, 5000);
     </script>
     <script src="<?= BASE_URL ?>public/js/session-sync.js"></script>
