@@ -84,14 +84,31 @@ function obtenerClaseEstado(string $estado): string
                             <p class="text-sm text-brownSoft">Visualiza el detalle general del historial registrado.</p>
                         </div>
 
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                            <div class="relative">
+                        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                            <select id="filtro-tipo" class="px-4 py-2 rounded-full border border-[#e8dccb] bg-white text-sm text-brownDark focus:outline-none focus:ring-2 focus:ring-mintGreen w-full sm:w-auto">
+                                <option value="id_mostrado">Nº de orden</option>
+                                <option value="mesa">Nº de mesa</option>
+                                <option value="usuario_nombre">Usuario</option>
+                                <option value="fecha_formateada">Fecha</option>
+                            </select>
+                            
+                            <div class="relative flex-grow sm:flex-grow-0 w-full sm:w-auto">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-brownSoft"></i>
-                                <input id="buscar-orden-input" type="text" placeholder="Buscar por fecha, # de orden o usuario" class="pl-10 pr-4 py-2 rounded-full border border-[#e8dccb] bg-white text-sm text-brownDark focus:outline-none focus:ring-2 focus:ring-mintGreen">
+                                <input id="buscar-orden-input" type="text" placeholder="Valor a buscar..." class="pl-10 pr-4 py-2 rounded-full border border-[#e8dccb] bg-white text-sm text-brownDark focus:outline-none focus:ring-2 focus:ring-mintGreen w-full">
                             </div>
-                            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F5EEE5] text-sm font-medium text-brownDark">
+
+                            <select id="filtro-estado" class="px-4 py-2 rounded-full border border-[#e8dccb] bg-white text-sm text-brownDark focus:outline-none focus:ring-2 focus:ring-mintGreen w-full sm:w-auto">
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_proceso">En proceso</option>
+                                <option value="lista">Lista</option>
+                                <option value="entregada">Entregada</option>
+                                <option value="cancelada">Cancelada</option>
+                            </select>
+
+                            <div class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-[#F5EEE5] text-sm font-medium text-brownDark w-full lg:w-auto ml-auto">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
-                                Actualización automática
+                                <span>Actualización automática</span>
                             </div>
                         </div>
                     </div>
@@ -197,7 +214,9 @@ function obtenerClaseEstado(string $estado): string
     <script>
         const API_ORDENES = "<?= BASE_URL ?>public/api/ordenesAdminData.php";
         const tablaBody = document.getElementById("tabla-ordenes-body");
+        const filtroTipo = document.getElementById("filtro-tipo");
         const buscarOrdenInput = document.getElementById("buscar-orden-input");
+        const filtroEstado = document.getElementById("filtro-estado");
 
         const modalOrden = document.getElementById("modal-orden");
         const cerrarModalOrdenBtn = document.getElementById("cerrar-modal-orden");
@@ -360,14 +379,24 @@ function obtenerClaseEstado(string $estado): string
 
         function aplicarFiltroOrdenes() {
             const termino = (buscarOrdenInput?.value || '').trim().toLowerCase();
-            const filtradas = !termino
-                ? ordenesCache
-                : ordenesCache.filter(orden => {
-                    const numero = String(orden.id_mostrado ?? '').toLowerCase();
-                    const fecha = String(orden.fecha_formateada ?? '').toLowerCase();
-                    const usuario = String(orden.usuario_nombre ?? '').toLowerCase();
-                    return numero.includes(termino) || fecha.includes(termino) || usuario.includes(termino);
-                });
+            const tipoFiltro = filtroTipo?.value || 'id_mostrado';
+            const estadoFiltro = (filtroEstado?.value || '').toLowerCase();
+            
+            const filtradas = ordenesCache.filter(orden => {
+                let matchTexto = true;
+                if (termino) {
+                    const valor = String(orden[tipoFiltro] ?? '').toLowerCase();
+                    matchTexto = valor.includes(termino);
+                }
+
+                let matchEstado = true;
+                if (estadoFiltro) {
+                    const estadoOrden = String(orden.estado_normalizado ?? "pendiente").toLowerCase();
+                    matchEstado = estadoOrden === estadoFiltro;
+                }
+
+                return matchTexto && matchEstado;
+            });
             renderTabla(filtradas);
 
             document.querySelectorAll('#tabla-ordenes-body tr[data-orden]').forEach(fila => {
@@ -432,6 +461,8 @@ function obtenerClaseEstado(string $estado): string
         });
 
         buscarOrdenInput?.addEventListener('input', aplicarFiltroOrdenes);
+        filtroTipo?.addEventListener('change', aplicarFiltroOrdenes);
+        filtroEstado?.addEventListener('change', aplicarFiltroOrdenes);
 
         cargarOrdenes();
         setInterval(cargarOrdenes, 5000);

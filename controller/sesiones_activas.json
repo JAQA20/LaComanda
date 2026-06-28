@@ -6,9 +6,9 @@
         "email": "admin@proyecto.com",
         "rol_id": 1,
         "login_at": 1782608942,
-        "ultima_actividad": 1782609164,
+        "ultima_actividad": 1782610021,
         "ip": "192.168.65.1",
         "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
-        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1782609164655"
+        "pagina_actual": "\/public\/api\/obtenerOrdenes.php"
     }
 ]
