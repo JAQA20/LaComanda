@@ -26,6 +26,8 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script defer src="http://192.168.100.236:3000/script.js" data-website-id="c24a5ebc-504e-44ca-9203-da878b980848"></script>
+    
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">

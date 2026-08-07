@@ -34,5 +34,17 @@
         "ip": "192.168.65.1",
         "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
         "pagina_actual": "\/public\/api\/ordenesAdminData.php"
+    },
+    {
+        "session_id": "ecce54946ea245cf85fa76d5e0887a70",
+        "usuario_id": 1,
+        "nombre": "Admin admin",
+        "email": "admin@proyecto.com",
+        "rol_id": 1,
+        "login_at": 1785513588,
+        "ultima_actividad": 1785514734,
+        "ip": "192.168.65.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/150.0.0.0 Safari\/537.36 Edg\/150.0.0.0",
+        "pagina_actual": "\/public\/api\/ordenesAdminData.php"
     }
 ]

@@ -22,6 +22,8 @@ $rutaActual = $_SERVER["REQUEST_URI"];
         };
     </script>
 
+    <script defer src="http://192.168.100.236:3000/script.js" data-website-id="c24a5ebc-504e-44ca-9203-da878b980848"></script>
+
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
