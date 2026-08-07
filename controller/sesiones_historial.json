@@ -24,5 +24,57 @@
         "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
         "pagina_actual": "\/public\/api\/obtenerOrdenes.php",
         "logout_at": 1782612545
+    },
+    {
+        "session_id": "b4d0cb7fdbcf685a2df0085671714727",
+        "usuario_id": 1,
+        "nombre": "Admin admin",
+        "email": "admin@lacomanda.com",
+        "rol_id": 1,
+        "login_at": 1782953225,
+        "ultima_actividad": 1782953345,
+        "ip": "172.18.0.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
+        "pagina_actual": "\/public\/api\/ordenesAdminData.php",
+        "logout_at": 1782953348
+    },
+    {
+        "session_id": "1c43b9cfaafa55d573b59975ce21ca63",
+        "usuario_id": 1,
+        "nombre": "Admin admin",
+        "email": "admin@lacomanda.com",
+        "rol_id": 1,
+        "login_at": 1783195977,
+        "ultima_actividad": 1783196487,
+        "ip": "172.18.0.1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36",
+        "pagina_actual": "\/public\/api\/ordenesAdminData.php",
+        "logout_at": 1783196491
+    },
+    {
+        "session_id": "9d3c04349522ebf16036703df3a6fcf5",
+        "usuario_id": 1,
+        "nombre": "Admin admin",
+        "email": "admin@lacomanda.com",
+        "rol_id": 1,
+        "login_at": 1783196500,
+        "ultima_actividad": 1783198620,
+        "ip": "172.18.0.1",
+        "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
+        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1783198621851",
+        "logout_at": 1783198622
+    },
+    {
+        "session_id": "c001a6a33b70d6ad8e234ef60764d21d",
+        "usuario_id": 1,
+        "nombre": "Admin admin",
+        "email": "admin@lacomanda.com",
+        "rol_id": 1,
+        "login_at": 1785879111,
+        "ultima_actividad": 1785879751,
+        "ip": "172.18.0.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/151.0.0.0 Safari\/537.36 Edg\/151.0.0.0",
+        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1785879751508",
+        "logout_at": 1785879753
     }
 ]
