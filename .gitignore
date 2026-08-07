@@ -1,3 +1,4 @@
 .env
 Documentacion_Deploy_Railway_LaComanda.html
 /controller/*.js
+.DS_Store
