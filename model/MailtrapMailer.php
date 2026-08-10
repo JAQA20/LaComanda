@@ -99,11 +99,14 @@ class MailtrapMailer
         $username = trim((string)($config['smtp_username'] ?? ''));
         $password = trim((string)($config['smtp_password'] ?? ''));
         $encryption = strtolower(trim((string)($config['smtp_encryption'] ?? 'tls')));
-        $fromEmail = trim((string)($config['from_email'] ?? 'no-reply@lacomanda.local'));
+        $fromEmail = trim((string)($config['from_email'] ?? ''));
+        if ($fromEmail === '') {
+            $fromEmail = $username !== '' ? $username : 'no-reply@lacomanda.com';
+        }
         $fromName = trim((string)($config['from_name'] ?? 'La Comanda'));
 
         if ($host === '' || $port <= 0 || $username === '' || $password === '') {
-            throw new Exception('SMTP Mailtrap no configurado: falta host, puerto, usuario o contraseña');
+            throw new Exception('SMTP no configurado: falta host, puerto, usuario o contraseña');
         }
 
         $toDisplayName = $toName !== '' ? $toName : $toEmail;
