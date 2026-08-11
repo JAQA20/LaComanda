@@ -1,3 +1,6 @@
 .env
 Documentacion_Deploy_Railway_LaComanda.html
 /controller/*.js
+.DS_Store
+controller/sesiones_activas.json
+controller/sesiones_historial.json
