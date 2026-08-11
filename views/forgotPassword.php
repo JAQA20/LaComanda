@@ -20,7 +20,7 @@ require_once __DIR__ . "/../config/rutas.php";
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/forgotPassword.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/login.css">
 </head>
 
 <body class="bg-brand-beige min-h-screen">
@@ -51,14 +51,14 @@ require_once __DIR__ . "/../config/rutas.php";
 
                     <button
                         type="submit"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-2xl transition-colors duration-200">
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#70A38F] hover:bg-[#5B8F7A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#70A38F] transition-all duration-200 transform hover:scale-105">
                         Enviar enlace
                     </button>
                 </form>
 
                 <div class="mt-6 text-center">
-                    <a href="<?= BASE_URL ?>views/login.php" class="text-green-600 hover:underline font-medium">
-                        Volver al login
+                    <a href="<?= BASE_URL ?>views/login.php" class="font-medium text-brand-green hover:underline">
+                        Volver al inicio de sesión
                     </a>
                 </div>
             </div>

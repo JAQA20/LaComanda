@@ -477,14 +477,25 @@ let dragState = null;
                 productosGrid.innerHTML = items.map(p => {
                     const nombre = p.nombre ?? "";
                     const precio = Number(p.precio ?? 0);
-                    const icono = p.icono ?? "fa-box";
+                    const imagen = p.imagen;
                     const nombreSafe = nombre.replace(/'/g, "\\'");
+                    
+                    let imgSrc = "";
+                    if (imagen) {
+                        if (imagen.startsWith("http://") || imagen.startsWith("https://")) {
+                            imgSrc = imagen;
+                        } else {
+                            imgSrc = BASE_URL + "public/img/productos/" + imagen;
+                        }
+                    } else {
+                        imgSrc = BASE_URL + "public/img/productos/default.png"; // Fallback
+                    }
 
                     return `
                         <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
                             <div class="text-center">
-                                <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas ${icono} text-white text-xl"></i>
+                                <div class="w-20 h-20 mx-auto mb-4 overflow-hidden rounded-xl border border-gray-100 flex items-center justify-center bg-gray-50">
+                                    <img src="${imgSrc}" alt="${escaparHtml(nombre)}" class="w-full h-full object-cover" onerror="this.src='${BASE_URL}public/img/productos/default.png'">
                                 </div>
                                 <h3 class="text-brown font-semibold text-lg mb-2">${nombre}</h3>
                                 <p class="text-mint font-bold text-xl mb-4">₡${precio.toLocaleString()}</p>
@@ -1010,9 +1021,8 @@ let dragState = null;
                 const result = await respuesta.json();
 
                 if (result.status === "OK") {
-                    console.log("Orden guardada correctamente en backend");
-                    console.log("mesaActual antes de actualizar estado:", mesaActual);
-                    console.log("mesaEstados antes:", mesaEstados);
+
+
 
                     mesaEstados[mesaActual] = {
                         general: 'pendiente',
@@ -1020,13 +1030,10 @@ let dragState = null;
                         barista: 'pendiente',
                         estado: 'pendiente'
                     };
-                    console.log("mesaEstados después:", mesaEstados);
 
                     guardarEstadoMesas();
-                    console.log("Estado guardado en localStorage");
 
                     actualizarEstadoMesa(mesaActual);
-                    console.log("UI de mesa actualizada");
 
                     await Swal.fire({
                         position: "center",

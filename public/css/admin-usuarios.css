@@ -73,5 +73,18 @@ table.dataTable thead th{
   border-radius: 10px !important;
 }
 
+/* Custom DataTables Pagination */
+.page-item.active .page-link {
+    background-color: var(--mint) !important;
+    border-color: var(--mint) !important;
+    color: white !important;
+}
 
+.page-link {
+    color: var(--brown) !important;
+}
 
+.page-link:hover {
+    background-color: var(--beige) !important;
+    color: var(--brown) !important;
+}

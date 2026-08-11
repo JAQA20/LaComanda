@@ -87,7 +87,29 @@
             background: rgba(112, 163, 143, 0.55);
         }
 
+/* Custom DataTables Pagination */
+.page-item.active .page-link {
+    background-color: #70A38F !important;
+    border-color: #70A38F !important;
+    color: white !important;
+}
 
-        
-        
-  
+.page-link {
+    color: #4b2e2a !important;
+}
+
+.page-link:hover {
+    background-color: #ede3d6 !important;
+    color: #4b2e2a !important;
+}
+
+/* SweetAlert Global Overrides */
+div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
+    background-color: #4E342E !important; /* brownDark */
+    color: #fff !important;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel {
+    background-color: #F5EEE5 !important; 
+    color: #4E342E !important;
+}

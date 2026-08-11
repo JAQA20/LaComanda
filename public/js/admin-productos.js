@@ -60,4 +60,31 @@ $(document).ready(function () {
     $("#editCategoriaOrden").val(btn.data("orden"));
     $("#editCategoriaActiva").prop("checked", Number(btn.data("activo")) === 1);
   });
+
+  $(document).on("click", ".btn-editar-producto", function () {
+    const btn = $(this);
+    $("#editProductoId").val(btn.attr("data-id"));
+    $("#editProductoNombre").val(btn.attr("data-nombre"));
+    $("#editProductoCategoria").val(btn.attr("data-categoria_id"));
+    $("#editProductoPrecio").val(btn.attr("data-precio"));
+    $("#editProductoImagenUrl").val(btn.attr("data-imagen_url"));
+    $("#editProductoActivo").prop("checked", Number(btn.attr("data-activo")) === 1);
+  });
+
+  // Validaciones antes de enviar el formulario de edición de productos
+  $("#modalEditarProducto form").on("submit", function(e) {
+    const nombre = $("#editProductoNombre").val().trim();
+    const categoria = $("#editProductoCategoria").val();
+    const precio = $("#editProductoPrecio").val();
+
+    if (!nombre || !categoria || !precio || precio <= 0) {
+      e.preventDefault();
+      Swal.fire({
+        icon: 'error',
+        title: 'Faltan datos',
+        text: 'Por favor completa el nombre, la categoría y asegura que el precio sea mayor a 0.',
+        confirmButtonText: 'Entendido'
+      });
+    }
+  });
 });

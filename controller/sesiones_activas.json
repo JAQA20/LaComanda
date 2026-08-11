@@ -1,50 +1,14 @@
 [
     {
-        "session_id": "f4a92a9163ba55e1022c47661e33f36f",
-        "usuario_id": 4,
-        "nombre": "Barista barista",
-        "email": "barista@lacomanda.com",
-        "rol_id": 4,
-        "login_at": 1782610966,
-        "ultima_actividad": 1782613010,
+        "session_id": "2c5d111d58c76de472c3d8605ada95c2",
+        "usuario_id": 2,
+        "nombre": "Mesero mesero",
+        "email": "mesero@proyecto.com",
+        "rol_id": 2,
+        "login_at": 1786399040,
+        "ultima_actividad": 1786400760,
         "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36",
-        "pagina_actual": "\/public\/api\/baristaEstado.php"
-    },
-    {
-        "session_id": "9ce7a2af26206cfcc1d46e474448c196",
-        "usuario_id": 1,
-        "nombre": "Admin admin",
-        "email": "admin@proyecto.com",
-        "rol_id": 1,
-        "login_at": 1782612533,
-        "ultima_actividad": 1782612535,
-        "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/605.1.15 (KHTML, like Gecko) Version\/26.5 Safari\/605.1.15",
-        "pagina_actual": "\/views\/admin\/ordenesAdmin.php"
-    },
-    {
-        "session_id": "f212c0a1dd795ee22fa7afc80bba1ea4",
-        "usuario_id": 1,
-        "nombre": "Admin admin",
-        "email": "admin@proyecto.com",
-        "rol_id": 1,
-        "login_at": 1782612552,
-        "ultima_actividad": 1782612705,
-        "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
-        "pagina_actual": "\/public\/api\/ordenesAdminData.php"
-    },
-    {
-        "session_id": "ecce54946ea245cf85fa76d5e0887a70",
-        "usuario_id": 1,
-        "nombre": "Admin admin",
-        "email": "admin@proyecto.com",
-        "rol_id": 1,
-        "login_at": 1785513588,
-        "ultima_actividad": 1785514734,
-        "ip": "192.168.65.1",
-        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/150.0.0.0 Safari\/537.36 Edg\/150.0.0.0",
-        "pagina_actual": "\/public\/api\/ordenesAdminData.php"
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/151.0.0.0 Safari\/537.36",
+        "pagina_actual": "\/public\/api\/layoutMesas.php?_=1786400760733"
     }
 ]

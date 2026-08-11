@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors', 1);
+// ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
@@ -15,7 +15,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: " . BASE_URL . "views/admin/nuevoUsuario.php");
+    header("Location: " . BASE_URL . "views/admin/usuarios.php");
     exit;
 }
 
@@ -27,14 +27,14 @@ $old = [
 ];
 
 $password  = $_POST["password"] ?? "";
-$password2 = $_POST["password2"] ?? "";
+$password_confirm = $_POST["password_confirm"] ?? "";
 
 try {
     if ($old["nombre"] === "" || $old["apellido"] === "" || $old["email"] === "" || $old["rol_id"] === "") {
         throw new Exception("Todos los campos obligatorios deben completarse.");
     }
 
-    if ($password !== $password2) {
+    if ($password !== $password_confirm) {
         throw new Exception("Las contraseñas no coinciden.");
     }
 
@@ -50,12 +50,9 @@ try {
         (int)$old["rol_id"]
     );
 
-    $_SESSION["nuevo_usuario_success"] = "Usuario creado correctamente.";
     header("Location: " . BASE_URL . "views/admin/usuarios.php?created=1");
     exit;
 } catch (Throwable $e) {
-    $_SESSION["nuevo_usuario_errors"] = [$e->getMessage()];
-    $_SESSION["nuevo_usuario_old"] = $old;
-    header("Location: " . BASE_URL . "views/admin/nuevoUsuario.php");
+    header("Location: " . BASE_URL . "views/admin/usuarios.php?error=" . urlencode($e->getMessage()));
     exit;
 }

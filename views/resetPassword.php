@@ -14,7 +14,7 @@ require_once __DIR__ . "/../config/rutas.php";
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/resetPassword.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/login.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
 
 </head>
@@ -48,7 +48,7 @@ require_once __DIR__ . "/../config/rutas.php";
                     </div>
 
                     <a href="<?= BASE_URL ?>views/login.php"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none transition-all duration-200">
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-green hover-bg-brand-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-green transition-all duration-200 transform hover:scale-105">
                         Ir al login
                     </a>
 
@@ -60,7 +60,7 @@ require_once __DIR__ . "/../config/rutas.php";
                     </div>
 
                     <a href="<?= BASE_URL ?>views/login.php"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none transition-all duration-200">
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-brand-green hover-bg-brand-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-green transition-all duration-200 transform hover:scale-105">
                         Volver al login
                     </a>
 
@@ -101,13 +101,13 @@ require_once __DIR__ . "/../config/rutas.php";
                         <div id="submit-button-section">
                             <button
                                 type="submit"
-                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white brand-green focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#70A38F] hover:bg-[#5B8F7A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#70A38F] transition-all duration-200 transform hover:scale-105">
                                 Actualizar Contraseña
                             </button>
                         </div>
 
                         <div class="text-center text-sm">
-                            <a href="<?= BASE_URL ?>views/login.php" class="text-green-600 hover:underline font-medium">
+                            <a href="<?= BASE_URL ?>views/login.php" class="font-medium text-[#70A38F] hover:underline">
                                 Volver al login
                             </a>
                         </div>

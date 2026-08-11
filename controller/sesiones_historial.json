@@ -24,5 +24,31 @@
         "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/149.0.0.0 Safari\/537.36 Edg\/149.0.0.0",
         "pagina_actual": "\/public\/api\/obtenerOrdenes.php",
         "logout_at": 1782612545
+    },
+    {
+        "session_id": "2c5d111d58c76de472c3d8605ada95c2",
+        "usuario_id": 2,
+        "nombre": "Mesero mesero",
+        "email": "mesero@proyecto.com",
+        "rol_id": 2,
+        "login_at": 1786397551,
+        "ultima_actividad": 1786397562,
+        "ip": "192.168.65.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/151.0.0.0 Safari\/537.36",
+        "pagina_actual": "\/public\/api\/estadoMesas.php?_=1786397562082",
+        "logout_at": 1786397565
+    },
+    {
+        "session_id": "ecce54946ea245cf85fa76d5e0887a70",
+        "usuario_id": 23,
+        "nombre": "Javier Quiros",
+        "email": "jaquirs10@gmail.com",
+        "rol_id": 1,
+        "login_at": 1786405036,
+        "ultima_actividad": 1786406841,
+        "ip": "192.168.65.1",
+        "user_agent": "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/151.0.0.0 Safari\/537.36 Edg\/151.0.0.0",
+        "pagina_actual": "\/views\/admin\/admin.php",
+        "logout_at": 1786406845
     }
 ]

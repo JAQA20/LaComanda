@@ -53,7 +53,8 @@ verificarRol([1]); // solo Admin
     <!-- Tu CSS principal -->
     <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
 
-
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -69,11 +70,11 @@ verificarRol([1]); // solo Admin
         <!-- Content Area -->
         <main id="content-area" class="flex-1 p-6 w-full">
             <div id="mesas-view" class="block w-full">
-                <div class="bg-gradient-to-r from-brownDark to-brownSoft rounded-3xl shadow-card p-8 mb-8 text-white">
+                <div class="bg-gradient-to-r from-mintGreen to-[#6a9e7a] rounded-3xl shadow-card p-8 mb-8 text-white">
                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div>
                             <p class="uppercase tracking-[0.2em] text-sm text-beigeSoft mb-2">Panel administrativo</p>
-                            <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Historial de Órdenes</h1>
+                            <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Dashboard administrativo</h1>
                             <p class="text-sm md:text-base text-white/85 max-w-2xl">
                                 Consulta el resumen de ventas y el estado de las órdenes registradas en La Comanda.
                             </p>
@@ -178,6 +179,35 @@ verificarRol([1]); // solo Admin
                         </div>
                     </a>
                 </div>
+
+                <!-- Gráficos y Sesiones -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                    <div class="bg-white rounded-2xl shadow-card p-6 border border-[#efe7db]">
+                        <h2 class="text-lg font-bold text-brownDark mb-4">Productos más vendidos</h2>
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="chartProductos"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-card p-6 border border-[#efe7db]">
+                        <h2 class="text-lg font-bold text-brownDark mb-4">Historial de ventas (6 meses)</h2>
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="chartVentas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-card p-6 border border-[#efe7db] mt-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-brownDark">Usuarios conectados</h2>
+                        <span id="contador-usuarios-activos" class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                            0 activos
+                        </span>
+                    </div>
+                    <div id="contenedor-sesiones" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <!-- Tarjetas de sesión generadas por JS -->
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
@@ -208,7 +238,8 @@ verificarRol([1]); // solo Admin
                 const response = await fetch(API_ORDENES_ADMIN, {
                     method: "GET",
                     headers: {
-                        "Accept": "application/json"
+                        "Accept": "application/json",
+                        "X-Background-Request": "true"
                     },
                     cache: "no-store"
                 });
@@ -233,6 +264,109 @@ verificarRol([1]); // solo Admin
 
         cargarResumenOrdenes();
         setInterval(cargarResumenOrdenes, 5000);
+
+        // Chart.js e integracion
+        const API_DASHBOARD_CHARTS = "<?= BASE_URL ?>public/api/dashboardCharts.php";
+        const API_USUARIOS_CONECTADOS = "<?= BASE_URL ?>public/api/usuariosConectados.php";
+
+        async function cargarGraficos() {
+            try {
+                const response = await fetch(API_DASHBOARD_CHARTS, { 
+                    cache: 'no-store',
+                    headers: { 'X-Background-Request': 'true' }
+                });
+                if (!response.ok) throw new Error("Error cargando gráficos");
+                const data = await response.json();
+
+                if (data.ok) {
+                    new Chart(document.getElementById('chartProductos'), {
+                        type: 'bar',
+                        data: {
+                            labels: data.top_productos.map(p => p.nombre),
+                            datasets: [{
+                                label: 'Cantidad vendida',
+                                data: data.top_productos.map(p => p.total),
+                                backgroundColor: '#7FB69E'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+
+                    new Chart(document.getElementById('chartVentas'), {
+                        type: 'line',
+                        data: {
+                            labels: data.ventas_historial.map(v => v.fecha),
+                            datasets: [{
+                                label: 'Ventas ₡',
+                                data: data.ventas_historial.map(v => v.total_ventas),
+                                borderColor: '#8D6E63',
+                                backgroundColor: 'rgba(141, 110, 99, 0.2)',
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        cargarGraficos();
+
+        // Sesiones activas
+        const contenedorSesiones = document.getElementById('contenedor-sesiones');
+        const contadorUsuariosActivos = document.getElementById('contador-usuarios-activos');
+
+        async function cargarUsuariosConectados() {
+            try {
+                const response = await fetch(API_USUARIOS_CONECTADOS, {
+                    headers: { 'X-Background-Request': 'true' }
+                });
+                if (!response.ok) throw new Error("Error cargando usuarios conectados");
+                const data = await response.json();
+
+                if (data.ok && data.sesiones) {
+                    contadorUsuariosActivos.textContent = `${data.sesiones.length} activos`;
+                    
+                    if (data.sesiones.length === 0) {
+                        contenedorSesiones.innerHTML = `<div class="col-span-full text-center text-muted py-4">No hay usuarios conectados.</div>`;
+                        return;
+                    }
+
+                    contenedorSesiones.innerHTML = data.sesiones.map(s => `
+                        <div class="flex items-start gap-4 p-4 border border-[#efe7db] rounded-xl bg-[#F8F5F0]">
+                            <div class="w-12 h-12 rounded-full bg-mintGreen text-white flex items-center justify-center text-xl font-bold flex-shrink-0 mt-1">
+                                ${s.nombre.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="text-brownDark font-bold truncate">${s.nombre}</h3>
+                                    <span class="badge ${s.estado_class} text-[10px] shadow-sm ml-2">${s.estado_label}</span>
+                                </div>
+                                <p class="text-xs text-brownSoft truncate mb-2">${s.rol}</p>
+                                <div class="text-[11px] text-muted space-y-1">
+                                    <p><i class="fa-solid fa-arrow-right-to-bracket text-success w-3"></i> ${s.login_at}</p>
+                                    <p><i class="fa-solid fa-arrow-right-from-bracket text-danger w-3"></i> ${s.logout_at}</p>
+                                    <p><i class="fa-regular fa-hand-pointer text-primary w-3"></i> ${s.ultima_actividad}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+        cargarUsuariosConectados();
+        setInterval(cargarUsuariosConectados, 3000);
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -84,6 +84,13 @@ try {
         $resetLink = $baseUrl . '/views/resetPassword.php?token=' . urlencode($tokenPlain);
     }
 
+    if (empty($appUrl) || strpos($appUrl, 'localhost') !== false || strpos($appUrl, '127.0.0.1') !== false) {
+        // En localhost Mailtrap no puede descargar la imagen local, usamos un logo genérico bonito
+        $logoUrl = 'https://ui-avatars.com/api/?name=La+Comanda&background=70A38F&color=fff&size=120&font-size=0.33';
+    } else {
+        $logoUrl = $appUrl . '/public/img/logotipo1.PNG';
+    }
+
     $subject = "Recuperar contraseña - La Comanda";
     $name = trim(($usuario['nombre'] ?? 'usuario'));
 
@@ -91,8 +98,6 @@ try {
     $message .= "Recibimos una solicitud para restablecer tu contraseña.\n";
     $message .= "Usa este enlace (expira en 60 minutos):\n{$resetLink}\n\n";
     $message .= "Si no solicitaste este cambio, puedes ignorar este mensaje.\n";
-
-    $logoUrl = $baseUrl . '/public/img/logotipo1.PNG';
 
     $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
     $safeResetLink = htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8');

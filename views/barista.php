@@ -383,7 +383,10 @@ function obtenerPasoOrden($estado)
 
         async function fetchBaristaEstado() {
             try {
-                const response = await fetch('<?= BASE_URL ?>public/api/baristaEstado.php', { cache: 'no-store' });
+                const response = await fetch('<?= BASE_URL ?>public/api/baristaEstado.php', { 
+                    cache: 'no-store',
+                    headers: { 'X-Background-Request': 'true' }
+                });
                 const data = await response.json();
                 if (!data.ok) return;
                 currentPendientes = data.pendientes || [];

@@ -10,7 +10,7 @@ class Productos
         $conexion = Conexion::conectar();
 
         $sql = "
-            SELECT p.id, p.nombre, p.precio, p.icono, p.activo,
+            SELECT p.id, p.nombre, p.precio, p.imagen, p.activo,
                    p.categoria_id, c.nombre AS categoria_nombre, c.slug AS categoria_slug
             FROM productos p
             LEFT JOIN categorias c ON c.id = p.categoria_id
@@ -60,7 +60,7 @@ class Productos
         if ($slug === "" || $slug === "mesas") return [];
 
         $stmt = $conexion->prepare("
-            SELECT p.id, p.nombre, p.precio, p.icono
+            SELECT p.id, p.nombre, p.precio, p.imagen
             FROM productos p
             INNER JOIN categorias c ON c.id = p.categoria_id
             WHERE c.slug = ?
@@ -90,7 +90,7 @@ class Productos
         $id = (int)$id;
 
         $stmt = $conexion->prepare("
-            SELECT id, categoria_id, nombre, precio, icono, activo
+            SELECT id, categoria_id, nombre, precio, imagen, activo
             FROM productos
             WHERE id = ?
             LIMIT 1
@@ -139,33 +139,33 @@ class Productos
         return $res->num_rows > 0;
     }
 
-    public static function crear($categoria_id, $nombre, $precio, $icono, $activo)
+    public static function crear($categoria_id, $nombre, $precio, $imagen, $activo)
     {
         $conexion = Conexion::conectar();
 
         $categoria_id = (int)$categoria_id;
         $nombre = trim($nombre);
         $precio = (int)$precio;
-        $icono = trim($icono);
+        $imagen = trim($imagen);
         $activo = (int)$activo;
 
         if ($categoria_id <= 0 || $nombre === "" || $precio <= 0) {
             throw new Exception("Debe completar todos los campos obligatorios.");
         }
 
-        if ($icono === "") $icono = "fa-mug-hot";
+        if ($imagen === "") $imagen = null;
 
         if (self::nombreExisteEnCategoria($nombre, $categoria_id)) {
             throw new Exception("Ya existe un producto con ese nombre en esta categoría.");
         }
 
         $stmt = $conexion->prepare("
-            INSERT INTO productos (categoria_id, nombre, precio, icono, activo)
+            INSERT INTO productos (categoria_id, nombre, precio, imagen, activo)
             VALUES (?, ?, ?, ?, ?)
         ");
         if (!$stmt) throw new Exception("Error prepare crear: " . $conexion->error);
 
-        $stmt->bind_param("isisi", $categoria_id, $nombre, $precio, $icono, $activo);
+        $stmt->bind_param("isisi", $categoria_id, $nombre, $precio, $imagen, $activo);
 
         if (!$stmt->execute()) {
             throw new Exception("No se pudo crear el producto: " . $stmt->error);
@@ -174,7 +174,7 @@ class Productos
         return $stmt->insert_id;
     }
 
-    public static function actualizar($id, $categoria_id, $nombre, $precio, $icono, $activo)
+    public static function actualizar($id, $categoria_id, $nombre, $precio, $imagen, $activo)
     {
         $conexion = Conexion::conectar();
 
@@ -182,14 +182,14 @@ class Productos
         $categoria_id = (int)$categoria_id;
         $nombre = trim($nombre);
         $precio = (int)$precio;
-        $icono = trim($icono);
+        $imagen = trim($imagen);
         $activo = (int)$activo;
 
         if ($id <= 0) throw new Exception("ID inválido.");
         if ($categoria_id <= 0 || $nombre === "" || $precio <= 0) {
             throw new Exception("Debe completar todos los campos obligatorios.");
         }
-        if ($icono === "") $icono = "fa-mug-hot";
+        if ($imagen === "") $imagen = null;
 
         if (self::nombreExisteEnCategoria($nombre, $categoria_id, $id)) {
             throw new Exception("Ya existe otro producto con ese nombre en esta categoría.");
@@ -197,13 +197,13 @@ class Productos
 
         $stmt = $conexion->prepare("
             UPDATE productos
-            SET categoria_id = ?, nombre = ?, precio = ?, icono = ?, activo = ?
+            SET categoria_id = ?, nombre = ?, precio = ?, imagen = ?, activo = ?
             WHERE id = ?
             LIMIT 1
         ");
         if (!$stmt) throw new Exception("Error prepare actualizar: " . $conexion->error);
 
-        $stmt->bind_param("isisii", $categoria_id, $nombre, $precio, $icono, $activo, $id);
+        $stmt->bind_param("isisii", $categoria_id, $nombre, $precio, $imagen, $activo, $id);
 
         if (!$stmt->execute()) {
             throw new Exception("No se pudo actualizar el producto: " . $stmt->error);

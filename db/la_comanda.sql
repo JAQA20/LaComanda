@@ -87,7 +87,7 @@ CREATE TABLE productos (
   categoria_id INT NOT NULL,
   nombre VARCHAR(120) NOT NULL,
   precio DECIMAL(10,2) NOT NULL,
-  icono VARCHAR(60) NOT NULL DEFAULT 'fa-mug-hot',
+  imagen VARCHAR(255) NULL,
   activo TINYINT(1) NOT NULL DEFAULT 1,
   creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uniq_producto_categoria_nombre (categoria_id, nombre),
@@ -229,70 +229,76 @@ INSERT INTO categorias(nombre, slug, icono, orden, activo) VALUES
 ('Postres', 'postres', 'fa-cake', 5, 1),
 ('Bebidas Frías', 'bebidas', 'fa-glass-water', 6, 1);
 
-INSERT INTO productos (categoria_id, nombre, precio, icono, activo)
-SELECT c.id, v.nombre, v.precio, v.icono, 1
+INSERT INTO productos (categoria_id, nombre, precio, imagen, activo)
+SELECT c.id, v.nombre, v.precio, v.imagen, 1
 FROM categorias c
 JOIN (
     -- CAFES / BARISTA
-    SELECT 'cafes' AS slug, 'Espresso' AS nombre, 1800.00 AS precio, 'fa-mug-hot' AS icono
-    UNION ALL SELECT 'cafes', 'Capuccino', 2400.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Latte', 2600.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Americano', 2000.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Mocha', 2800.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Macchiato', 2500.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Café Negro', 1700.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Café con Leche', 2200.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Café Vainilla', 2900.00, 'fa-mug-hot'
-    UNION ALL SELECT 'cafes', 'Flat White', 2700.00, 'fa-mug-hot'
+    SELECT 'cafes' AS slug, 'Espresso' AS nombre, 1800.00 AS precio, NULL AS imagen
+    UNION ALL SELECT 'cafes', 'Capuccino', 2400.00, NULL
+    UNION ALL SELECT 'cafes', 'Latte', 2600.00, NULL
+    UNION ALL SELECT 'cafes', 'Americano', 2000.00, NULL
+    UNION ALL SELECT 'cafes', 'Mocha', 2800.00, NULL
+    UNION ALL SELECT 'cafes', 'Macchiato', 2500.00, NULL
+    UNION ALL SELECT 'cafes', 'Café Negro', 1700.00, NULL
+    UNION ALL SELECT 'cafes', 'Café con Leche', 2200.00, NULL
+    UNION ALL SELECT 'cafes', 'Café Vainilla', 2900.00, NULL
+    UNION ALL SELECT 'cafes', 'Flat White', 2700.00, NULL
 
     -- COMIDAS / COCINA
-    UNION ALL SELECT 'comidas', 'Sandwich de Pollo', 4200.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Panini Toscana', 4800.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Croissant de Jamón y Queso', 3500.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Wrap de Pavo', 3900.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Bagel de Salmón', 5200.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Quiche Lorena', 4100.00, 'fa-cheese'
-    UNION ALL SELECT 'comidas', 'Empanada de Carne', 2200.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Empanada de Queso', 2100.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Tostada de Aguacate', 4300.00, 'fa-bread-slice'
-    UNION ALL SELECT 'comidas', 'Bowl de Yogurt y Frutas', 3600.00, 'fa-bowl-food'
+    UNION ALL SELECT 'comidas', 'Sandwich de Pollo', 4200.00, NULL
+    UNION ALL SELECT 'comidas', 'Panini Toscana', 4800.00, NULL
+    UNION ALL SELECT 'comidas', 'Croissant de Jamón y Queso', 3500.00, NULL
+    UNION ALL SELECT 'comidas', 'Wrap de Pavo', 3900.00, NULL
+    UNION ALL SELECT 'comidas', 'Bagel de Salmón', 5200.00, NULL
+    UNION ALL SELECT 'comidas', 'Quiche Lorena', 4100.00, NULL
+    UNION ALL SELECT 'comidas', 'Empanada de Carne', 2200.00, NULL
+    UNION ALL SELECT 'comidas', 'Empanada de Queso', 2100.00, NULL
+    UNION ALL SELECT 'comidas', 'Tostada de Aguacate', 4300.00, NULL
+    UNION ALL SELECT 'comidas', 'Bowl de Yogurt y Frutas', 3600.00, NULL
 
     -- Especialidades se deja yendo a cocina porque la regla acordada fue:
     -- solo 'cafes' y 'bebidas' van a barista.
     -- Si después quieren refinar esto, aquí es uno de los puntos a revisar.
     -- ESPECIALIDADES / COCINA SEGÚN REGLA ACTUAL
-    UNION ALL SELECT 'especialidades', 'Frappé Caramelo', 3200.00, 'fa-blender'
-    UNION ALL SELECT 'especialidades', 'Mocaccino Especial', 3500.00, 'fa-star'
-    UNION ALL SELECT 'especialidades', 'Chocolate Caliente Premium', 3000.00, 'fa-mug-hot'
-    UNION ALL SELECT 'especialidades', 'Latte Lavanda', 3400.00, 'fa-star'
-    UNION ALL SELECT 'especialidades', 'Café Bombón', 3100.00, 'fa-star'
-    UNION ALL SELECT 'especialidades', 'Frappé Mocha', 3300.00, 'fa-blender'
-    UNION ALL SELECT 'especialidades', 'Matcha Latte', 3600.00, 'fa-leaf'
-    UNION ALL SELECT 'especialidades', 'Golden Milk', 3400.00, 'fa-mug-hot'
-    UNION ALL SELECT 'especialidades', 'Taro Latte', 3700.00, 'fa-star'
-    UNION ALL SELECT 'especialidades', 'Affogato', 3900.00, 'fa-ice-cream'
+    UNION ALL SELECT 'especialidades', 'Frappé Caramelo', 3200.00, NULL
+    UNION ALL SELECT 'especialidades', 'Mocaccino Especial', 3500.00, NULL
+    UNION ALL SELECT 'especialidades', 'Chocolate Caliente Premium', 3000.00, NULL
+    UNION ALL SELECT 'especialidades', 'Latte Lavanda', 3400.00, NULL
+    UNION ALL SELECT 'especialidades', 'Café Bombón', 3100.00, NULL
+    UNION ALL SELECT 'especialidades', 'Frappé Mocha', 3300.00, NULL
+    UNION ALL SELECT 'especialidades', 'Matcha Latte', 3600.00, NULL
+    UNION ALL SELECT 'especialidades', 'Golden Milk', 3400.00, NULL
+    UNION ALL SELECT 'especialidades', 'Taro Latte', 3700.00, NULL
+    UNION ALL SELECT 'especialidades', 'Affogato', 3900.00, NULL
 
     -- POSTRES / COCINA
-    UNION ALL SELECT 'postres', 'Cheesecake', 2800.00, 'fa-cake-candles'
-    UNION ALL SELECT 'postres', 'Brownie con Helado', 3000.00, 'fa-ice-cream'
-    UNION ALL SELECT 'postres', 'Tiramisú', 3200.00, 'fa-cake-candles'
-    UNION ALL SELECT 'postres', 'Croissant de Almendra', 2600.00, 'fa-bread-slice'
-    UNION ALL SELECT 'postres', 'Galleta de Chispas', 1800.00, 'fa-cookie'
-    UNION ALL SELECT 'postres', 'Queque de Zanahoria', 2700.00, 'fa-cake-candles'
-    UNION ALL SELECT 'postres', 'Muffin de Arándanos', 2300.00, 'fa-cake-candles'
-    UNION ALL SELECT 'postres', 'Pie de Limón', 2900.00, 'fa-cake-candles'
-    UNION ALL SELECT 'postres', 'Tres Leches', 3100.00, 'fa-cake-candles'
-    UNION ALL SELECT 'postres', 'Roll de Canela', 2500.00, 'fa-bread-slice'
+    UNION ALL SELECT 'postres', 'Cheesecake', 2800.00, NULL
+    UNION ALL SELECT 'postres', 'Brownie con Helado', 3000.00, NULL
+    UNION ALL SELECT 'postres', 'Tiramisú', 3200.00, NULL
+    UNION ALL SELECT 'postres', 'Croissant de Almendra', 2600.00, NULL
+    UNION ALL SELECT 'postres', 'Galleta de Chispas', 1800.00, NULL
+    UNION ALL SELECT 'postres', 'Queque de Zanahoria', 2700.00, NULL
+    UNION ALL SELECT 'postres', 'Muffin de Arándanos', 2300.00, NULL
+    UNION ALL SELECT 'postres', 'Pie de Limón', 2900.00, NULL
+    UNION ALL SELECT 'postres', 'Tres Leches', 3100.00, NULL
+    UNION ALL SELECT 'postres', 'Roll de Canela', 2500.00, NULL
 
     -- BEBIDAS / BARISTA
-    UNION ALL SELECT 'bebidas', 'Iced Latte', 2900.00, 'fa-glass-water'
-    UNION ALL SELECT 'bebidas', 'Té Frío Durazno', 2500.00, 'fa-glass-water'
-    UNION ALL SELECT 'bebidas', 'Limonada Natural', 2200.00, 'fa-glass-water'
-    UNION ALL SELECT 'bebidas', 'Limonada con Hierbabuena', 2400.00, 'fa-glass-water'
-    UNION ALL SELECT 'bebidas', 'Smoothie de Fresa', 3300.00, 'fa-blender'
-    UNION ALL SELECT 'bebidas', 'Smoothie de Mango', 3300.00, 'fa-blender'
-    UNION ALL SELECT 'bebidas', 'Chocolate Frío', 2800.00, 'fa-glass-water'
-    UNION ALL SELECT 'bebidas', 'Milkshake Vainilla', 3500.00, 'fa-blender'
-    UNION ALL SELECT 'bebidas', 'Milkshake Chocolate', 3500.00, 'fa-blender'
-    UNION ALL SELECT 'bebidas', 'Agua Mineral', 1500.00, 'fa-bottle-water'
+    UNION ALL SELECT 'bebidas', 'Iced Latte', 2900.00, NULL
+    UNION ALL SELECT 'bebidas', 'Té Frío Durazno', 2500.00, NULL
+    UNION ALL SELECT 'bebidas', 'Limonada Natural', 2200.00, NULL
+    UNION ALL SELECT 'bebidas', 'Limonada con Hierbabuena', 2400.00, NULL
+    UNION ALL SELECT 'bebidas', 'Smoothie de Fresa', 3300.00, NULL
+    UNION ALL SELECT 'bebidas', 'Smoothie de Mango', 3300.00, NULL
+    UNION ALL SELECT 'bebidas', 'Chocolate Frío', 2800.00, NULL
+    UNION ALL SELECT 'bebidas', 'Milkshake Vainilla', 3500.00, NULL
+    UNION ALL SELECT 'bebidas', 'Milkshake Chocolate', 3500.00, NULL
+    UNION ALL SELECT 'bebidas', 'Agua Mineral', 1500.00, NULL
 ) v ON v.slug = c.slug;
+
+UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Caf%';
+UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Té%';
+UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1623366302587-bca835848bb5?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Croissant%';
+UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Frappé%';
+UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150' WHERE imagen IS NULL OR imagen = '';

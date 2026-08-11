@@ -20,4 +20,15 @@ if (!isset($_SESSION["usuario_id"])) {
     exit;
 }
 
-SesionesActivas::tocarSesionActual();
+if (!isset($_SERVER['HTTP_X_BACKGROUND_REQUEST'])) {
+    $limiteInactividad = 7 * 60 * 60; // 7 horas
+    if (isset($_SESSION['ultima_actividad_php']) && (time() - $_SESSION['ultima_actividad_php'] > $limiteInactividad)) {
+        SesionesActivas::cerrarSesionActual();
+        session_unset();
+        session_destroy();
+        header("Location: " . BASE_URL . "views/login.php?error=Sesión expirada por inactividad");
+        exit;
+    }
+    $_SESSION['ultima_actividad_php'] = time();
+    SesionesActivas::tocarSesionActual();
+}

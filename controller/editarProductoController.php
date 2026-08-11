@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors', 1);
+// ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
@@ -10,49 +10,63 @@ require_once __DIR__ . "/../model/Productos.php";
 
 verificarRol([1]);
 
-$errors = [];
-$id = (int)($_GET["id"] ?? 0);
-
-try {
-    $categorias = Productos::listarCategoriasActivas();
-} catch (Throwable $e) {
-    $categorias = [];
-    $errors[] = "Error cargando categorías: " . $e->getMessage();
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: " . BASE_URL . "views/admin/productos.php");
+    exit;
 }
 
-$producto = null;
+$idPost = (int)($_POST["id"] ?? 0);
+$categoria_id = (int)($_POST["categoria_id"] ?? 0);
+$nombre = trim($_POST["nombre"] ?? "");
+$precio = (int)($_POST["precio"] ?? 0);
+$imagen_url = trim($_POST["imagen_url"] ?? "");
+$activo = isset($_POST["activo"]) ? 1 : 0;
+
 try {
-    $producto = Productos::obtenerPorId($id);
-    if (!$producto) throw new Exception("Producto no encontrado.");
-} catch (Throwable $e) {
-    $errors[] = $e->getMessage();
-}
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $idPost = (int)($_POST["id"] ?? 0);
-
-    $categoria_id = (int)($_POST["categoria_id"] ?? 0);
-    $nombre = $_POST["nombre"] ?? "";
-    $precio = (int)($_POST["precio"] ?? 0);
-    $icono = $_POST["icono"] ?? "fa-mug-hot";
-    $activo = isset($_POST["activo"]) ? 1 : 0;
-
-    try {
-        Productos::actualizar($idPost, $categoria_id, $nombre, $precio, $icono, $activo);
-        header("Location: " . BASE_URL . "views/admin/productos.php?updated=1");
-        exit;
-    } catch (Throwable $e) {
-        $errors[] = $e->getMessage();
-        // Para repintar el form con lo que intentó guardar:
-        $producto = [
-            "id" => $idPost,
-            "categoria_id" => $categoria_id,
-            "nombre" => $nombre,
-            "precio" => $precio,
-            "icono" => $icono,
-            "activo" => $activo
-        ];
+    if ($idPost === 0 || $categoria_id === 0 || $nombre === "" || $precio <= 0) {
+        throw new Exception("Todos los campos obligatorios deben completarse y ser válidos.");
     }
-}
 
-require_once ROOT_PATH . "/views/admin/editarProducto.php";
+    $productoOriginal = Productos::obtenerPorId($idPost);
+    if (!$productoOriginal) {
+        throw new Exception("Producto no encontrado.");
+    }
+
+    $imagenFinal = $productoOriginal['imagen'] ?? null;
+    
+    // 1. Check if a new file was uploaded
+    if (isset($_FILES['imagen_file']) && $_FILES['imagen_file']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['imagen_file'];
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        
+        if (!in_array($file['type'], $allowedTypes)) {
+            throw new Exception("El archivo debe ser una imagen válida (JPG, PNG, WebP).");
+        }
+
+        $uploadDir = __DIR__ . "/../public/img/productos/";
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('prod_') . '.' . $ext;
+        $destination = $uploadDir . $filename;
+
+        if (!move_uploaded_file($file['tmp_name'], $destination)) {
+            throw new Exception("No se pudo guardar la imagen subida.");
+        }
+
+        $imagenFinal = '/public/img/productos/' . $filename;
+    } 
+    // 2. Fallback to URL if provided and no file uploaded
+    elseif ($imagen_url !== "") {
+        $imagenFinal = $imagen_url;
+    }
+
+    Productos::actualizar($idPost, $categoria_id, $nombre, $precio, $imagenFinal, $activo);
+    header("Location: " . BASE_URL . "views/admin/productos.php?updated=1");
+    exit;
+} catch (Throwable $e) {
+    header("Location: " . BASE_URL . "views/admin/productos.php?error=" . urlencode($e->getMessage()));
+    exit;
+}

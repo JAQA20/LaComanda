@@ -133,21 +133,37 @@ class SesionesActivas
         self::escribirHistorial($historial);
     }
 
-    public static function listarActivas($ttlSegundos = 1800)
+    public static function listarActivas()
     {
-        $ahora = time();
         $sesiones = self::leer();
-        $sesionesActivas = [];
+        $historial = self::leerHistorial();
+        $ahora = time();
+        $modificado = false;
+        
+        $ttl = 7 * 3600; // 7 horas
 
-        foreach ($sesiones as $sesion) {
-            $ultima = (int)($sesion['ultima_actividad'] ?? 0);
-            if ($ultima > 0 && ($ahora - $ultima) <= $ttlSegundos) {
-                $sesionesActivas[] = $sesion;
+        foreach ($sesiones as $index => $sesion) {
+            if ($ahora - (int)$sesion['ultima_actividad'] >= $ttl) {
+                // Eliminar del historial actual si estuviera
+                $historial = array_values(array_filter($historial, function ($h) use ($sesion) {
+                    return ($h['session_id'] ?? '') !== $sesion['session_id'];
+                }));
+                // Registrar cierre por inactividad
+                $sesion['logout_at'] = $sesion['ultima_actividad'] + $ttl; 
+                $historial[] = $sesion;
+                
+                unset($sesiones[$index]);
+                $modificado = true;
             }
         }
+        
+        if ($modificado) {
+            $sesiones = array_values($sesiones);
+            self::escribir($sesiones);
+            self::escribirHistorial($historial);
+        }
 
-        self::escribir($sesionesActivas);
-        return $sesionesActivas;
+        return $sesiones;
     }
 
     public static function nombreRol($rolId)
@@ -175,14 +191,11 @@ class SesionesActivas
         $ultimaActividad = (int)$ultimaActividad;
         $diferencia = time() - $ultimaActividad;
 
-        if ($diferencia <= 120) {
-            return ['label' => 'Activo ahora', 'class' => 'bg-success-subtle text-success border border-success-subtle'];
+        if ($diferencia < 900) { // Menos de 15 minutos
+            return ['label' => 'Activo', 'class' => 'bg-success-subtle text-success border border-success-subtle'];
         }
 
-        if ($diferencia <= 600) {
-            return ['label' => 'Inactivo reciente', 'class' => 'bg-warning-subtle text-warning border border-warning-subtle'];
-        }
-
+        // 15 minutos o más
         return ['label' => 'Inactivo', 'class' => 'bg-secondary-subtle text-secondary border border-secondary-subtle'];
     }
 

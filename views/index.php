@@ -955,7 +955,9 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
 
         async function sincronizarEstadosMesas(mostrarNotificacion = false) {
             try {
-                const resp = await fetch(`${BASE_URL}public/api/estadoMesas.php?_=${Date.now()}`);
+                const resp = await fetch(`${BASE_URL}public/api/estadoMesas.php?_=${Date.now()}`, {
+                    headers: { 'X-Background-Request': 'true' }
+                });
 
                 if (!resp.ok) {
                     const errorText = await resp.text();
@@ -1233,18 +1235,29 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 productosGrid.innerHTML = items.map(p => {
                     const nombre = p.nombre ?? "";
                     const precio = Number(p.precio ?? 0);
-                    const icono = p.icono ?? "fa-box";
+                    const imagen = p.imagen;
                     const nombreSafe = nombre.replace(/'/g, "\\'");
+                    
+                    let imgSrc = "";
+                    if (imagen) {
+                        if (imagen.startsWith("http://") || imagen.startsWith("https://")) {
+                            imgSrc = imagen;
+                        } else {
+                            imgSrc = BASE_URL + "public/img/productos/" + imagen;
+                        }
+                    } else {
+                        imgSrc = BASE_URL + "public/img/productos/default.png";
+                    }
 
                     return `
                         <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
                             <div class="text-center">
-                                <div class="w-16 h-16 custom-mint rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas ${icono} text-white text-xl"></i>
+                                <div class="w-20 h-20 mx-auto mb-4 overflow-hidden rounded-xl border border-gray-100 flex items-center justify-center bg-gray-50">
+                                    <img src="${imgSrc}" alt="${escaparHtml(nombre)}" class="w-full h-full object-cover" onerror="this.src='${BASE_URL}public/img/productos/default.png'">
                                 </div>
                                 <h3 class="text-brown font-semibold text-lg mb-2">${nombre}</h3>
                                 <p class="text-mint font-bold text-xl mb-4">₡${precio.toLocaleString()}</p>
-                                <button onclick="agregarProducto('${nombreSafe}', ${precio})"
+                                <button onclick="agregarProducto('${nombreSafe}', ${precio}, '${imgSrc}')"
                                         class="w-full custom-mint text-white py-2 rounded-lg hover-mint-bg transition-all duration-200 flex items-center justify-center">
                                     <i class="fas fa-plus mr-2"></i>
                                     Agregar
@@ -1296,7 +1309,7 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
             if (mesasView) mesasView.classList.remove('hidden');
         }
 
-        function agregarProducto(nombre, precio) {
+        function agregarProducto(nombre, precio, imagenUrl = '') {
             if (!mesaActual) {
                 Swal.fire({
                     icon: "error",
@@ -1313,6 +1326,7 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                 ordenActual.push({
                     nombre,
                     precio,
+                    imagen: imagenUrl,
                     cantidad: 1,
                     notas: []
                 });
@@ -1497,8 +1511,13 @@ $isAdminLayout = isset($_SESSION['rol_id']) && (int)$_SESSION['rol_id'] === 1;
                     return `
                         <div class="bg-gray-50 p-3 rounded-lg">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="flex-1">
-                                    <p class="text-brown font-medium">${escaparHtml(item.nombre)}</p>
+                                ${item.imagen ? `
+                                <div class="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                                    <img src="${item.imagen}" class="w-full h-full object-cover">
+                                </div>
+                                ` : ''}
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-brown font-medium truncate">${escaparHtml(item.nombre)}</p>
                                     <p class="text-mint text-sm">₡${item.precio.toLocaleString()} c/u</p>
                                 </div>
                                 <div class="flex items-center space-x-2">

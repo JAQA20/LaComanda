@@ -417,7 +417,10 @@ function obtenerPasoOrden($estado)
 
         async function fetchOrdenes() {
             try {
-                const response = await fetch('<?= BASE_URL ?>public/api/obtenerOrdenes.php', { cache: 'no-store' });
+                const response = await fetch('<?= BASE_URL ?>public/api/obtenerOrdenes.php', { 
+                    cache: 'no-store',
+                    headers: { 'X-Background-Request': 'true' }
+                });
                 const data = await response.json();
                 if (!data.ok || !Array.isArray(data.ordenes)) return;
                 currentOrders = data.ordenes;

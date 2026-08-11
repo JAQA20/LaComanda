@@ -3,374 +3,298 @@ require_once __DIR__ . "/../../middleware/auth.php";
 require_once __DIR__ . "/../../middleware/roles.php";
 require_once __DIR__ . "/../../config/rutas.php";
 require_once __DIR__ . "/../../model/Usuarios.php";
-require_once __DIR__ . "/../../model/SesionesActivas.php";
 verificarRol([1]);
 
 $usuarios = Usuarios::listar();
-$sesionesActivas = SesionesActivas::listarActivas();
-$editarUsuarioSuccess = $_SESSION["editar_usuario_success"] ?? null;
-unset($_SESSION["editar_usuario_success"]);
+$roles = Usuarios::listarRoles();
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Usuarios | La Comanda</title>
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- DataTables (Bootstrap 5) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        window.FontAwesomeConfig = { autoReplaceSvg: 'nest' };
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#F8F5F0',
+                        beigeSoft: '#EDE3D6',
+                        brownDark: '#4E342E',
+                        brownSoft: '#8D6E63',
+                        mintGreen: '#7FB69E',
+                        goldSoft: '#D6B98C'
+                    },
+                    boxShadow: {
+                        card: '0 10px 25px rgba(0,0,0,0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
 
-    <!-- FontAwesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-    <!-- Estilos propios -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/admin-usuarios.css">
+    <style>
+        .dataTables_wrapper .row { margin-bottom: 1rem; align-items: center; }
+        .dataTables_filter input { border-radius: 0.75rem !important; border: 1px solid #efe7db !important; padding: 0.4rem 1rem !important; }
+        .dataTables_length select { border-radius: 0.5rem !important; border: 1px solid #efe7db !important; }
+        table.dataTable>thead>tr>th { border-bottom: 1px solid #efe7db; color: #8D6E63; font-weight: 600; }
+        table.dataTable>tbody>tr>td { border-color: #efe7db; }
+        .modal-backdrop { z-index: 40 !important; }
+        .modal { z-index: 50 !important; }
+    </style>
 </head>
 
-<body class="bg-comanda">
-
+<body class="custom-beige min-h-screen font-sans">
+    
     <?php require_once ROOT_PATH . "/views/admin/adminNavbar.php"; ?>
 
-    <main class="container-fluid pt-5 mt-4">
-        <div class="container-xxl py-4">
-
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
-                <?php if (isset($_GET["deleted"])): ?>
-                    <div class="alert alert-success mb-3">
-                        <i class="fa-solid fa-circle-check me-2"></i>
-                        Usuario eliminado correctamente.
-                    </div>
-                <?php endif; ?>
-
-                <?php if (isset($_GET["error"]) && $_GET["error"] === "self_delete"): ?>
-                    <div class="alert alert-danger mb-3">
-                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                        No puedes eliminar tu propio usuario.
-                    </div>
-                <?php endif; ?>
-
-                <?php if (isset($_GET["error"]) && $_GET["error"] === "delete_failed"): ?>
-                    <div class="alert alert-danger mb-3">
-                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
-                        No se pudo eliminar el usuario.
-                    </div>
-                <?php endif; ?>
-                <?php if (isset($_GET["error"]) && $_GET["error"] === "root_delete"): ?>
-                    <div class="alert alert-danger mb-3">
-                        <i class="fa-solid fa-shield-halved me-2"></i>
-                        El usuario principal del sistema no puede ser eliminado.
-                    </div>
-                <?php endif; ?>
-
-
-
+    <div class="flex pt-16 min-h-screen">
+        <main class="flex-1 p-6 w-full max-w-7xl mx-auto">
+            
+            <div class="bg-gradient-to-r from-[#8D6E63] to-[#4E342E] rounded-3xl shadow-card p-8 mb-8 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 class="h3 mb-1 text-brown fw-bold">Usuarios</h1>
-                    <div class="text-muted small">Gestión de usuarios del sistema</div>
+                    <p class="uppercase tracking-[0.2em] text-sm text-beigeSoft mb-2">Administración</p>
+                    <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Gestión de Usuarios</h1>
+                    <p class="text-sm md:text-base text-white/85 max-w-2xl">
+                        Administra los accesos al sistema, roles y credenciales del personal de La Comanda.
+                    </p>
                 </div>
-
-                <a href="<?= BASE_URL ?>views/admin/nuevoUsuario.php" class="btn btn-mint px-3 py-2">
-                    <i class="fa-solid fa-user-plus me-2"></i>
-                    Agregar nuevo usuario
-                </a>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" class="bg-white text-brownDark hover:bg-gray-50 px-5 py-3 rounded-xl shadow-sm transition-colors font-semibold flex items-center justify-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
+                        <i class="fa-solid fa-user-plus"></i> Agregar usuario
+                    </button>
+                </div>
             </div>
 
-            <div class="card card-comanda shadow-sm mb-4">
-                <div class="card-body">
-
-                    <div class="table-responsive">
-                        <table id="tablaUsuarios" class="table table-hover align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th style="min-width:260px;">Nombre</th>
-                                    <th style="min-width:260px;">Email</th>
-                                    <th style="min-width:170px;">Rol</th>
-                                    <th class="text-end" style="width:120px;">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($usuarios as $u): ?>
-                                    <tr>
-                                        <td>
-                                            <div class="fw-semibold">
-                                                <?= htmlspecialchars($u["nombre"] . " " . $u["apellido"]) ?>
-                                            </div>
-                                            <div class="text-muted small">ID: <?= (int)$u["id"] ?></div>
-                                        </td>
-
-                                        <td><?= htmlspecialchars($u["email"]) ?></td>
-
-                                        <td>
-                                            <span class="badge badge-role ">
-                                                <?= htmlspecialchars($u["rol_nombre"] ?? ("Rol " . (int)$u["rol_id"])) ?>
-                                            </span>
-                                        </td>
-
-                                        <td class="text-end">
-                                            <!-- Editar -->
-                                            <a class="btn btn-sm btn-light"
-                                                href="<?= BASE_URL ?>views/admin/editarUsuario.php?id=<?= (int)$u['id'] ?>"
-                                                title="Editar">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </a>
-
-                                            <!-- Eliminar -->
-                                            <?php if ((int)$u["id"] !== 1 && (int)$u["id"] !== 2 && (int)$u["id"] !== 3 && (int)$u["id"] !== 4): ?>
-                                                <form class="d-inline form-eliminar-usuario"
-                                                    method="POST"
-                                                    action="<?= BASE_URL ?>public/api/eliminarUsuario.php">
-                                                    <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
-                                                    <button type="submit"
-                                                        class="btn btn-sm btn-light text-danger"
-                                                        title="Eliminar">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            <?php else: ?>
-                                                <button class="btn btn-sm btn-light text-secondary"
-                                                    title="Usuario protegido"
-                                                    disabled>
-                                                    <i class="fa-solid fa-lock"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+            <!-- Alertas -->
+            <div class="w-full mb-6 space-y-3">
+                <?php if (isset($_GET["created"])): ?>
+                    <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 font-semibold"><i class="fa-solid fa-circle-check text-xl"></i> Usuario creado correctamente.</div>
+                <?php endif; ?>
+                <?php if (isset($_GET["updated"])): ?>
+                    <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 font-semibold"><i class="fa-solid fa-circle-check text-xl"></i> Usuario actualizado correctamente.</div>
+                <?php endif; ?>
+                <?php if (isset($_GET["deleted"])): ?>
+                    <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 font-semibold"><i class="fa-solid fa-circle-check text-xl"></i> Usuario eliminado correctamente.</div>
+                <?php endif; ?>
+                <?php if (isset($_GET["error"])): ?>
+                    <div class="bg-red-50 text-red-700 border border-red-200 rounded-xl p-4 flex items-center gap-3 font-semibold">
+                        <i class="fa-solid fa-triangle-exclamation text-xl"></i> 
+                        <?php 
+                        $err = $_GET["error"];
+                        if ($err === "self_delete") echo "No puedes eliminar tu propio usuario.";
+                        elseif ($err === "delete_failed") echo "No se pudo eliminar el usuario.";
+                        elseif ($err === "root_delete") echo "El usuario principal no puede ser eliminado.";
+                        else echo htmlspecialchars($err);
+                        ?>
                     </div>
+                <?php endif; ?>
+            </div>
 
+            <div class="bg-white rounded-2xl shadow-card p-6 border border-[#efe7db]">
+                <div class="overflow-x-auto pb-4">
+                    <table id="tablaUsuarios" class="w-full text-sm align-middle">
+                        <thead>
+                            <tr class="text-brownSoft text-left border-b border-[#efe7db]">
+                                <th class="pb-3 font-semibold min-w-[200px]">Nombre</th>
+                                <th class="pb-3 font-semibold min-w-[200px]">Email</th>
+                                <th class="pb-3 font-semibold min-w-[120px]">Rol</th>
+                                <th class="pb-3 font-semibold text-right min-w-[100px]">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#efe7db]">
+                            <?php foreach ($usuarios as $u): ?>
+                            <tr class="hover:bg-[#FCFAF7] transition-colors">
+                                <td class="py-3 pr-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-[#F5EEE5] flex items-center justify-center text-brownSoft shadow-sm">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-brownDark text-base"><?= htmlspecialchars($u["nombre"] . " " . $u["apellido"]) ?></p>
+                                            <p class="text-[11px] text-brownSoft font-semibold tracking-wide">ID: <?= (int)$u["id"] ?></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2 font-medium text-brownDark">
+                                    <?= htmlspecialchars($u["email"]) ?>
+                                </td>
+                                <td class="py-3 px-2">
+                                    <span class="px-3 py-1 bg-mintGreen text-white rounded-lg text-xs font-bold shadow-sm inline-block">
+                                        <?= htmlspecialchars($u["rol_nombre"] ?? ("Rol " . (int)$u["rol_id"])) ?>
+                                    </span>
+                                </td>
+                                <td class="py-3 pl-3 text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button type="button" class="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white border border-[#efe7db] text-brownDark hover:bg-[#F5EEE5] hover:border-[#e8dccb] shadow-sm transition-all btn-editar-usuario"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEditarUsuario"
+                                            data-id="<?= (int)$u['id'] ?>"
+                                            data-nombre="<?= htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8') ?>"
+                                            data-apellido="<?= htmlspecialchars($u['apellido'], ENT_QUOTES, 'UTF-8') ?>"
+                                            data-email="<?= htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8') ?>"
+                                            data-rol_id="<?= (int)$u['rol_id'] ?>">
+                                            <i class="fa-solid fa-pen text-sm"></i>
+                                        </button>
+                                        <?php if (!in_array((int)$u["id"], [1, 2, 3, 4])): ?>
+                                        <form class="inline-block form-eliminar-usuario" method="POST" action="<?= BASE_URL ?>public/api/eliminarUsuario.php">
+                                            <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
+                                            <button type="submit" class="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-white border border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 shadow-sm transition-all">
+                                                <i class="fa-solid fa-trash text-sm"></i>
+                                            </button>
+                                        </form>
+                                        <?php else: ?>
+                                        <button class="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-gray-50 border border-gray-200 text-gray-400 shadow-sm" disabled title="Usuario protegido">
+                                            <i class="fa-solid fa-lock text-sm"></i>
+                                        </button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="card card-comanda shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        </main>
+    </div>
+
+    <!-- Modal Nuevo Usuario -->
+    <div class="modal fade" id="modalNuevoUsuario" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-2xl shadow-card overflow-hidden">
+                <form id="formNuevoUsuario" method="POST" action="<?= BASE_URL ?>public/api/nuevoUsuario.php">
+                    <div class="bg-[#F8F5F0] px-6 py-4 border-b border-[#efe7db] flex justify-between items-center">
                         <div>
-                            <h2 class="h5 mb-1 text-brown fw-bold">Usuarios conectados</h2>
-                            <div class="text-muted small">Monitoreo de sesiones activas en tiempo real</div>
+                            <h3 class="text-xl font-extrabold text-brownDark">Nuevo usuario</h3>
                         </div>
-                        <span id="contador-usuarios-activos" class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-                            <?= count($sesionesActivas) ?> activos
-                        </span>
+                        <button type="button" class="text-brownSoft hover:text-brownDark transition-colors" data-bs-dismiss="modal"><i class="fa-solid fa-xmark text-xl"></i></button>
                     </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" id="tablaUsuariosConectados">
-                            <thead>
-                                <tr>
-                                    <th style="min-width:220px;">Usuario</th>
-                                    <th style="min-width:220px;">Email</th>
-                                    <th style="min-width:140px;">Rol</th>
-                                    <th style="min-width:180px;">Hora de login</th>
-                                    <th style="min-width:180px;">Última actividad</th>
-                                    <th style="min-width:140px;">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-usuarios-conectados-body">
-                                <?php if (empty($sesionesActivas)): ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
-                                            <i class="fa-solid fa-user-clock me-2"></i>
-                                            No hay usuarios conectados en este momento.
-                                        </td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($sesionesActivas as $sesion): ?>
-                                        <?php $estadoActividad = SesionesActivas::obtenerEstadoActividad($sesion['ultima_actividad'] ?? 0); ?>
-                                        <?php $detalleSesion = htmlspecialchars(json_encode([
-                                            'usuario_id' => (int)($sesion['usuario_id'] ?? 0),
-                                            'nombre' => (string)($sesion['nombre'] ?? 'Sin nombre'),
-                                            'email' => (string)($sesion['email'] ?? 'Sin email'),
-                                            'rol' => SesionesActivas::nombreRol($sesion['rol_id'] ?? 0),
-                                            'login_at' => SesionesActivas::formatearHora($sesion['login_at'] ?? null),
-                                            'ultima_actividad' => SesionesActivas::formatearHora($sesion['ultima_actividad'] ?? null),
-                                            'dispositivo' => SesionesActivas::resumirUserAgent($sesion['user_agent'] ?? ''),
-                                            'pagina_actual' => (string)($sesion['pagina_actual'] ?? 'N/A'),
-                                            'ip' => (string)($sesion['ip'] ?? 'N/A'),
-                                            'estado_label' => $estadoActividad['label']
-                                        ], JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>
-                                        <tr class="fila-sesion-activa" data-sesion="<?= $detalleSesion ?>" style="cursor:pointer;">
-                                            <td>
-                                                <div class="fw-semibold"><?= htmlspecialchars($sesion['nombre'] ?? 'Sin nombre') ?></div>
-                                                <div class="text-muted small">ID usuario: <?= (int)($sesion['usuario_id'] ?? 0) ?></div>
-                                            </td>
-                                            <td><?= htmlspecialchars($sesion['email'] ?? 'Sin email') ?></td>
-                                            <td>
-                                                <span class="badge badge-role">
-                                                    <?= htmlspecialchars(SesionesActivas::nombreRol($sesion['rol_id'] ?? 0)) ?>
-                                                </span>
-                                            </td>
-                                            <td><?= htmlspecialchars(SesionesActivas::formatearHora($sesion['login_at'] ?? null)) ?></td>
-                                            <td><?= htmlspecialchars(SesionesActivas::formatearHora($sesion['ultima_actividad'] ?? null)) ?></td>
-                                            <td>
-                                                <span class="badge <?= htmlspecialchars($estadoActividad['class']) ?>"><?= htmlspecialchars($estadoActividad['label']) ?></span>
-                                            </td>
-                                        </tr>
+                    
+                    <div class="p-6 bg-white">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-brownDark mb-1">Nombre</label>
+                                <input type="text" name="nombre" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-brownDark mb-1">Apellido</label>
+                                <input type="text" name="apellido" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-brownDark mb-1">Correo Electrónico</label>
+                                <input type="email" name="email" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-brownDark mb-1">Rol</label>
+                                <select name="rol_id" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                                    <option value="">Seleccione un rol</option>
+                                    <?php foreach ($roles as $r): ?>
+                                        <option value="<?= (int)$r['id'] ?>"><?= htmlspecialchars($r['nombre']) ?></option>
                                     <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-brownDark mb-1">Contraseña</label>
+                                <input type="password" name="password" id="nuevoUsuarioPassword" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required minlength="8">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-brownDark mb-1">Confirmar contraseña</label>
+                                <input type="password" name="password_confirm" id="nuevoUsuarioPasswordConfirm" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required minlength="8">
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <div class="modal fade" id="modalSesionActiva" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title text-brown fw-bold">Detalle de sesión activa</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6"><strong>Usuario:</strong><br><span id="modal-sesion-usuario">-</span></div>
-                        <div class="col-md-6"><strong>Email:</strong><br><span id="modal-sesion-email">-</span></div>
-                        <div class="col-md-6"><strong>Rol:</strong><br><span id="modal-sesion-rol">-</span></div>
-                        <div class="col-md-6"><strong>Estado:</strong><br><span id="modal-sesion-estado">-</span></div>
-                        <div class="col-md-6"><strong>Hora de login:</strong><br><span id="modal-sesion-login">-</span></div>
-                        <div class="col-md-6"><strong>Última actividad:</strong><br><span id="modal-sesion-actividad">-</span></div>
-                        <div class="col-md-6"><strong>Hora de logout:</strong><br><span id="modal-sesion-logout">-</span></div>
-                        <div class="col-md-6"><strong>Dispositivo:</strong><br><span id="modal-sesion-dispositivo">-</span></div>
-                        <div class="col-md-6"><strong>IP:</strong><br><span id="modal-sesion-ip">-</span></div>
-                        <div class="col-12"><strong>Página actual:</strong><br><span id="modal-sesion-pagina">-</span></div>
+                    <div class="px-6 py-4 bg-[#FCFAF7] border-t border-[#efe7db] flex justify-end gap-3">
+                        <button type="button" class="px-5 py-2.5 rounded-xl text-brownDark font-bold hover:bg-[#F5EEE5] transition-colors" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-brownDark text-white font-bold hover:bg-[#362018] transition-colors shadow-sm"><i class="fa-solid fa-floppy-disk me-2"></i>Crear usuario</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <?php require_once __DIR__ . "/../layout/footer.php"; ?>
+    <!-- Modal Editar Usuario -->
+    <div class="modal fade" id="modalEditarUsuario" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-2xl shadow-card overflow-hidden">
+                <form id="formEditarUsuario" method="POST" action="<?= BASE_URL ?>public/api/editarUsuario.php">
+                    <input type="hidden" name="id" id="editUsuarioId">
+                    <div class="bg-[#F8F5F0] px-6 py-4 border-b border-[#efe7db] flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-extrabold text-brownDark">Editar usuario</h3>
+                        </div>
+                        <button type="button" class="text-brownSoft hover:text-brownDark transition-colors" data-bs-dismiss="modal"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    </div>
+                    
+                    <div class="p-6 bg-white">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-brownDark mb-1">Nombre</label>
+                                <input type="text" name="nombre" id="editUsuarioNombre" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-brownDark mb-1">Apellido</label>
+                                <input type="text" name="apellido" id="editUsuarioApellido" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-brownDark mb-1">Correo Electrónico</label>
+                                <input type="email" name="email" id="editUsuarioEmail" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-brownDark mb-1">Rol</label>
+                                <select name="rol_id" id="editUsuarioRol" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                                    <option value="">Seleccione un rol</option>
+                                    <?php foreach ($roles as $r): ?>
+                                        <option value="<?= (int)$r['id'] ?>"><?= htmlspecialchars($r['nombre']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
 
-    <!-- JS -->
+                        <div class="mt-6 pt-4 border-t border-[#efe7db]">
+                            <h4 class="font-bold text-brownDark mb-3"><i class="fa-solid fa-key me-2"></i>Cambiar Contraseña (Opcional)</h4>
+                            <p class="text-xs text-brownSoft mb-4">Si llenas estos campos, se solicitará tu contraseña actual de administrador por seguridad.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-brownDark mb-1">Nueva Contraseña</label>
+                                    <input type="password" name="password" id="editUsuarioPassword" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" minlength="8">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-brownDark mb-1">Confirmar Nueva Contraseña</label>
+                                    <input type="password" name="password2" id="editUsuarioPassword2" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" minlength="8">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 bg-[#FCFAF7] border-t border-[#efe7db] flex justify-end gap-3">
+                        <button type="button" class="px-5 py-2.5 rounded-xl text-brownDark font-bold hover:bg-[#F5EEE5] transition-colors" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-brownDark text-white font-bold hover:bg-[#362018] transition-colors shadow-sm"><i class="fa-solid fa-floppy-disk me-2"></i>Actualizar usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- DataTables -->
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.min.js"></script>
-
-    <!-- SweetAlert2 para confirmación de eliminación -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <?php if (!empty($editarUsuarioSuccess)): ?>
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Cambios guardados',
-                text: <?= json_encode($editarUsuarioSuccess) ?>,
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#70A38F'
-            });
-        </script>
-    <?php endif; ?>
-
-    <!-- Script propio -->
-    <script src="<?= BASE_URL ?>public/js/admin-usuarios.js"></script>
+    
     <script>
-        const API_USUARIOS_CONECTADOS = "<?= BASE_URL ?>public/api/usuariosConectados.php";
-        const tablaUsuariosConectadosBody = document.getElementById("tabla-usuarios-conectados-body");
-        const contadorUsuariosActivos = document.getElementById("contador-usuarios-activos");
-        const modalSesionActiva = new bootstrap.Modal(document.getElementById('modalSesionActiva'));
-
-        function escapeHtml(texto) {
-            const div = document.createElement("div");
-            div.textContent = texto ?? "";
-            return div.innerHTML;
-        }
-
-        function renderUsuariosConectados(sesiones) {
-            contadorUsuariosActivos.textContent = `${sesiones.length} activos`;
-
-            if (!Array.isArray(sesiones) || sesiones.length === 0) {
-                tablaUsuariosConectadosBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
-                            <i class="fa-solid fa-user-clock me-2"></i>
-                            No hay usuarios conectados en este momento.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tablaUsuariosConectadosBody.innerHTML = sesiones.map(sesion => {
-                const payload = encodeURIComponent(JSON.stringify(sesion));
-                return `
-                    <tr class="fila-sesion-activa" data-sesion="${payload}" style="cursor:pointer;">
-                        <td>
-                            <div class="fw-semibold">${escapeHtml(sesion.nombre || 'Sin nombre')}</div>
-                            <div class="text-muted small">ID usuario: ${escapeHtml(String(sesion.usuario_id || 0))}</div>
-                        </td>
-                        <td>${escapeHtml(sesion.email || 'Sin email')}</td>
-                        <td><span class="badge badge-role">${escapeHtml(sesion.rol || 'Rol')}</span></td>
-                        <td>${escapeHtml(sesion.login_at || 'N/A')}</td>
-                        <td>${escapeHtml(sesion.ultima_actividad || 'N/A')}</td>
-                        <td><span class="badge ${escapeHtml(sesion.estado_class || 'bg-secondary-subtle text-secondary')}">${escapeHtml(sesion.estado_label || 'Inactivo')}</span></td>
-                    </tr>
-                `;
-            }).join('');
-
-            document.querySelectorAll('.fila-sesion-activa').forEach(fila => {
-                fila.addEventListener('click', () => {
-                    try {
-                        const sesion = JSON.parse(decodeURIComponent(fila.dataset.sesion || ''));
-                        document.getElementById('modal-sesion-usuario').textContent = sesion.nombre || '-';
-                        document.getElementById('modal-sesion-email').textContent = sesion.email || '-';
-                        document.getElementById('modal-sesion-rol').textContent = sesion.rol || '-';
-                        document.getElementById('modal-sesion-estado').textContent = sesion.estado_label || '-';
-                        document.getElementById('modal-sesion-login').textContent = sesion.login_at || '-';
-                        document.getElementById('modal-sesion-actividad').textContent = sesion.ultima_actividad || '-';
-                        document.getElementById('modal-sesion-logout').textContent = sesion.logout_at || 'Sin logout registrado';
-                        document.getElementById('modal-sesion-dispositivo').textContent = sesion.dispositivo || '-';
-                        document.getElementById('modal-sesion-ip').textContent = sesion.ip || '-';
-                        document.getElementById('modal-sesion-pagina').textContent = sesion.pagina_actual || '-';
-                        modalSesionActiva.show();
-                    } catch (error) {
-                        console.error('Error leyendo detalle de sesión:', error);
-                    }
-                });
-            });
-        }
-
-        async function cargarUsuariosConectados() {
-            try {
-                const response = await fetch(API_USUARIOS_CONECTADOS, {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json"
-                    },
-                    cache: "no-store"
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (!data.ok) {
-                    throw new Error("Respuesta inválida del backend");
-                }
-
-                renderUsuariosConectados(data.sesiones || []);
-            } catch (error) {
-                console.error("Error cargando usuarios conectados:", error);
-            }
-        }
-
-        cargarUsuariosConectados();
-        setInterval(cargarUsuariosConectados, 8000);
+        const BASE_URL = '<?= BASE_URL ?>';
     </script>
-
+    <script src="<?= BASE_URL ?>public/js/admin-usuarios.js?v=<?= time() ?>"></script>
 </body>
-
 </html>

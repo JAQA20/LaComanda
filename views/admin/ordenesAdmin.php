@@ -60,21 +60,24 @@ function obtenerClaseEstado(string $estado): string
         }
     </script>
 
-    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/styles.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>public/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
-<body class="bg-cream font-montserrat text-brownDark">
+<body class="custom-beige min-h-screen font-montserrat text-brownDark">
     <?php require_once ROOT_PATH . "/views/admin/adminNavbar.php"; ?>
 
     <div class="pt-24 px-4 md:px-8 pb-10">
         <div class="max-w-7xl mx-auto">
 
-            <div class="mb-8">
-                <h1 class="text-3xl md:text-4xl font-extrabold text-brownDark mb-2">Historial de Órdenes</h1>
-                <p class="text-sm md:text-base text-brownSoft max-w-2xl">
-                    Consulta el detalle completo de las órdenes registradas en La Comanda.
-                </p>
+            <div class="bg-gradient-to-r from-[#8D6E63] to-[#4E342E] rounded-3xl shadow-card p-8 mb-8 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <p class="uppercase tracking-[0.2em] text-sm text-beigeSoft mb-2">Administración</p>
+                    <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Historial de Órdenes</h1>
+                    <p class="text-sm md:text-base text-white/85 max-w-2xl">
+                        Consulta el detalle completo de las órdenes registradas en La Comanda.
+                    </p>
+                </div>
             </div>
 
             <div class="bg-white rounded-3xl shadow-card border border-[#efe7db] overflow-hidden">
@@ -117,7 +120,7 @@ function obtenerClaseEstado(string $estado): string
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
-                        <thead class="bg-[#5D4037] text-white">
+                        <thead class="bg-mintGreen text-white">
                             <tr>
                                 <th class="px-6 py-4 text-left text-sm font-semibold">ID Orden</th>
                                 <th class="px-6 py-4 text-left text-sm font-semibold">Mesa</th>
@@ -474,7 +477,8 @@ function obtenerClaseEstado(string $estado): string
                 const response = await fetch(API_ORDENES, {
                     method: "GET",
                     headers: {
-                        "Accept": "application/json"
+                        "Accept": "application/json",
+                        "X-Background-Request": "true"
                     },
                     cache: "no-store"
                 });

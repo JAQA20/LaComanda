@@ -1,5 +1,5 @@
 <?php
-// ini_set('display_errors', 1);
+// // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
@@ -69,7 +69,7 @@
 // require_once ROOT_PATH . "/views/admin/editarUsuario.php";
 
 
-ini_set('display_errors', 1);
+// ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
@@ -123,14 +123,9 @@ try {
 
     Usuarios::actualizar($id, $nombre, $apellido, $email, $rol_id, $passToUpdate);
 
-    $_SESSION["editar_usuario_success"] = $passToUpdate !== null
-        ? "La contraseña del usuario se actualizó correctamente."
-        : "El usuario se actualizó correctamente.";
-
-    header("Location: " . BASE_URL . "views/admin/usuarios.php?success=usuario_actualizado");
+    header("Location: " . BASE_URL . "views/admin/usuarios.php?updated=1");
     exit;
 } catch (Throwable $e) {
-    $_SESSION["editar_usuario_errors"] = [$e->getMessage()];
-    header("Location: " . BASE_URL . "views/admin/editarUsuario.php?id=" . $id);
+    header("Location: " . BASE_URL . "views/admin/usuarios.php?error=" . urlencode($e->getMessage()));
     exit;
 }

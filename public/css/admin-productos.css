@@ -39,9 +39,9 @@
 }
 
 .badge-category {
-  background: rgba(75, 46, 42, 0.08);
-  color: #4b2e2a;
-  border: 1px solid rgba(75, 46, 42, 0.15);
+  background: #4b2e2a !important; /* Mismo color del borde/letra café */
+  color: #ffffff !important;
+  border: 1px solid #4b2e2a !important;
   font-weight: 600;
 }
 
@@ -78,4 +78,20 @@
 
 .alerts-stack .alert {
   border-radius: 14px;
+}
+
+/* Custom DataTables Pagination */
+.page-item.active .page-link {
+    background-color: #70A38F !important;
+    border-color: #70A38F !important;
+    color: white !important;
+}
+
+.page-link {
+    color: #4b2e2a !important;
+}
+
+.page-link:hover {
+    background-color: #f6f0e6 !important;
+    color: #4b2e2a !important;
 }
