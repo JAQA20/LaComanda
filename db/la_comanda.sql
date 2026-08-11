@@ -1,304 +1,354 @@
--- =========================================
--- LA COMANDA - MySQL Schema limpio para migración 100% DB
--- =========================================
--- Archivo limpiado para servir como nueva base oficial de MySQL.
--- Eliminé rastros del flujo híbrido con JSON y preparé el esquema
--- para trabajar órdenes 100% desde base de datos.
---
--- Se fuerza utf8mb4 desde el inicio del script porque en Docker/MySQL
--- la importación automática del seed estaba entrando con latin1 y eso
--- corrompía tildes/acentos (ej: CafÃ©) cada vez que se recreaba la base.
--- Esto ataca el problema en la importación, no en la vista.
--- =========================================
 
-/*!40101 SET NAMES utf8mb4 */;
-SET CHARACTER SET utf8mb4;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+DROP TABLE IF EXISTS `categorias`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `categorias` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icono` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'fa-tags',
+  `orden` int NOT NULL DEFAULT '1',
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`),
+  UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP DATABASE IF EXISTS la_comanda;
-CREATE DATABASE la_comanda
-  CHARACTER SET utf8
-  COLLATE utf8_unicode_ci;
+LOCK TABLES `categorias` WRITE;
+/*!40000 ALTER TABLE `categorias` DISABLE KEYS */;
+INSERT INTO `categorias` VALUES (1,'Mesas','mesas','fa-table',1,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (2,'Cafés','cafes','fa-coffee',2,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (3,'Comidas','comidas','fa-hamburger',3,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (4,'Especialidades','especialidades','fa-star',4,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (5,'Postres','postres','fa-cake',5,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (6,'Bebidas Frías','bebidas','fa-glass-water',6,1,'2026-08-10 23:33:18');
+/*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `detalle_orden`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `detalle_orden` (
+  `id_detalle` int NOT NULL AUTO_INCREMENT,
+  `id_orden` int NOT NULL,
+  `id_producto` int NOT NULL,
+  `cantidad` int NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `estado_item` enum('pendiente','en_preparacion','listo','entregado') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendiente',
+  `fecha_inicio_preparacion` datetime DEFAULT NULL,
+  `fecha_lista` datetime DEFAULT NULL,
+  `fecha_entrega` datetime DEFAULT NULL,
+  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_detalle`),
+  KEY `idx_detalle_orden` (`id_orden`),
+  KEY `idx_detalle_producto` (`id_producto`),
+  KEY `idx_detalle_estado_item` (`estado_item`),
+  CONSTRAINT `detalle_orden_ibfk_1` FOREIGN KEY (`id_orden`) REFERENCES `ordenes` (`id_orden`) ON DELETE CASCADE,
+  CONSTRAINT `detalle_orden_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-USE la_comanda;
+LOCK TABLES `detalle_orden` WRITE;
+/*!40000 ALTER TABLE `detalle_orden` DISABLE KEYS */;
+/*!40000 ALTER TABLE `detalle_orden` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `layout_configs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `layout_configs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `layout_key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload_json` longtext COLLATE utf8mb4_unicode_ci,
+  `actualizado_por` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `layout_key` (`layout_key`),
+  KEY `actualizado_por` (`actualizado_por`),
+  CONSTRAINT `layout_configs_ibfk_1` FOREIGN KEY (`actualizado_por`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ---------- Roles / Usuarios ----------
-CREATE TABLE roles (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(50) NOT NULL UNIQUE
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+LOCK TABLES `layout_configs` WRITE;
+/*!40000 ALTER TABLE `layout_configs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `layout_configs` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `mesas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `mesas` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `numero` int NOT NULL,
+  `estado` enum('disponible','ocupada') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'disponible',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `numero` (`numero`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE usuarios (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL,
-  apellido VARCHAR(100) NOT NULL,
-  email VARCHAR(100) NOT NULL UNIQUE,
-  activo TINYINT(1) NOT NULL DEFAULT 1,
-  password VARCHAR(255) NOT NULL,
-  rol_id INT NOT NULL,
-  creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (rol_id) REFERENCES roles(id)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+LOCK TABLES `mesas` WRITE;
+/*!40000 ALTER TABLE `mesas` DISABLE KEYS */;
+INSERT INTO `mesas` VALUES (1,1,'disponible');
+INSERT INTO `mesas` VALUES (2,2,'disponible');
+INSERT INTO `mesas` VALUES (3,3,'disponible');
+INSERT INTO `mesas` VALUES (4,4,'disponible');
+INSERT INTO `mesas` VALUES (5,5,'disponible');
+INSERT INTO `mesas` VALUES (6,6,'disponible');
+INSERT INTO `mesas` VALUES (7,7,'disponible');
+INSERT INTO `mesas` VALUES (8,8,'disponible');
+INSERT INTO `mesas` VALUES (9,9,'disponible');
+INSERT INTO `mesas` VALUES (10,10,'disponible');
+INSERT INTO `mesas` VALUES (11,11,'disponible');
+INSERT INTO `mesas` VALUES (12,12,'disponible');
+/*!40000 ALTER TABLE `mesas` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `ordenes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ordenes` (
+  `id_orden` int NOT NULL AUTO_INCREMENT,
+  `numero_orden` int NOT NULL,
+  `mesa_id` int NOT NULL,
+  `id_usuario` int DEFAULT NULL,
+  `notas` text COLLATE utf8mb4_unicode_ci,
+  `total` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `fecha_creacion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_lista` datetime DEFAULT NULL,
+  `fecha_entrega` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_orden`),
+  UNIQUE KEY `numero_orden` (`numero_orden`),
+  KEY `idx_ordenes_mesa` (`mesa_id`),
+  KEY `idx_ordenes_usuario` (`id_usuario`),
+  KEY `idx_ordenes_fecha_creacion` (`fecha_creacion`),
+  CONSTRAINT `ordenes_ibfk_1` FOREIGN KEY (`mesa_id`) REFERENCES `mesas` (`id`),
+  CONSTRAINT `ordenes_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE password_resets (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  usuario_id INT NOT NULL,
-  token VARCHAR(255) NOT NULL UNIQUE,
-  expira_en DATETIME NOT NULL,
-  usado TINYINT(1) DEFAULT 0,
-  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+LOCK TABLES `ordenes` WRITE;
+/*!40000 ALTER TABLE `ordenes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ordenes` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `password_resets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `password_resets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `usuario_id` int NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expira_en` datetime NOT NULL,
+  `usado` tinyint(1) DEFAULT '0',
+  `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token` (`token`),
+  KEY `usuario_id` (`usuario_id`),
+  CONSTRAINT `password_resets_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ---------- Mesas ----------
-CREATE TABLE mesas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  numero INT NOT NULL UNIQUE,
-  estado ENUM('disponible','ocupada') NOT NULL DEFAULT 'disponible'
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+LOCK TABLES `password_resets` WRITE;
+/*!40000 ALTER TABLE `password_resets` DISABLE KEYS */;
+INSERT INTO `password_resets` VALUES (1,23,'ba72520a9fa0ae45b7e398400a731b468ef5dee1a5ee34cc706163de14578050','2026-08-11 00:12:04',1,'2026-08-10 23:42:04');
+INSERT INTO `password_resets` VALUES (2,23,'43058bb8492a2c1125745d77499bd3755db67de66752c41eb1749d154311014b','2026-08-11 00:15:21',1,'2026-08-10 23:45:21');
+INSERT INTO `password_resets` VALUES (3,23,'ee926abfd0ce05849f88b79a1df78246a5a3fe6f6624020d3e333d97f7c85937','2026-08-11 01:07:42',1,'2026-08-11 00:07:42');
+INSERT INTO `password_resets` VALUES (4,23,'3e05124aeede6b91dba3db13cf401e484afc96c63237ada7ee9bf36ac6ce692a','2026-08-11 01:12:26',0,'2026-08-11 00:12:26');
+/*!40000 ALTER TABLE `password_resets` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `productos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `productos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `categoria_id` int NOT NULL,
+  `nombre` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `precio` decimal(10,2) NOT NULL,
+  `imagen` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_producto_categoria_nombre` (`categoria_id`,`nombre`),
+  CONSTRAINT `productos_ibfk_1` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ---------- Layout compartido del croquis ----------
-CREATE TABLE layout_configs (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  layout_key VARCHAR(100) NOT NULL UNIQUE,
-  payload_json LONGTEXT NULL,
-  actualizado_por INT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (actualizado_por) REFERENCES usuarios(id) ON DELETE SET NULL
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+LOCK TABLES `productos` WRITE;
+/*!40000 ALTER TABLE `productos` DISABLE KEYS */;
+INSERT INTO `productos` VALUES (1,2,'Espresso',1800.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (2,2,'Capuccino',2400.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (3,2,'Latte',2600.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (4,2,'Americano',2000.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (5,2,'Mocha',2800.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (6,2,'Macchiato',2500.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (7,2,'Café Negro',1700.00,'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (8,2,'Café con Leche',2200.00,'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (9,2,'Café Vainilla',2900.00,'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (10,2,'Flat White',2700.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (11,3,'Sandwich de Pollo',4200.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (12,3,'Panini Toscana',4800.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (13,3,'Croissant de Jamón y Queso',3500.00,'https://images.unsplash.com/photo-1623366302587-bca835848bb5?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (14,3,'Wrap de Pavo',3900.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (15,3,'Bagel de Salmón',5200.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (16,3,'Quiche Lorena',4100.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (17,3,'Empanada de Carne',2200.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (18,3,'Empanada de Queso',2100.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (19,3,'Tostada de Aguacate',4300.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (20,3,'Bowl de Yogurt y Frutas',3600.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (21,4,'Frappé Caramelo',3200.00,'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (22,4,'Mocaccino Especial',3500.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (23,4,'Chocolate Caliente Premium',3000.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (24,4,'Latte Lavanda',3400.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (25,4,'Café Bombón',3100.00,'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (26,4,'Frappé Mocha',3300.00,'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (27,4,'Matcha Latte',3600.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (28,4,'Golden Milk',3400.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (29,4,'Taro Latte',3700.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (30,4,'Affogato',3900.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (31,5,'Cheesecake',2800.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (32,5,'Brownie con Helado',3000.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (33,5,'Tiramisú',3200.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (34,5,'Croissant de Almendra',2600.00,'https://images.unsplash.com/photo-1623366302587-bca835848bb5?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (35,5,'Galleta de Chispas',1800.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (36,5,'Queque de Zanahoria',2700.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (37,5,'Muffin de Arándanos',2300.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (38,5,'Pie de Limón',2900.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (39,5,'Tres Leches',3100.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (40,5,'Roll de Canela',2500.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (41,6,'Iced Latte',2900.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (42,6,'Té Frío Durazno',2500.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (43,6,'Limonada Natural',2200.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (44,6,'Limonada con Hierbabuena',2400.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (45,6,'Smoothie de Fresa',3300.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (46,6,'Smoothie de Mango',3300.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (47,6,'Chocolate Frío',2800.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (48,6,'Milkshake Vainilla',3500.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (49,6,'Milkshake Chocolate',3500.00,'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+INSERT INTO `productos` VALUES (50,6,'Agua Mineral',1500.00,'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150',1,'2026-08-10 23:33:18');
+/*!40000 ALTER TABLE `productos` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `roles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- ---------- Catálogo ----------
--- Se mantiene el catálogo actual, pero ahora queda como base del ruteo
--- cocina/barista por categoría. La regla acordada es:
---   - barista: 'cafes' y 'bebidas'
---   - cocina: todo lo demás excepto 'mesas'
-CREATE TABLE categorias (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(60) NOT NULL UNIQUE,
-  slug VARCHAR(100) NOT NULL UNIQUE,
-  icono VARCHAR(60) NOT NULL DEFAULT 'fa-tags',
-  orden INT NOT NULL DEFAULT 1,
-  activo TINYINT(1) NOT NULL DEFAULT 1,
-  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+LOCK TABLES `roles` WRITE;
+/*!40000 ALTER TABLE `roles` DISABLE KEYS */;
+INSERT INTO `roles` VALUES (1,'admin');
+INSERT INTO `roles` VALUES (4,'barista');
+INSERT INTO `roles` VALUES (3,'cocina');
+INSERT INTO `roles` VALUES (2,'mesero');
+/*!40000 ALTER TABLE `roles` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `usuarios`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `usuarios` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `apellido` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `rol_id` int NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  KEY `rol_id` (`rol_id`),
+  CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-CREATE TABLE productos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  categoria_id INT NOT NULL,
-  nombre VARCHAR(120) NOT NULL,
-  precio DECIMAL(10,2) NOT NULL,
-  imagen VARCHAR(255) NULL,
-  activo TINYINT(1) NOT NULL DEFAULT 1,
-  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uniq_producto_categoria_nombre (categoria_id, nombre),
-  FOREIGN KEY (categoria_id) REFERENCES categorias(id)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+LOCK TABLES `usuarios` WRITE;
+/*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
+INSERT INTO `usuarios` VALUES (1,'Admin','admin','admin@proyecto.com',1,'$2y$10$GKsD.e.cZoSYxMDBbMBHFOgo.Y30c/q2EZ2dIsawRMwe/JVp5NrJy',1,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (2,'Mesero','mesero','mesero@proyecto.com',1,'$2y$10$SoHgtdyHv03k8vJGiG8bAe/y58gdq0Jok0F4ODrULH4ZCRdv87UJe',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (3,'Cocina','cocina','cocina@proyecto.com',1,'$2y$10$5mBtWhzM51hYAcjUFNPC6.am2VvqLeu4h78Q3iJJIY.NRyiVTmo1G',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (4,'Barista','barista','barista@lacomanda.com',1,'$2y$10$esYITJaGc.AvG18WlMi8ROwwiB/64QRH8ieUl9.wlgYNdnYX1OtLC',4,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (5,'Carlos','Ramírez','carlos.ramirez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (6,'Ana','Gómez','ana.gomez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (7,'Luis','Fernández','luis.fernandez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (8,'María','Vargas','maria.vargas@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (9,'José','Soto','jose.soto@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (10,'Pedro','Mora','pedro.mora@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (11,'Laura','Jiménez','laura.jimenez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (12,'Andrés','Rojas','andres.rojas@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (13,'Paola','Castro','paola.castro@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (14,'Daniel','Alvarado','daniel.alvarado@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (15,'Sofía','Navarro','sofia.navarro@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (16,'Kevin','Chaves','kevin.chaves@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (17,'Valeria','Cordero','valeria.cordero@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (18,'Ricardo','Pérez','ricardo.perez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (19,'Natalia','Salas','natalia.salas@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (20,'Esteban','León','esteban.leon@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (21,'Mónica','Araya','monica.araya@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (22,'Fernando','Solís','fernando.solis@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (23,'Javier','Quiros','jaquirs10@gmail.com',1,'$2y$10$cgWVe/yj/4ALg8p7nBSUjesAj9Q2aghNKd6tqTVMuvzLIppB5r8q2',1,'2026-08-10 23:36:57');
+/*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `vw_detalle_preparacion`;
+/*!50001 DROP VIEW IF EXISTS `vw_detalle_preparacion`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `vw_detalle_preparacion` AS SELECT 
+ 1 AS `id_detalle`,
+ 1 AS `id_orden`,
+ 1 AS `numero_orden`,
+ 1 AS `mesa_id`,
+ 1 AS `id_usuario`,
+ 1 AS `notas_orden`,
+ 1 AS `fecha_creacion`,
+ 1 AS `id_producto`,
+ 1 AS `producto_nombre`,
+ 1 AS `categoria_id`,
+ 1 AS `categoria_nombre`,
+ 1 AS `categoria_slug`,
+ 1 AS `cantidad`,
+ 1 AS `precio_unitario`,
+ 1 AS `estado_item`,
+ 1 AS `fecha_inicio_preparacion`,
+ 1 AS `fecha_lista`,
+ 1 AS `fecha_entrega`,
+ 1 AS `area_preparacion`*/;
+SET character_set_client = @saved_cs_client;
+/*!50001 DROP VIEW IF EXISTS `vw_detalle_preparacion`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb3_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_detalle_preparacion` AS select `d`.`id_detalle` AS `id_detalle`,`d`.`id_orden` AS `id_orden`,`o`.`numero_orden` AS `numero_orden`,`o`.`mesa_id` AS `mesa_id`,`o`.`id_usuario` AS `id_usuario`,`o`.`notas` AS `notas_orden`,`o`.`fecha_creacion` AS `fecha_creacion`,`d`.`id_producto` AS `id_producto`,`p`.`nombre` AS `producto_nombre`,`c`.`id` AS `categoria_id`,`c`.`nombre` AS `categoria_nombre`,`c`.`slug` AS `categoria_slug`,`d`.`cantidad` AS `cantidad`,`d`.`precio_unitario` AS `precio_unitario`,`d`.`estado_item` AS `estado_item`,`d`.`fecha_inicio_preparacion` AS `fecha_inicio_preparacion`,`d`.`fecha_lista` AS `fecha_lista`,`d`.`fecha_entrega` AS `fecha_entrega`,(case when (`c`.`slug` in ('cafes','bebidas')) then 'barista' when (`c`.`slug` = 'mesas') then 'ignorar' else 'cocina' end) AS `area_preparacion` from (((`detalle_orden` `d` join `ordenes` `o` on((`o`.`id_orden` = `d`.`id_orden`))) join `productos` `p` on((`p`.`id` = `d`.`id_producto`))) join `categorias` `c` on((`c`.`id` = `p`.`categoria_id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
--- ---------- Órdenes (cabecera) ----------
--- Cambios principales sobre la tabla ordenes:
--- 1) Eliminé columnas heredadas del flujo con JSON.
--- 2) numero_json fue reemplazado por numero_orden.
--- 3) id_estado deja de ser la fuente principal del flujo.
--- 4) La orden ahora funciona como cabecera; el estado real vive en detalle_orden.
--- 5) Se agregaron timestamps más claros para lista/entrega a nivel de orden.
-CREATE TABLE ordenes (
-  id_orden INT AUTO_INCREMENT PRIMARY KEY,
-  numero_orden INT NOT NULL UNIQUE,
-  mesa_id INT NOT NULL,
-  id_usuario INT NULL,
-  notas TEXT NULL,
-  total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  fecha_lista DATETIME NULL,
-  fecha_entrega DATETIME NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (mesa_id) REFERENCES mesas(id),
-  FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE SET NULL,
-  INDEX idx_ordenes_mesa (mesa_id),
-  INDEX idx_ordenes_usuario (id_usuario),
-  INDEX idx_ordenes_fecha_creacion (fecha_creacion)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- ---------- Detalle de órdenes (estado por ítem) ----------
--- Esta tabla se convirtió en el centro del flujo operativo.
--- Cambios principales:
--- 1) Se agregó estado_item para manejar el avance por producto.
--- 2) Se agregaron fechas por ítem (inicio, listo, entrega).
--- 3) Se agregaron índices para consultas de cocina/barista/historial.
--- 4) Aquí vive ahora la lógica real del proceso.
--- Barista:
---   categorias.slug IN ('cafes', 'bebidas')
--- Cocina:
---   categorias.slug NOT IN ('cafes', 'bebidas', 'mesas')
-CREATE TABLE detalle_orden (
-  id_detalle INT AUTO_INCREMENT PRIMARY KEY,
-  id_orden INT NOT NULL,
-  id_producto INT NOT NULL,
-  cantidad INT NOT NULL,
-  precio_unitario DECIMAL(10,2) NOT NULL,
-  estado_item ENUM('pendiente', 'en_preparacion', 'listo', 'entregado') NOT NULL DEFAULT 'pendiente',
-  fecha_inicio_preparacion DATETIME NULL,
-  fecha_lista DATETIME NULL,
-  fecha_entrega DATETIME NULL,
-  observaciones TEXT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_orden) REFERENCES ordenes(id_orden) ON DELETE CASCADE,
-  FOREIGN KEY (id_producto) REFERENCES productos(id),
-  INDEX idx_detalle_orden (id_orden),
-  INDEX idx_detalle_producto (id_producto),
-  INDEX idx_detalle_estado_item (estado_item)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- ---------- Vista auxiliar para ruteo de preparación ----------
--- Agregué esta vista para simplificar consultas futuras.
--- Sirve para que cocina y barista no tengan que repetir joins grandes.
--- También deja calculada el área de preparación según categoría.
-CREATE VIEW vw_detalle_preparacion AS
-SELECT
-  d.id_detalle,
-  d.id_orden,
-  o.numero_orden,
-  o.mesa_id,
-  o.id_usuario,
-  o.notas AS notas_orden,
-  o.fecha_creacion,
-  d.id_producto,
-  p.nombre AS producto_nombre,
-  c.id AS categoria_id,
-  c.nombre AS categoria_nombre,
-  c.slug AS categoria_slug,
-  d.cantidad,
-  d.precio_unitario,
-  d.estado_item,
-  d.fecha_inicio_preparacion,
-  d.fecha_lista,
-  d.fecha_entrega,
-  CASE
-    WHEN c.slug IN ('cafes', 'bebidas') THEN 'barista'
-    WHEN c.slug = 'mesas' THEN 'ignorar'
-    ELSE 'cocina'
-  END AS area_preparacion
-FROM detalle_orden d
-INNER JOIN ordenes o ON o.id_orden = d.id_orden
-INNER JOIN productos p ON p.id = d.id_producto
-INNER JOIN categorias c ON c.id = p.categoria_id;
-
--- ---------- Datos iniciales ----------
--- Limpié los seeds duplicados que venían en el archivo original.
--- Dejé una sola carga coherente de usuarios, categorías y productos.
-INSERT INTO roles(nombre) VALUES
-('admin'), ('mesero'), ('cocina'), ('barista');
-
--- -----------------------------------Usuarios de sistema-----------------------------------
-INSERT INTO usuarios(nombre, apellido, email, password, rol_id, activo) VALUES
-('Admin', 'admin', 'admin@proyecto.com', '$2y$10$GKsD.e.cZoSYxMDBbMBHFOgo.Y30c/q2EZ2dIsawRMwe/JVp5NrJy', 1, 1),
-('Mesero', 'mesero', 'mesero@proyecto.com', '$2y$10$SoHgtdyHv03k8vJGiG8bAe/y58gdq0Jok0F4ODrULH4ZCRdv87UJe', 2, 1),
-('Cocina', 'cocina', 'cocina@proyecto.com', '$2y$10$5mBtWhzM51hYAcjUFNPC6.am2VvqLeu4h78Q3iJJIY.NRyiVTmo1G', 3, 1),
-('Barista', 'barista', 'barista@lacomanda.com', '$2y$10$esYITJaGc.AvG18WlMi8ROwwiB/64QRH8ieUl9.wlgYNdnYX1OtLC', 4, 1),
-('Carlos', 'Ramírez', 'carlos.ramirez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2, 1),
-('Ana', 'Gómez', 'ana.gomez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2, 1),
-('Luis', 'Fernández', 'luis.fernandez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2, 1),
-('María', 'Vargas', 'maria.vargas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2, 1),
-('José', 'Soto', 'jose.soto@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2, 1),
-('Pedro', 'Mora', 'pedro.mora@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3, 1),
-('Laura', 'Jiménez', 'laura.jimenez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3, 1),
-('Andrés', 'Rojas', 'andres.rojas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3, 1),
-('Paola', 'Castro', 'paola.castro@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3, 1),
-('Daniel', 'Alvarado', 'daniel.alvarado@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4, 1),
-('Sofía', 'Navarro', 'sofia.navarro@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4, 1),
-('Kevin', 'Chaves', 'kevin.chaves@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4, 1),
-('Valeria', 'Cordero', 'valeria.cordero@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4, 1),
-('Ricardo', 'Pérez', 'ricardo.perez@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2, 1),
-('Natalia', 'Salas', 'natalia.salas@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3, 1),
-('Esteban', 'León', 'esteban.leon@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 4, 1),
-('Mónica', 'Araya', 'monica.araya@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 2, 1),
-('Fernando', 'Solís', 'fernando.solis@lacomanda.com', '$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a', 3, 1);
-
-INSERT INTO mesas(numero, estado) VALUES
-(1,'disponible'), (2,'disponible'), (3,'disponible'), (4,'disponible'),
-(5,'disponible'), (6,'disponible'), (7,'disponible'), (8,'disponible'),
-(9,'disponible'), (10,'disponible'), (11,'disponible'), (12,'disponible');
-
-INSERT INTO categorias(nombre, slug, icono, orden, activo) VALUES
-('Mesas', 'mesas', 'fa-table', 1, 1),
-('Cafés', 'cafes', 'fa-coffee', 2, 1),
-('Comidas', 'comidas', 'fa-hamburger', 3, 1),
-('Especialidades', 'especialidades', 'fa-star', 4, 1),
-('Postres', 'postres', 'fa-cake', 5, 1),
-('Bebidas Frías', 'bebidas', 'fa-glass-water', 6, 1);
-
-INSERT INTO productos (categoria_id, nombre, precio, imagen, activo)
-SELECT c.id, v.nombre, v.precio, v.imagen, 1
-FROM categorias c
-JOIN (
-    -- CAFES / BARISTA
-    SELECT 'cafes' AS slug, 'Espresso' AS nombre, 1800.00 AS precio, NULL AS imagen
-    UNION ALL SELECT 'cafes', 'Capuccino', 2400.00, NULL
-    UNION ALL SELECT 'cafes', 'Latte', 2600.00, NULL
-    UNION ALL SELECT 'cafes', 'Americano', 2000.00, NULL
-    UNION ALL SELECT 'cafes', 'Mocha', 2800.00, NULL
-    UNION ALL SELECT 'cafes', 'Macchiato', 2500.00, NULL
-    UNION ALL SELECT 'cafes', 'Café Negro', 1700.00, NULL
-    UNION ALL SELECT 'cafes', 'Café con Leche', 2200.00, NULL
-    UNION ALL SELECT 'cafes', 'Café Vainilla', 2900.00, NULL
-    UNION ALL SELECT 'cafes', 'Flat White', 2700.00, NULL
-
-    -- COMIDAS / COCINA
-    UNION ALL SELECT 'comidas', 'Sandwich de Pollo', 4200.00, NULL
-    UNION ALL SELECT 'comidas', 'Panini Toscana', 4800.00, NULL
-    UNION ALL SELECT 'comidas', 'Croissant de Jamón y Queso', 3500.00, NULL
-    UNION ALL SELECT 'comidas', 'Wrap de Pavo', 3900.00, NULL
-    UNION ALL SELECT 'comidas', 'Bagel de Salmón', 5200.00, NULL
-    UNION ALL SELECT 'comidas', 'Quiche Lorena', 4100.00, NULL
-    UNION ALL SELECT 'comidas', 'Empanada de Carne', 2200.00, NULL
-    UNION ALL SELECT 'comidas', 'Empanada de Queso', 2100.00, NULL
-    UNION ALL SELECT 'comidas', 'Tostada de Aguacate', 4300.00, NULL
-    UNION ALL SELECT 'comidas', 'Bowl de Yogurt y Frutas', 3600.00, NULL
-
-    -- Especialidades se deja yendo a cocina porque la regla acordada fue:
-    -- solo 'cafes' y 'bebidas' van a barista.
-    -- Si después quieren refinar esto, aquí es uno de los puntos a revisar.
-    -- ESPECIALIDADES / COCINA SEGÚN REGLA ACTUAL
-    UNION ALL SELECT 'especialidades', 'Frappé Caramelo', 3200.00, NULL
-    UNION ALL SELECT 'especialidades', 'Mocaccino Especial', 3500.00, NULL
-    UNION ALL SELECT 'especialidades', 'Chocolate Caliente Premium', 3000.00, NULL
-    UNION ALL SELECT 'especialidades', 'Latte Lavanda', 3400.00, NULL
-    UNION ALL SELECT 'especialidades', 'Café Bombón', 3100.00, NULL
-    UNION ALL SELECT 'especialidades', 'Frappé Mocha', 3300.00, NULL
-    UNION ALL SELECT 'especialidades', 'Matcha Latte', 3600.00, NULL
-    UNION ALL SELECT 'especialidades', 'Golden Milk', 3400.00, NULL
-    UNION ALL SELECT 'especialidades', 'Taro Latte', 3700.00, NULL
-    UNION ALL SELECT 'especialidades', 'Affogato', 3900.00, NULL
-
-    -- POSTRES / COCINA
-    UNION ALL SELECT 'postres', 'Cheesecake', 2800.00, NULL
-    UNION ALL SELECT 'postres', 'Brownie con Helado', 3000.00, NULL
-    UNION ALL SELECT 'postres', 'Tiramisú', 3200.00, NULL
-    UNION ALL SELECT 'postres', 'Croissant de Almendra', 2600.00, NULL
-    UNION ALL SELECT 'postres', 'Galleta de Chispas', 1800.00, NULL
-    UNION ALL SELECT 'postres', 'Queque de Zanahoria', 2700.00, NULL
-    UNION ALL SELECT 'postres', 'Muffin de Arándanos', 2300.00, NULL
-    UNION ALL SELECT 'postres', 'Pie de Limón', 2900.00, NULL
-    UNION ALL SELECT 'postres', 'Tres Leches', 3100.00, NULL
-    UNION ALL SELECT 'postres', 'Roll de Canela', 2500.00, NULL
-
-    -- BEBIDAS / BARISTA
-    UNION ALL SELECT 'bebidas', 'Iced Latte', 2900.00, NULL
-    UNION ALL SELECT 'bebidas', 'Té Frío Durazno', 2500.00, NULL
-    UNION ALL SELECT 'bebidas', 'Limonada Natural', 2200.00, NULL
-    UNION ALL SELECT 'bebidas', 'Limonada con Hierbabuena', 2400.00, NULL
-    UNION ALL SELECT 'bebidas', 'Smoothie de Fresa', 3300.00, NULL
-    UNION ALL SELECT 'bebidas', 'Smoothie de Mango', 3300.00, NULL
-    UNION ALL SELECT 'bebidas', 'Chocolate Frío', 2800.00, NULL
-    UNION ALL SELECT 'bebidas', 'Milkshake Vainilla', 3500.00, NULL
-    UNION ALL SELECT 'bebidas', 'Milkshake Chocolate', 3500.00, NULL
-    UNION ALL SELECT 'bebidas', 'Agua Mineral', 1500.00, NULL
-) v ON v.slug = c.slug;
-
-UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Caf%';
-UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1550881111-7cfde14b8073?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Té%';
-UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1623366302587-bca835848bb5?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Croissant%';
-UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&q=80&w=150&h=150' WHERE nombre LIKE '%Frappé%';
-UPDATE productos SET imagen = 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=150&h=150' WHERE imagen IS NULL OR imagen = '';
