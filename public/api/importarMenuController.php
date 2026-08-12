@@ -15,7 +15,7 @@ try {
         throw new Exception("Error al subir el archivo PDF.");
     }
 
-    $apiKey = getenv('GEMINI_API_KEY');
+    $apiKey = trim(app_env('GEMINI_API_KEY'));
     if (!$apiKey) {
         throw new Exception("La clave de API de Gemini no está configurada en .env");
     }
