@@ -27,7 +27,7 @@ try {
     $prompt .= "Platillos a traducir:\n" . json_encode($productosSinImagen, JSON_UNESCAPED_UNICODE);
 
     // Llamar a la API de Gemini (usaremos gemini-3.5-flash)
-    $geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . trim(app_env('GEMINI_API_KEY'));
+    $geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=" . trim(app_env('GEMINI_API_KEY'));
 
     $requestBody = json_encode([
         "contents" => [
