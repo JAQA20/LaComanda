@@ -31,6 +31,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db/la_comanda.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./db/add_ons_schema.sql:/docker-entrypoint-initdb.d/02-addons.sql:ro
 
 volumes:
   mysql_data:

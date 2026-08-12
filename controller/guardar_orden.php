@@ -46,7 +46,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Se normaliza el payload esperado desde el frontend para insertarlo en el schema nuevo.
 $data["mesa"] = isset($data["mesa"]) ? (string)$data["mesa"] : "0";
-$data["items"] = isset($data["items"]) ? app_normalize_text((string)$data["items"]) : "";
+$data["items"] = isset($data["items"]) && is_array($data["items"]) ? $data["items"] : [];
 $data["notas"] = isset($data["notas"]) ? app_normalize_text((string)$data["notas"]) : "";
 $data["usuario_id"] = $_SESSION["usuario_id"] ?? null;
 
@@ -59,7 +59,7 @@ if ((int)$data["mesa"] <= 0) {
     exit;
 }
 
-if (trim($data["items"]) === '') {
+if (empty($data["items"])) {
     http_response_code(400);
     echo json_encode([
         "status" => "ERROR",

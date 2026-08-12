@@ -312,7 +312,12 @@ function obtenerClaseEstado(string $estado): string
             modalNotas.textContent = String(orden.notas ?? 'Sin notas');
             modalOrdenActualId = orden.id_mostrado;
             
-            const estadoCocina = String(orden.estado_subordenes?.cocina ?? 'no_aplica');
+            const items = Array.isArray(orden.items_detalle) ? orden.items_detalle : [];
+            
+            const tieneCocina = items.some(i => String(i.area).toLowerCase() === 'cocina');
+            const tieneBarista = items.some(i => String(i.area).toLowerCase() === 'barista');
+
+            const estadoCocina = tieneCocina ? String(orden.estado_subordenes?.cocina ?? 'pendiente') : 'no_aplica';
             if (estadoCocina === 'no_aplica') {
                 modalSelectCocina.value = 'no_aplica';
                 modalSelectCocina.disabled = true;
@@ -323,7 +328,7 @@ function obtenerClaseEstado(string $estado): string
                 btnUpdateCocina.disabled = false;
             }
 
-            const estadoBarista = String(orden.estado_subordenes?.barista ?? 'no_aplica');
+            const estadoBarista = tieneBarista ? String(orden.estado_subordenes?.barista ?? 'pendiente') : 'no_aplica';
             if (estadoBarista === 'no_aplica') {
                 modalSelectBarista.value = 'no_aplica';
                 modalSelectBarista.disabled = true;
@@ -333,8 +338,6 @@ function obtenerClaseEstado(string $estado): string
                 modalSelectBarista.disabled = false;
                 btnUpdateBarista.disabled = false;
             }
-
-            const items = Array.isArray(orden.items_detalle) ? orden.items_detalle : [];
             if (items.length === 0) {
                 modalItemsBody.innerHTML = `
                     <tr>
@@ -342,16 +345,30 @@ function obtenerClaseEstado(string $estado): string
                     </tr>
                 `;
             } else {
-                modalItemsBody.innerHTML = items.map(item => `
+                modalItemsBody.innerHTML = items.map(item => {
+                    let opcHtml = '';
+                    if (item.opciones_json && Array.isArray(item.opciones_json) && item.opciones_json.length > 0) {
+                        opcHtml = `<div class="mt-1 text-[11px] text-mintGreen font-medium">` + item.opciones_json.map(o => `+${escapeHtml(o.nombre)}`).join(', ') + `</div>`;
+                    }
+                    let notHtml = '';
+                    if (item.notas_item && item.notas_item.trim() !== '') {
+                        notHtml = `<div class="mt-1 text-[11px] text-yellow-600 italic">Nota: ${escapeHtml(item.notas_item)}</div>`;
+                    }
+                    return `
                     <tr>
-                        <td class="px-5 py-4 font-medium text-brownDark">${escapeHtml(String(item.nombre ?? 'N/A'))}</td>
+                        <td class="px-5 py-4 text-brownDark">
+                            <span class="font-medium">${escapeHtml(String(item.nombre ?? 'N/A'))}</span>
+                            ${opcHtml}
+                            ${notHtml}
+                        </td>
                         <td class="px-5 py-4 text-brownSoft">${escapeHtml(String(item.area ?? 'N/A')).replace('cocina', 'Cocina').replace('barista', 'Barista')}</td>
                         <td class="px-5 py-4 text-brownSoft">${escapeHtml(capitalizarEstado(String(item.estado_item ?? 'pendiente')))}</td>
                         <td class="px-5 py-4 text-brownSoft">${escapeHtml(String(item.cantidad ?? 0))}</td>
                         <td class="px-5 py-4 text-brownSoft">${formatearColones(item.precio_unitario ?? 0)}</td>
                         <td class="px-5 py-4 font-semibold text-mintGreen">${formatearColones(item.subtotal ?? 0)}</td>
                     </tr>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             modalOrden.classList.remove('hidden');

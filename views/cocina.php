@@ -210,12 +210,7 @@ function obtenerPasoOrden($estado)
                             </form>
                         <?php endif; ?>
 
-                        <?php if ((int)($_SESSION['rol_id'] ?? 0) === 1 && ($orden['estado'] ?? '') === 'lista'): ?>
-                            <form action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST">
-                                <input type="hidden" name="numero" value="<?= htmlspecialchars((string)$orden['numero']) ?>">
-                                <button type="submit" class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar como entregada</button>
-                            </form>
-                        <?php endif; ?>
+
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -241,15 +236,7 @@ function obtenerPasoOrden($estado)
                 </div>
                 <div id="modal-notas-section" class="mb-6"></div>
                 <div class="border-t pt-6">
-                    <?php if ((int)($_SESSION['rol_id'] ?? 0) === 1): ?>
-                        <form id="deliver-form" action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST" class="flex gap-3">
-                            <input type="hidden" id="modal-orden-numero-input" name="numero">
-                            <button type="submit" class="flex-1 bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200"><i class="fas fa-check mr-2"></i>Marcar como entregada</button>
-                            <button type="button" id="close-modal-btn-bottom" class="flex-1 bg-gray-300 hover:bg-gray-400 text-brown-dark font-medium py-3 rounded-xl transition-colors duration-200">Cerrar</button>
-                        </form>
-                    <?php else: ?>
                         <button type="button" id="close-modal-btn-bottom" class="w-full bg-gray-300 hover:bg-gray-400 text-brown-dark font-medium py-3 rounded-xl transition-colors duration-200">Cerrar</button>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -311,12 +298,30 @@ function obtenerPasoOrden($estado)
         }
 
         function renderProductos(itemsDetalle) {
-            return (itemsDetalle || []).map(item => `
-                <div class="flex justify-between text-sm">
-                    <span class="text-brown-dark">${escapeHtml(item.nombre)}</span>
-                    <span class="text-brown-dark font-medium">x${escapeHtml(item.cantidad)}</span>
+            return (itemsDetalle || []).map(item => {
+                let opcionesHtml = '';
+                if (item.opciones_json && Array.isArray(item.opciones_json) && item.opciones_json.length > 0) {
+                    opcionesHtml = `<div class="mt-1 text-sm text-mint-green font-medium">` +
+                        item.opciones_json.map(opt => `<div class="flex items-center gap-1"><i class="fa-solid fa-plus text-xs"></i> ${escapeHtml(opt.nombre)}</div>`).join('') +
+                    `</div>`;
+                }
+
+                let notasHtml = '';
+                if (item.notas_item && item.notas_item.trim() !== '') {
+                    notasHtml = `<div class="mt-1 text-sm text-yellow-600 italic">Nota: ${escapeHtml(item.notas_item)}</div>`;
+                }
+
+                return `
+                <div class="flex justify-between text-sm items-start mb-2 border-b border-gray-100 pb-2">
+                    <div class="flex-1">
+                        <span class="text-brown-dark font-medium">${escapeHtml(item.nombre)}</span>
+                        ${opcionesHtml}
+                        ${notasHtml}
+                    </div>
+                    <span class="text-brown-dark font-bold ml-2">x${escapeHtml(item.cantidad)}</span>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function renderNotas(notas) {
@@ -358,7 +363,6 @@ function obtenerPasoOrden($estado)
                         <button class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn" data-orden-numero="${escapeHtml(orden.numero)}"><i class="fas fa-expand"></i>Ver detalles completos</button>
                         ${(rolId === 1 || rolId === 3) && orden.estado === 'pendiente' ? `<form action="<?= BASE_URL ?>public/api/cocinaAccion.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><input type="hidden" name="accion" value="preparacion"><button type="submit" class="w-full bg-brown-dark hover:bg-[#4a2d22] text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar en preparación</button></form>` : ''}
                         ${(rolId === 1 || rolId === 3) && orden.estado === 'en_preparacion' ? `<form action="<?= BASE_URL ?>public/api/cocinaAccion.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><input type="hidden" name="accion" value="lista"><button type="submit" class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar como lista</button></form>` : ''}
-                        ${rolId === 1 && orden.estado === 'lista' ? `<form action="<?= BASE_URL ?>public/api/marcarEntrega.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><button type="submit" class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar como entregada</button></form>` : ''}
                     </div>`;
             }).join('');
         }
@@ -396,9 +400,28 @@ function obtenerPasoOrden($estado)
             const productosList = document.getElementById('modal-productos-list');
             productosList.innerHTML = '';
             (itemsDetalle || []).forEach(item => {
+                let opcionesHtml = '';
+                if (item.opciones_json && Array.isArray(item.opciones_json) && item.opciones_json.length > 0) {
+                    opcionesHtml = `<div class="mt-1 text-sm text-mint-green font-medium">` +
+                        item.opciones_json.map(opt => `<div class="flex items-center gap-1"><i class="fa-solid fa-plus text-xs"></i> ${escapeHtml(opt.nombre)}</div>`).join('') +
+                    `</div>`;
+                }
+                
+                let notasHtml = '';
+                if (item.notas_item && item.notas_item.trim() !== '') {
+                    notasHtml = `<div class="mt-1 text-sm text-yellow-600 italic">Nota: ${escapeHtml(item.notas_item)}</div>`;
+                }
+
                 const itemDiv = document.createElement('div');
-                itemDiv.className = 'flex justify-between items-center py-2 px-3 bg-white rounded border border-beige-light';
-                itemDiv.innerHTML = `<span class="font-medium text-brown-dark">${escapeHtml(item.nombre)}</span><span class="bg-mint-green text-white px-3 py-1 rounded-full font-semibold">x${escapeHtml(item.cantidad)}</span>`;
+                itemDiv.className = 'flex justify-between items-start py-2 px-3 bg-white rounded border border-beige-light mb-2';
+                itemDiv.innerHTML = `
+                    <div class="flex-1">
+                        <span class="font-medium text-brown-dark">${escapeHtml(item.nombre)}</span>
+                        ${opcionesHtml}
+                        ${notasHtml}
+                    </div>
+                    <span class="bg-mint-green text-white px-3 py-1 rounded-full font-semibold ml-2">x${escapeHtml(item.cantidad)}</span>
+                `;
                 productosList.appendChild(itemDiv);
             });
 

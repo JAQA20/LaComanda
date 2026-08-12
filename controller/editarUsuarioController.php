@@ -121,7 +121,21 @@ try {
         $passToUpdate = $password;
     }
 
+    $usuarioAntiguo = Usuarios::obtenerPorId($id);
+    $rolCambiado = $usuarioAntiguo && ((int)$usuarioAntiguo['rol_id'] !== $rol_id);
+    $passwordCambiado = $passToUpdate !== null;
+
     Usuarios::actualizar($id, $nombre, $apellido, $email, $rol_id, $passToUpdate);
+
+    // If the logged in user changes their own role or password, log them out
+    if (isset($_SESSION['usuario_id']) && (int)$_SESSION['usuario_id'] === $id && ($rolCambiado || $passwordCambiado)) {
+        require_once __DIR__ . "/../model/SesionesActivas.php";
+        SesionesActivas::cerrarSesionActual();
+        session_unset();
+        session_destroy();
+        header("Location: " . BASE_URL . "views/login.php?error=relogin");
+        exit;
+    }
 
     header("Location: " . BASE_URL . "views/admin/usuarios.php?updated=1");
     exit;

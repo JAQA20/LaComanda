@@ -33,6 +33,11 @@ try {
     }
 
     $imagenFinal = $productoOriginal['imagen'] ?? null;
+    $eliminar_imagen = isset($_POST["eliminar_imagen"]) ? 1 : 0;
+
+    if ($eliminar_imagen) {
+        $imagenFinal = null;
+    }
     
     // 1. Check if a new file was uploaded
     if (isset($_FILES['imagen_file']) && $_FILES['imagen_file']['error'] === UPLOAD_ERR_OK) {

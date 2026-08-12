@@ -58,3 +58,11 @@ function app_configure_errors(): void
 
     error_reporting(E_ALL);
 }
+
+// Configurar seguridad de sesiones antes de que cualquier session_start() ocurra
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_samesite', 'Lax');
+if (app_is_production() && (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
+    ini_set('session.cookie_secure', 1);
+}

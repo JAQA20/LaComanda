@@ -144,9 +144,9 @@ class Productos
         $conexion = Conexion::conectar();
 
         $categoria_id = (int)$categoria_id;
-        $nombre = trim($nombre);
+        $nombre = trim((string)$nombre);
         $precio = (int)$precio;
-        $imagen = trim($imagen);
+        $imagen = trim((string)$imagen);
         $activo = (int)$activo;
 
         if ($categoria_id <= 0 || $nombre === "" || $precio <= 0) {
@@ -180,9 +180,9 @@ class Productos
 
         $id = (int)$id;
         $categoria_id = (int)$categoria_id;
-        $nombre = trim($nombre);
+        $nombre = trim((string)$nombre);
         $precio = (int)$precio;
-        $imagen = trim($imagen);
+        $imagen = trim((string)$imagen);
         $activo = (int)$activo;
 
         if ($id <= 0) throw new Exception("ID inválido.");

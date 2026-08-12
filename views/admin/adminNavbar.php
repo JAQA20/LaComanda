@@ -22,7 +22,6 @@ $rutaActual = $_SERVER["REQUEST_URI"];
         };
     </script>
 
-    <script defer src="http://192.168.100.236:3000/script.js" data-website-id="c24a5ebc-504e-44ca-9203-da878b980848"></script>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,6 +83,8 @@ $rutaActual = $_SERVER["REQUEST_URI"];
                 Productos
             </a>
 
+
+
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/ordenesAdmin.php', $rutaActual) ?>"
                 href="<?= BASE_URL ?>views/admin/ordenesAdmin.php">
                 Historial de ordenes
@@ -124,7 +125,21 @@ $rutaActual = $_SERVER["REQUEST_URI"];
         </div>
     </nav>
     <script src="<?= BASE_URL ?>public/js/session-sync.js"></script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Solo seleccionar los divs de alerta que tienen padding p-4
+            const alerts = document.querySelectorAll('div.bg-emerald-50.p-4, div.bg-red-50.p-4');
+            if (alerts.length > 0) {
+                setTimeout(() => {
+                    alerts.forEach(alert => {
+                        alert.style.transition = 'opacity 0.5s ease-out';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.remove(), 500);
+                    });
+                }, 3500);
+            }
+        });
+    </script>
 </body>
 
 </html>

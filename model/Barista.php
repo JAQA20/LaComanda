@@ -31,6 +31,8 @@ class Barista
                 d.fecha_inicio_preparacion,
                 d.fecha_lista,
                 d.fecha_entrega AS detalle_fecha_entrega,
+                d.opciones_json,
+                d.observaciones AS notas_item,
                 p.nombre AS producto_nombre,
                 c.slug AS categoria_slug
             FROM ordenes o
@@ -38,7 +40,7 @@ class Barista
             INNER JOIN detalle_orden d ON d.id_orden = o.id_orden
             INNER JOIN productos p ON p.id = d.id_producto
             INNER JOIN categorias c ON c.id = p.categoria_id
-            WHERE c.slug IN ('cafes', 'bebidas')
+            WHERE c.slug IN ('cafes', 'bebidas', 'especialidades')
             ORDER BY o.fecha_creacion DESC, d.id_detalle ASC
         ";
     }
@@ -73,6 +75,8 @@ class Barista
                 'nombre' => (string)$row['producto_nombre'],
                 'cantidad' => (int)$row['cantidad'],
                 'estado_item' => (string)$row['estado_item'],
+                'opciones_json' => !empty($row['opciones_json']) ? json_decode((string)$row['opciones_json'], true) : [],
+                'notas_item' => (string)($row['notas_item'] ?? ''),
             ];
             $ordenes[$idOrden]['estados'][] = (string)$row['estado_item'];
         }
@@ -151,7 +155,7 @@ class Barista
                  SET d.estado_item = 'en_preparacion',
                      d.fecha_inicio_preparacion = COALESCE(d.fecha_inicio_preparacion, ?)
                  WHERE o.numero_orden = ?
-                   AND c.slug IN ('cafes', 'bebidas')
+                   AND c.slug IN ('cafes', 'bebidas', 'especialidades')
                    AND d.estado_item = 'pendiente'"
             );
             $stmt->bind_param('si', $fechaAhora, $numeroOrden);
@@ -179,7 +183,7 @@ class Barista
                      d.fecha_lista = ?,
                      d.fecha_inicio_preparacion = COALESCE(d.fecha_inicio_preparacion, ?)
                  WHERE o.numero_orden = ?
-                   AND c.slug IN ('cafes', 'bebidas')
+                   AND c.slug IN ('cafes', 'bebidas', 'especialidades')
                    AND d.estado_item IN ('pendiente', 'en_preparacion')"
             );
             $stmt->bind_param('ssi', $fechaAhora, $fechaAhora, $numeroOrden);

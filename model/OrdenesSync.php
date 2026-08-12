@@ -119,12 +119,10 @@ class OrdenesSync
             $mesaId = self::resolverMesaId($conexion, $mesaNumero);
             $numeroOrden = self::siguienteNumeroOrden($conexion);
             $fechaCreacion = date('Y-m-d H:i:s');
-            $usuarioId = isset($orden['usuario_id']) ? (int)$orden['usuario_id'] : null;
             $notas = self::normalizarTexto((string)($orden['notas'] ?? ''));
-            $itemsTexto = self::normalizarTexto((string)($orden['items'] ?? ''));
-            $items = self::parsearItems($itemsTexto);
+            $items = $orden['items'] ?? [];
 
-            if (count($items) === 0) {
+            if (!is_array($items) || count($items) === 0) {
                 throw new RuntimeException('La orden no contiene productos válidos.');
             }
 
@@ -133,27 +131,43 @@ class OrdenesSync
             $total = 0.0;
 
             foreach ($items as $item) {
-                $key = mb_strtolower($item['nombre'], 'UTF-8');
+                $nombreItem = $item['nombre'] ?? '';
+                $key = mb_strtolower($nombreItem, 'UTF-8');
+                
                 if (!isset($mapa[$key])) {
-                    $key = self::claveProducto($item['nombre']);
+                    $key = self::claveProducto($nombreItem);
                 }
 
                 if (!isset($mapa[$key])) {
-                    throw new RuntimeException('Producto no encontrado en catálogo: ' . $item['nombre']);
+                    throw new RuntimeException('Producto no encontrado en catálogo: ' . $nombreItem);
                 }
 
                 $producto = $mapa[$key];
-                $cantidad = (int)$item['cantidad'];
-                $precio = (float)$producto['precio'];
+                $cantidad = (int)($item['cantidad'] ?? 1);
+                
+                // Si el item ya viene con su precio (incluye extras), usarlo. Si no, usar precio base.
+                $precio = isset($item['precio']) ? (float)$item['precio'] : (float)$producto['precio'];
+                
                 $subtotal = $cantidad * $precio;
                 $total += $subtotal;
+                
+                // Obtener opciones_json y notas
+                $opciones_json = !empty($item['opciones_json']) ? json_encode($item['opciones_json'], JSON_UNESCAPED_UNICODE) : null;
+                $notas_item = '';
+                if (!empty($item['notas']) && is_array($item['notas'])) {
+                    $notas_item = implode(' | ', array_filter($item['notas']));
+                }
 
                 $detalles[] = [
-                    'id_producto' => (int)$producto['id'],
+                    'id_producto' => $producto['id'],
                     'cantidad' => $cantidad,
                     'precio' => $precio,
+                    'opciones_json' => $opciones_json,
+                    'notas_item' => $notas_item
                 ];
             }
+
+            $usuarioId = isset($orden['usuario_id']) ? (int)$orden['usuario_id'] : null;
 
             $stmtOrden = $conexion->prepare(
                 "INSERT INTO ordenes (numero_orden, mesa_id, id_usuario, notas, total, fecha_creacion)
@@ -176,15 +190,18 @@ class OrdenesSync
             }
 
             $stmtDetalle = $conexion->prepare(
-                "INSERT INTO detalle_orden (id_orden, id_producto, cantidad, precio_unitario, estado_item)
-                 VALUES (?, ?, ?, ?, 'pendiente')"
+                "INSERT INTO detalle_orden (id_orden, id_producto, cantidad, precio_unitario, opciones_json, observaciones, estado_item)
+                 VALUES (?, ?, ?, ?, ?, ?, 'pendiente')"
             );
 
             foreach ($detalles as $detalle) {
                 $idProducto = (int)$detalle['id_producto'];
                 $cantidad = (int)$detalle['cantidad'];
                 $precio = (float)$detalle['precio'];
-                $stmtDetalle->bind_param("iiid", $idOrden, $idProducto, $cantidad, $precio);
+                $opcJson = $detalle['opciones_json'];
+                $notasItem = $detalle['notas_item'];
+                
+                $stmtDetalle->bind_param("iiidss", $idOrden, $idProducto, $cantidad, $precio, $opcJson, $notasItem);
                 $stmtDetalle->execute();
             }
 
@@ -216,6 +233,8 @@ class OrdenesSync
                 d.id_detalle,
                 d.cantidad,
                 d.estado_item,
+                d.opciones_json,
+                d.observaciones AS notas_item,
                 p.nombre AS producto_nombre,
                 c.slug AS categoria_slug
             FROM ordenes o
@@ -223,7 +242,7 @@ class OrdenesSync
             INNER JOIN detalle_orden d ON d.id_orden = o.id_orden
             INNER JOIN productos p ON p.id = d.id_producto
             INNER JOIN categorias c ON c.id = p.categoria_id
-            WHERE c.slug NOT IN ('cafes', 'bebidas', 'mesas')
+            WHERE c.slug NOT IN ('cafes', 'bebidas', 'especialidades', 'mesas')
             ORDER BY o.fecha_creacion DESC, d.id_detalle ASC
         ";
 
@@ -249,6 +268,8 @@ class OrdenesSync
                 'nombre' => (string)$row['producto_nombre'],
                 'cantidad' => (int)$row['cantidad'],
                 'estado_item' => (string)$row['estado_item'],
+                'opciones_json' => !empty($row['opciones_json']) ? json_decode((string)$row['opciones_json'], true) : [],
+                'notas_item' => (string)($row['notas_item'] ?? ''),
             ];
             $ordenes[$idOrden]['estados'][] = (string)$row['estado_item'];
         }
@@ -308,7 +329,7 @@ class OrdenesSync
                  SET d.estado_item = 'en_preparacion',
                      d.fecha_inicio_preparacion = COALESCE(d.fecha_inicio_preparacion, ?)
                  WHERE o.numero_orden = ?
-                   AND c.slug NOT IN ('cafes', 'bebidas', 'mesas')
+                   AND c.slug NOT IN ('cafes', 'bebidas', 'especialidades', 'mesas')
                    AND d.estado_item = 'pendiente'"
             );
             $stmt->bind_param("si", $fechaAhora, $numeroOrden);
@@ -336,7 +357,7 @@ class OrdenesSync
                      d.fecha_lista = ?,
                      d.fecha_inicio_preparacion = COALESCE(d.fecha_inicio_preparacion, ?)
                  WHERE o.numero_orden = ?
-                   AND c.slug NOT IN ('cafes', 'bebidas', 'mesas')
+                   AND c.slug NOT IN ('cafes', 'bebidas', 'especialidades', 'mesas')
                    AND d.estado_item IN ('pendiente', 'en_preparacion')"
             );
             $stmt->bind_param("ssi", $fechaAhora, $fechaAhora, $numeroOrden);
@@ -444,7 +465,7 @@ class OrdenesSync
                 ];
             }
 
-            $area = in_array((string)$row['categoria_slug'], ['cafes', 'bebidas'], true) ? 'barista' : 'cocina';
+            $area = in_array((string)$row['categoria_slug'], ['cafes', 'bebidas', 'especialidades'], true) ? 'barista' : 'cocina';
             $ordenes[$idOrden][$area][] = (string)$row['estado_item'];
         }
 
@@ -515,8 +536,8 @@ class OrdenesSync
             $mesaId = (int)$row['mesa_id'];
             $fechaAhora = date('Y-m-d H:i:s');
             $filtroArea = $area === 'barista'
-                ? "c.slug IN ('cafes', 'bebidas')"
-                : "c.slug NOT IN ('cafes', 'bebidas', 'mesas')";
+                ? "c.slug IN ('cafes', 'bebidas', 'especialidades')"
+                : "c.slug NOT IN ('cafes', 'bebidas', 'especialidades', 'mesas')";
 
             $sqlUpdate = "
                 UPDATE detalle_orden d

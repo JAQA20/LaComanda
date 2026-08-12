@@ -70,6 +70,8 @@ try {
             d.cantidad,
             d.precio_unitario,
             d.estado_item,
+            d.opciones_json,
+            d.observaciones AS notas_item,
             p.nombre AS producto_nombre,
             c.slug AS categoria_slug
         FROM ordenes o
@@ -113,7 +115,7 @@ try {
             $cantidad = (int)($row['cantidad'] ?? 0);
             $precioUnitario = (float)($row['precio_unitario'] ?? 0);
             $categoriaSlug = (string)($row['categoria_slug'] ?? '');
-            $area = in_array($categoriaSlug, ['cafes', 'bebidas'], true) ? 'barista' : 'cocina';
+            $area = in_array($categoriaSlug, ['cafes', 'bebidas', 'especialidades'], true) ? 'barista' : 'cocina';
             $estadoItem = (string)($row['estado_item'] ?? 'pendiente');
 
             $ordenesAgrupadas[$idOrden]['items_detalle'][] = [
@@ -123,6 +125,8 @@ try {
                 'subtotal' => $cantidad * $precioUnitario,
                 'estado_item' => $estadoItem,
                 'area' => $area,
+                'opciones_json' => !empty($row['opciones_json']) ? json_decode((string)$row['opciones_json'], true) : [],
+                'notas_item' => (string)($row['notas_item'] ?? ''),
             ];
             $ordenesAgrupadas[$idOrden]['subordenes'][$area][] = $estadoItem;
             $ordenesAgrupadas[$idOrden]['_estados'][] = $estadoItem;

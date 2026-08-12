@@ -9,6 +9,23 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+DROP TABLE IF EXISTS `categoria_grupos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `categoria_grupos` (
+  `categoria_id` int NOT NULL,
+  `grupo_id` int NOT NULL,
+  PRIMARY KEY (`categoria_id`,`grupo_id`),
+  KEY `grupo_id` (`grupo_id`),
+  CONSTRAINT `categoria_grupos_ibfk_1` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `categoria_grupos_ibfk_2` FOREIGN KEY (`grupo_id`) REFERENCES `grupos_opciones` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `categoria_grupos` WRITE;
+/*!40000 ALTER TABLE `categoria_grupos` DISABLE KEYS */;
+/*!40000 ALTER TABLE `categoria_grupos` ENABLE KEYS */;
+UNLOCK TABLES;
 DROP TABLE IF EXISTS `categorias`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -45,6 +62,7 @@ CREATE TABLE `detalle_orden` (
   `id_producto` int NOT NULL,
   `cantidad` int NOT NULL,
   `precio_unitario` decimal(10,2) NOT NULL,
+  `opciones_json` json DEFAULT NULL,
   `estado_item` enum('pendiente','en_preparacion','listo','entregado') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendiente',
   `fecha_inicio_preparacion` datetime DEFAULT NULL,
   `fecha_lista` datetime DEFAULT NULL,
@@ -64,6 +82,24 @@ CREATE TABLE `detalle_orden` (
 LOCK TABLES `detalle_orden` WRITE;
 /*!40000 ALTER TABLE `detalle_orden` DISABLE KEYS */;
 /*!40000 ALTER TABLE `detalle_orden` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `grupos_opciones`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `grupos_opciones` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `requerido` tinyint(1) NOT NULL DEFAULT '0',
+  `seleccion_multiple` tinyint(1) NOT NULL DEFAULT '0',
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `grupos_opciones` WRITE;
+/*!40000 ALTER TABLE `grupos_opciones` DISABLE KEYS */;
+/*!40000 ALTER TABLE `grupos_opciones` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `layout_configs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -113,6 +149,26 @@ INSERT INTO `mesas` VALUES (10,10,'disponible');
 INSERT INTO `mesas` VALUES (11,11,'disponible');
 INSERT INTO `mesas` VALUES (12,12,'disponible');
 /*!40000 ALTER TABLE `mesas` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `opciones`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `opciones` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `grupo_id` int NOT NULL,
+  `nombre` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `precio_adicional` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `grupo_id` (`grupo_id`),
+  CONSTRAINT `opciones_ibfk_1` FOREIGN KEY (`grupo_id`) REFERENCES `grupos_opciones` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `opciones` WRITE;
+/*!40000 ALTER TABLE `opciones` DISABLE KEYS */;
+/*!40000 ALTER TABLE `opciones` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `ordenes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -167,6 +223,23 @@ INSERT INTO `password_resets` VALUES (2,23,'43058bb8492a2c1125745d77499bd3755db6
 INSERT INTO `password_resets` VALUES (3,23,'ee926abfd0ce05849f88b79a1df78246a5a3fe6f6624020d3e333d97f7c85937','2026-08-11 01:07:42',1,'2026-08-11 00:07:42');
 INSERT INTO `password_resets` VALUES (4,23,'3e05124aeede6b91dba3db13cf401e484afc96c63237ada7ee9bf36ac6ce692a','2026-08-11 01:12:26',0,'2026-08-11 00:12:26');
 /*!40000 ALTER TABLE `password_resets` ENABLE KEYS */;
+UNLOCK TABLES;
+DROP TABLE IF EXISTS `producto_grupos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `producto_grupos` (
+  `producto_id` int NOT NULL,
+  `grupo_id` int NOT NULL,
+  PRIMARY KEY (`producto_id`,`grupo_id`),
+  KEY `grupo_id` (`grupo_id`),
+  CONSTRAINT `producto_grupos_ibfk_1` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `producto_grupos_ibfk_2` FOREIGN KEY (`grupo_id`) REFERENCES `grupos_opciones` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `producto_grupos` WRITE;
+/*!40000 ALTER TABLE `producto_grupos` DISABLE KEYS */;
+/*!40000 ALTER TABLE `producto_grupos` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `productos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

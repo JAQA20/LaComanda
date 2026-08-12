@@ -324,7 +324,17 @@ function obtenerPasoOrden($estado)
                             <div class="flex flex-col items-center min-w-[70px]"><div class="w-8 h-8 rounded-full flex items-center justify-center text-sm ${stepCircleClassJs(pasoActual === 4, false)}">${pasoActual === 4 ? '✓' : '4'}</div><span class="mt-2 text-xs text-center ${stepTextClassJs(pasoActual === 4, false)}">Entregada</span></div>
                         </div></div></div>
                         <div class="mb-4"><h3 class="text-xl font-semibold text-brown-dark">Orden #${escapeHtml(orden.numero)}</h3><p class="text-sm text-brown-dark opacity-70">Mesa ${escapeHtml(orden.mesa)}</p></div>
-                        <div class="products-list mb-6"><h4 class="text-sm font-medium text-brown-dark mb-3">Bebidas:</h4><div class="space-y-2">${(orden.items || []).map(item => `<div class="flex justify-between text-sm"><span class="text-brown-dark">${escapeHtml(item.nombre)}</span><span class="text-brown-dark font-medium">x${escapeHtml(item.cantidad)}</span></div>`).join('')}</div></div>
+                        <div class="products-list mb-6"><h4 class="text-sm font-medium text-brown-dark mb-3">Bebidas:</h4><div class="space-y-2 border-t border-gray-100 pt-2">${(orden.items || []).map(item => {
+                            let opcHtml = '';
+                            if (item.opciones_json && Array.isArray(item.opciones_json) && item.opciones_json.length > 0) {
+                                opcHtml = `<div class="text-sm text-mint-green leading-tight mt-1">` + item.opciones_json.map(o => `+${escapeHtml(o.nombre)}`).join(', ') + `</div>`;
+                            }
+                            let notHtml = '';
+                            if (item.notas_item && item.notas_item.trim() !== '') {
+                                notHtml = `<div class="text-sm text-yellow-600 leading-tight italic mt-1">Nota: ${escapeHtml(item.notas_item)}</div>`;
+                            }
+                            return `<div class="flex justify-between items-start text-sm border-b border-gray-50 pb-1 mb-1"><div class="flex-1"><span class="text-brown-dark">${escapeHtml(item.nombre)}</span>${opcHtml}${notHtml}</div><span class="text-brown-dark font-medium ml-2">x${escapeHtml(item.cantidad)}</span></div>`;
+                        }).join('')}</div></div>
                         ${renderNotas(orden.notas || '')}
                         <button class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn" data-orden-numero="${escapeHtml(orden.numero)}"><i class="fas fa-expand"></i>Ver detalles completos</button>
                         ${orden.estado === 'pendiente' ? `<form action="<?= BASE_URL ?>public/api/baristaAccion.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><input type="hidden" name="accion" value="preparacion"><button type="submit" class="w-full bg-brown-dark hover:bg-[#4a2d22] text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar en preparación</button></form>` : ''}
@@ -363,9 +373,27 @@ function obtenerPasoOrden($estado)
             const productosList = document.getElementById('modal-productos-list');
             productosList.innerHTML = '';
             (itemsDetalle || []).forEach(item => {
+                let opcionesHtml = '';
+                if (item.opciones_json && Array.isArray(item.opciones_json) && item.opciones_json.length > 0) {
+                    opcionesHtml = `<div class="mt-1 text-sm text-mint-green font-medium">` +
+                        item.opciones_json.map(opt => `<div class="flex items-center gap-1"><i class="fa-solid fa-plus text-xs"></i> ${escapeHtml(opt.nombre)}</div>`).join('') +
+                    `</div>`;
+                }
+                let notasHtml = '';
+                if (item.notas_item && item.notas_item.trim() !== '') {
+                    notasHtml = `<div class="mt-1 text-sm text-yellow-600 italic">Nota: ${escapeHtml(item.notas_item)}</div>`;
+                }
+
                 const itemDiv = document.createElement('div');
-                itemDiv.className = 'flex justify-between items-center py-2 px-3 bg-white rounded border border-beige-light';
-                itemDiv.innerHTML = `<span class="font-medium text-brown-dark">${escapeHtml(item.nombre)}</span><span class="bg-brown-dark text-white px-3 py-1 rounded-full font-semibold">x${escapeHtml(item.cantidad)}</span>`;
+                itemDiv.className = 'flex justify-between items-start py-2 px-3 bg-white rounded border border-beige-light mb-2';
+                itemDiv.innerHTML = `
+                    <div class="flex-1">
+                        <span class="font-medium text-brown-dark">${escapeHtml(item.nombre)}</span>
+                        ${opcionesHtml}
+                        ${notasHtml}
+                    </div>
+                    <span class="bg-brown-dark text-white px-3 py-1 rounded-full font-semibold ml-2">x${escapeHtml(item.cantidad)}</span>
+                `;
                 productosList.appendChild(itemDiv);
             });
             const notasSection = document.getElementById('modal-notas-section');

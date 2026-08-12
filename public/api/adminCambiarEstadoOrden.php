@@ -47,9 +47,9 @@ try {
     // Actualizar el estado de los items en detalle_orden que pertenezcan al area correspondiente
     $areaCondition = "";
     if ($area === 'barista') {
-        $areaCondition = "AND c.slug IN ('cafes', 'bebidas')";
+        $areaCondition = "AND c.slug IN ('cafes', 'bebidas', 'especialidades')";
     } elseif ($area === 'cocina') {
-        $areaCondition = "AND c.slug NOT IN ('cafes', 'bebidas')";
+        $areaCondition = "AND c.slug NOT IN ('cafes', 'bebidas', 'especialidades', 'mesas')";
     } else {
         throw new Exception("Área inválida");
     }
