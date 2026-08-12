@@ -42,7 +42,7 @@ try {
     // 1. Check if a new file was uploaded
     if (isset($_FILES['imagen_file']) && $_FILES['imagen_file']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['imagen_file'];
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
         
         if (!in_array($file['type'], $allowedTypes)) {
             throw new Exception("El archivo debe ser una imagen válida (JPG, PNG, WebP).");

@@ -15,4 +15,8 @@ a2dismod mpm_event >/dev/null 2>&1 || true
 a2dismod mpm_worker >/dev/null 2>&1 || true
 a2enmod mpm_prefork >/dev/null 2>&1 || true
 
+# Arreglar permisos de subida de imágenes en servidores de producción (Docker)
+mkdir -p /var/www/html/public/img/productos
+chmod -R 777 /var/www/html/public/img/productos
+
 exec apache2-foreground

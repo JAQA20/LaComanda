@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY . /var/www/html/
 
+# Aumentar límites de subida para imágenes (fotos de celulares modernas son pesadas)
+RUN echo "upload_max_filesize = 20M\npost_max_size = 25M" > /usr/local/etc/php/conf.d/uploads.ini
 # Railway estaba arrancando Apache directo con apache2-foreground, por eso nunca pasaba
 # por railway/start.sh y no se desactivaban los MPM sobrantes. Eso causaba:
 # "AH00534: apache2: Configuration error: More than one MPM loaded."
