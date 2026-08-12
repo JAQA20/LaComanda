@@ -258,15 +258,11 @@ try {
 } catch (Exception $e) {
     $errorMsg = $e->getMessage();
     
-    // Si el error contiene JSON de la API de Gemini (503, etc)
-    if (strpos($errorMsg, '503') !== false || strpos($errorMsg, 'high demand') !== false || strpos($errorMsg, 'UNAVAILABLE') !== false) {
-        $friendlyMsg = "Los servidores de Inteligencia Artificial están temporalmente saturados. Por favor, espera unos minutos e inténtalo de nuevo.";
-    } elseif (strpos($errorMsg, '{') !== false) {
-        $friendlyMsg = "Hubo un error de comunicación con la Inteligencia Artificial. Por favor, inténtalo de nuevo.";
-    } else {
-        $friendlyMsg = $errorMsg;
-    }
-
-    echo json_encode(["success" => false, "message" => $friendlyMsg]);
+    // Devolver el error original para depuración
+    echo json_encode([
+        "success" => false, 
+        "message" => "Error de IA: " . $errorMsg,
+        "raw_error" => $errorMsg
+    ]);
     exit;
 }
