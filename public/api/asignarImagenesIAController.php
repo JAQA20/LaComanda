@@ -93,8 +93,14 @@ try {
     ]);
 
 } catch (Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+    $errorMsg = $e->getMessage();
+    if (strpos($errorMsg, '503') !== false || strpos($errorMsg, 'high demand') !== false) {
+        $friendlyMsg = "Los servidores de IA están saturados. Por favor, intenta de nuevo en unos minutos.";
+    } elseif (strpos($errorMsg, '{') !== false) {
+        $friendlyMsg = "Hubo un error de comunicación con la IA. Por favor, inténtalo de nuevo.";
+    } else {
+        $friendlyMsg = $errorMsg;
+    }
+    echo json_encode(["success" => false, "message" => $friendlyMsg]);
+    exit;
 }
