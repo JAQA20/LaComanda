@@ -147,9 +147,16 @@ $grupos = Modificadores::listarGrupos();
                                                 </div>
                                                 <div>
                                                     <p class="font-bold text-brownDark text-base"><?= htmlspecialchars($c['nombre']) ?></p>
-                                                    <span class="text-[10px] <?= ((int)$c['activo'] === 1) ? 'text-emerald-500' : 'text-gray-400' ?> uppercase font-bold tracking-wider">
-                                                        <?= ((int)$c['activo'] === 1) ? 'Activa' : 'Inactiva' ?>
-                                                    </span>
+                                                    <div class="flex items-center gap-2 mt-1">
+                                                        <span class="text-[10px] <?= ((int)$c['activo'] === 1) ? 'text-emerald-500' : 'text-gray-400' ?> uppercase font-bold tracking-wider">
+                                                            <?= ((int)$c['activo'] === 1) ? 'Activa' : 'Inactiva' ?>
+                                                        </span>
+                                                        <?php if ((int)$c['id'] !== 1): ?>
+                                                        <span class="text-[10px] bg-[#F5EEE5] text-brownDark px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                                                            <?= htmlspecialchars($c['area'] ?? 'cocina') ?>
+                                                        </span>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -165,6 +172,7 @@ $grupos = Modificadores::listarGrupos();
                                                     data-nombre="<?= htmlspecialchars($c['nombre'], ENT_QUOTES, 'UTF-8') ?>"
                                                     data-slug="<?= htmlspecialchars($c['slug'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                                     data-icono="<?= htmlspecialchars($c['icono'] ?? 'fa-tags', ENT_QUOTES, 'UTF-8') ?>"
+                                                    data-area="<?= htmlspecialchars($c['area'] ?? 'cocina', ENT_QUOTES, 'UTF-8') ?>"
                                                     data-orden="<?= (int)($c['orden'] ?? 1) ?>"
                                                     data-activo="<?= (int)$c['activo'] ?>">
                                                     <i class="fa-solid fa-pen text-xs"></i>
@@ -387,6 +395,13 @@ $grupos = Modificadores::listarGrupos();
                             <label class="block text-sm font-bold text-brownDark mb-1">Slug (Opcional)</label>
                             <input type="text" name="slug" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-mintGreen focus:border-transparent transition-all" placeholder="Se genera automáticamente">
                         </div>
+                        <div>
+                            <label class="block text-sm font-bold text-brownDark mb-1">Área de Preparación</label>
+                            <select name="area" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-mintGreen focus:border-transparent transition-all">
+                                <option value="cocina">Cocina</option>
+                                <option value="barista">Barista</option>
+                            </select>
+                        </div>
                         <div class="flex gap-4">
                             <div class="flex-1">
                                 <label class="block text-sm font-bold text-brownDark mb-1">Icono (FontAwesome)</label>
@@ -580,6 +595,13 @@ $grupos = Modificadores::listarGrupos();
                         <div>
                             <label class="block text-sm font-bold text-brownDark mb-1">Slug</label>
                             <input type="text" name="slug" id="editCategoriaSlug" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-mintGreen focus:border-transparent transition-all">
+                        </div>
+                        <div id="divEditCategoriaArea">
+                            <label class="block text-sm font-bold text-brownDark mb-1">Área de Preparación</label>
+                            <select name="area" id="editCategoriaArea" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-mintGreen focus:border-transparent transition-all">
+                                <option value="cocina">Cocina</option>
+                                <option value="barista">Barista</option>
+                            </select>
                         </div>
                         <div class="flex gap-4">
                             <div class="flex-1">

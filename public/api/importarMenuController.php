@@ -114,7 +114,19 @@ try {
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    
+    // Si estamos en entorno local, a veces cURL falla por certificados SSL
+    if (in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1'])) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    }
+
     $response = curl_exec($ch);
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        throw new Exception("Error de cURL (conexión con la IA): " . $error);
+    }
+
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
@@ -261,8 +273,6 @@ try {
     // Si el error contiene JSON de la API de Gemini (503, etc)
     if (strpos($errorMsg, '503') !== false || strpos($errorMsg, 'high demand') !== false || strpos($errorMsg, 'UNAVAILABLE') !== false) {
         $friendlyMsg = "Los servidores de Inteligencia Artificial están temporalmente saturados. Por favor, espera unos minutos e inténtalo de nuevo.";
-    } elseif (strpos($errorMsg, '{') !== false) {
-        $friendlyMsg = "Hubo un error de comunicación con la Inteligencia Artificial. Por favor, inténtalo de nuevo.";
     } else {
         $friendlyMsg = $errorMsg;
     }

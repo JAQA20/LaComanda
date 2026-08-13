@@ -987,13 +987,13 @@ let dragState = null;
                 })
                 .join("\n");
 
-            const notas = ordenActual
-                .flatMap(item => (Array.isArray(item.notas) ? item.notas.map(nota => `${item.nombre}: ${nota}`) : []))
-                .join("\n");
+            // Ya no concatenamos las notas de cada producto en una nota global,
+            // porque cada detalle_orden ya guarda sus propias observaciones.
+            const notas = '';
 
             const data = {
                 mesa: mesaActual,
-                items: listaProductos,
+                items: ordenActual,
                 notas: notas
             };
 

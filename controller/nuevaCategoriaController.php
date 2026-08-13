@@ -17,6 +17,7 @@ try {
         $_POST['nombre'] ?? '',
         $_POST['slug'] ?? '',
         $_POST['icono'] ?? 'fa-tags',
+        $_POST['area'] ?? 'cocina',
         (int)($_POST['orden'] ?? 1),
         isset($_POST['activo']) ? 1 : 0
     );

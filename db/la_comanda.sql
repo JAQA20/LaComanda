@@ -34,6 +34,7 @@ CREATE TABLE `categorias` (
   `nombre` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
   `slug` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `icono` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'fa-tags',
+  `area` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'cocina',
   `orden` int NOT NULL DEFAULT '1',
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `creado_en` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -45,12 +46,12 @@ CREATE TABLE `categorias` (
 
 LOCK TABLES `categorias` WRITE;
 /*!40000 ALTER TABLE `categorias` DISABLE KEYS */;
-INSERT INTO `categorias` VALUES (1,'Mesas','mesas','fa-table',1,1,'2026-08-10 23:33:18');
-INSERT INTO `categorias` VALUES (2,'Cafés','cafes','fa-coffee',2,1,'2026-08-10 23:33:18');
-INSERT INTO `categorias` VALUES (3,'Comidas','comidas','fa-hamburger',3,1,'2026-08-10 23:33:18');
-INSERT INTO `categorias` VALUES (4,'Especialidades','especialidades','fa-star',4,1,'2026-08-10 23:33:18');
-INSERT INTO `categorias` VALUES (5,'Postres','postres','fa-cake',5,1,'2026-08-10 23:33:18');
-INSERT INTO `categorias` VALUES (6,'Bebidas Frías','bebidas','fa-glass-water',6,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (1,'Mesas','mesas','fa-table','cocina',1,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (2,'Cafés','cafes','fa-coffee','barista',2,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (3,'Comidas','comidas','fa-hamburger','cocina',3,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (4,'Especialidades','especialidades','fa-star','barista',4,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (5,'Postres','postres','fa-cake','cocina',5,1,'2026-08-10 23:33:18');
+INSERT INTO `categorias` VALUES (6,'Bebidas Frías','bebidas','fa-glass-water','barista',6,1,'2026-08-10 23:33:18');
 /*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `detalle_orden`;

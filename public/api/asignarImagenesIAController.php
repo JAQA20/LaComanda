@@ -49,7 +49,18 @@ try {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     
+    // Si estamos en entorno local, a veces cURL falla por certificados SSL
+    if (in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1'])) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    }
+    
     $response = curl_exec($ch);
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        throw new Exception("Error de cURL (conexión con la IA): " . $error);
+    }
+
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
@@ -96,8 +107,6 @@ try {
     $errorMsg = $e->getMessage();
     if (strpos($errorMsg, '503') !== false || strpos($errorMsg, 'high demand') !== false) {
         $friendlyMsg = "Los servidores de IA están saturados. Por favor, intenta de nuevo en unos minutos.";
-    } elseif (strpos($errorMsg, '{') !== false) {
-        $friendlyMsg = "Hubo un error de comunicación con la IA. Por favor, inténtalo de nuevo.";
     } else {
         $friendlyMsg = $errorMsg;
     }

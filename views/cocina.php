@@ -179,18 +179,6 @@ function obtenerPasoOrden($estado)
                             </div>
                         </div>
 
-                        <?php $tieneNotas = !empty(trim((string)($orden['notas'] ?? ''))); ?>
-                        <div class="notes-section mb-6 p-3 rounded-lg <?= $tieneNotas ? 'bg-yellow-50 border border-yellow-200' : 'bg-red-50 border border-red-200' ?>">
-                            <div class="flex items-start">
-                                <?php if ($tieneNotas): ?>
-                                    <i class="fas fa-sticky-note text-yellow-600 mt-1 mr-2 flex-shrink-0"></i>
-                                    <div class="flex-1"><h5 class="text-sm font-semibold text-yellow-900">Notas especiales:</h5><p class="text-sm text-yellow-800 mt-1"><?= htmlspecialchars((string)$orden['notas']) ?></p></div>
-                                <?php else: ?>
-                                    <i class="fas fa-exclamation-triangle text-red-600 mt-1 mr-2 flex-shrink-0"></i>
-                                    <div class="flex-1"><h5 class="text-sm font-semibold text-red-900">⚠ Sin notas especiales</h5><p class="text-sm text-red-800 mt-1">Verificar con el cliente si hay requerimientos especiales</p></div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
 
                         <button class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn" data-orden-numero="<?= htmlspecialchars((string)$orden['numero']) ?>"><i class="fas fa-expand"></i>Ver detalles completos</button>
 
@@ -234,7 +222,7 @@ function obtenerPasoOrden($estado)
                     <h3 class="text-xl font-semibold text-brown-dark mb-4 flex items-center"><i class="fas fa-list mr-2"></i>Productos a preparar</h3>
                     <div id="modal-productos-list" class="space-y-3 bg-beige-light p-4 rounded-xl"></div>
                 </div>
-                <div id="modal-notas-section" class="mb-6"></div>
+
                 <div class="border-t pt-6">
                         <button type="button" id="close-modal-btn-bottom" class="w-full bg-gray-300 hover:bg-gray-400 text-brown-dark font-medium py-3 rounded-xl transition-colors duration-200">Cerrar</button>
                 </div>
@@ -324,13 +312,7 @@ function obtenerPasoOrden($estado)
             }).join('');
         }
 
-        function renderNotas(notas) {
-            const tieneNotas = notas && notas.trim() !== '';
-            if (tieneNotas) {
-                return `<div class="notes-section mb-6 p-3 rounded-lg bg-yellow-50 border border-yellow-200"><div class="flex items-start"><i class="fas fa-sticky-note text-yellow-600 mt-1 mr-2 flex-shrink-0"></i><div class="flex-1"><h5 class="text-sm font-semibold text-yellow-900">Notas especiales:</h5><p class="text-sm text-yellow-800 mt-1">${escapeHtml(notas)}</p></div></div></div>`;
-            }
-            return `<div class="notes-section mb-6 p-3 rounded-lg bg-red-50 border border-red-200"><div class="flex items-start"><i class="fas fa-exclamation-triangle text-red-600 mt-1 mr-2 flex-shrink-0"></i><div class="flex-1"><h5 class="text-sm font-semibold text-red-900">⚠ Sin notas especiales</h5><p class="text-sm text-red-800 mt-1">Verificar con el cliente si hay requerimientos especiales</p></div></div></div>`;
-        }
+
 
         function renderPendingOrders(ordenes) {
             const grid = document.getElementById('pending-orders-grid');
@@ -359,7 +341,6 @@ function obtenerPasoOrden($estado)
                         </div></div></div>
                         <div class="mb-4"><h3 class="text-xl font-semibold text-brown-dark">Orden #${escapeHtml(orden.numero)}</h3><p class="text-sm text-brown-dark opacity-70">Mesa ${escapeHtml(orden.mesa)}</p></div>
                         <div class="products-list mb-6"><h4 class="text-sm font-medium text-brown-dark mb-3">Productos:</h4><div class="space-y-2">${renderProductos(orden.items_detalle || [])}</div></div>
-                        ${renderNotas(orden.notas || '')}
                         <button class="w-full mb-3 bg-brown-dark hover:bg-opacity-90 text-white font-medium py-2 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 expand-order-btn" data-orden-numero="${escapeHtml(orden.numero)}"><i class="fas fa-expand"></i>Ver detalles completos</button>
                         ${(rolId === 1 || rolId === 3) && orden.estado === 'pendiente' ? `<form action="<?= BASE_URL ?>public/api/cocinaAccion.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><input type="hidden" name="accion" value="preparacion"><button type="submit" class="w-full bg-brown-dark hover:bg-[#4a2d22] text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar en preparación</button></form>` : ''}
                         ${(rolId === 1 || rolId === 3) && orden.estado === 'en_preparacion' ? `<form action="<?= BASE_URL ?>public/api/cocinaAccion.php" method="POST"><input type="hidden" name="numero" value="${escapeHtml(orden.numero)}"><input type="hidden" name="accion" value="lista"><button type="submit" class="w-full bg-mint-green hover:bg-mint-hover text-white font-medium py-3 rounded-xl transition-colors duration-200">Marcar como lista</button></form>` : ''}
@@ -425,10 +406,6 @@ function obtenerPasoOrden($estado)
                 productosList.appendChild(itemDiv);
             });
 
-            const notasSection = document.getElementById('modal-notas-section');
-            notasSection.innerHTML = notas && notas.trim() !== ''
-                ? `<div class="p-4 rounded-xl bg-yellow-50 border border-yellow-200"><h3 class="text-lg font-semibold text-yellow-900 mb-2 flex items-center"><i class="fas fa-sticky-note mr-2"></i>Notas especiales</h3><p class="text-yellow-800 whitespace-pre-wrap">${escapeHtml(notas)}</p></div>`
-                : `<div class="p-4 rounded-xl bg-orange-50 border border-orange-200"><h3 class="text-lg font-semibold text-orange-900 mb-2 flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i>⚠ Advertencia - Sin notas especiales</h3><p class="text-orange-800">Verificar con el cliente si hay requerimientos especiales antes de preparar</p></div>`;
             modal.classList.remove('hidden');
         }
 

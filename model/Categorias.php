@@ -25,7 +25,7 @@ class Categorias
     public static function listarActivas()
     {
         $cn = Conexion::conectar();
-        $sql = "SELECT id, nombre, slug, icono, orden, activo
+        $sql = "SELECT id, nombre, slug, icono, area, orden, activo
             FROM categorias
             WHERE activo = 1
             ORDER BY orden ASC, nombre ASC";
@@ -42,11 +42,11 @@ class Categorias
     {
         $cn = Conexion::conectar();
         $sql = "
-            SELECT c.id, c.nombre, c.slug, c.icono, c.orden, c.activo,
+            SELECT c.id, c.nombre, c.slug, c.icono, c.area, c.orden, c.activo,
                    COUNT(p.id) AS total_productos
             FROM categorias c
             LEFT JOIN productos p ON p.categoria_id = c.id
-            GROUP BY c.id, c.nombre, c.slug, c.icono, c.orden, c.activo
+            GROUP BY c.id, c.nombre, c.slug, c.icono, c.area, c.orden, c.activo
             ORDER BY c.orden ASC, c.nombre ASC
         ";
         $res = $cn->query($sql);
@@ -61,7 +61,7 @@ class Categorias
     public static function obtenerPorId(int $id)
     {
         $cn = Conexion::conectar();
-        $stmt = $cn->prepare("SELECT id, nombre, slug, icono, orden, activo FROM categorias WHERE id = ? LIMIT 1");
+        $stmt = $cn->prepare("SELECT id, nombre, slug, icono, area, orden, activo FROM categorias WHERE id = ? LIMIT 1");
         if (!$stmt) throw new Exception("Error prepare obtenerPorId: " . $cn->error);
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -76,7 +76,7 @@ class Categorias
     public static function obtenerPorSlug($slug)
     {
         $cn = Conexion::conectar();
-        $sql = "SELECT id, nombre, slug, icono, orden, activo
+        $sql = "SELECT id, nombre, slug, icono, area, orden, activo
             FROM categorias
             WHERE slug = ?
             LIMIT 1";
@@ -125,12 +125,13 @@ class Categorias
         return $res->num_rows > 0;
     }
 
-    public static function crear(string $nombre, string $slug, string $icono, int $orden, int $activo)
+    public static function crear(string $nombre, string $slug, string $icono, string $area, int $orden, int $activo)
     {
         $cn = Conexion::conectar();
         $nombre = app_normalize_text(trim($nombre));
         $slug = trim($slug);
         $icono = trim($icono);
+        $area = trim($area);
         $orden = $orden > 0 ? $orden : 1;
         $activo = $activo === 1 ? 1 : 0;
 
@@ -140,19 +141,20 @@ class Categorias
         if (self::nombreExiste($nombre)) throw new Exception('Ya existe una categoría con ese nombre.');
         if (self::slugExiste($slug)) throw new Exception('Ya existe una categoría con ese slug.');
 
-        $stmt = $cn->prepare("INSERT INTO categorias (nombre, slug, icono, orden, activo) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $cn->prepare("INSERT INTO categorias (nombre, slug, icono, area, orden, activo) VALUES (?, ?, ?, ?, ?, ?)");
         if (!$stmt) throw new Exception("Error prepare crear: " . $cn->error);
-        $stmt->bind_param("sssii", $nombre, $slug, $icono, $orden, $activo);
+        $stmt->bind_param("ssssii", $nombre, $slug, $icono, $area, $orden, $activo);
         if (!$stmt->execute()) throw new Exception("No se pudo crear la categoría: " . $stmt->error);
         return $stmt->insert_id;
     }
 
-    public static function actualizar(int $id, string $nombre, string $slug, string $icono, int $orden, int $activo)
+    public static function actualizar(int $id, string $nombre, string $slug, string $icono, string $area, int $orden, int $activo)
     {
         $cn = Conexion::conectar();
         $nombre = app_normalize_text(trim($nombre));
         $slug = trim($slug);
         $icono = trim($icono);
+        $area = trim($area);
         $orden = $orden > 0 ? $orden : 1;
         $activo = $activo === 1 ? 1 : 0;
 
@@ -163,9 +165,9 @@ class Categorias
         if (self::nombreExiste($nombre, $id)) throw new Exception('Ya existe otra categoría con ese nombre.');
         if (self::slugExiste($slug, $id)) throw new Exception('Ya existe otra categoría con ese slug.');
 
-        $stmt = $cn->prepare("UPDATE categorias SET nombre = ?, slug = ?, icono = ?, orden = ?, activo = ? WHERE id = ? LIMIT 1");
+        $stmt = $cn->prepare("UPDATE categorias SET nombre = ?, slug = ?, icono = ?, area = ?, orden = ?, activo = ? WHERE id = ? LIMIT 1");
         if (!$stmt) throw new Exception("Error prepare actualizar: " . $cn->error);
-        $stmt->bind_param("sssiii", $nombre, $slug, $icono, $orden, $activo, $id);
+        $stmt->bind_param("ssssiii", $nombre, $slug, $icono, $area, $orden, $activo, $id);
         if (!$stmt->execute()) throw new Exception("No se pudo actualizar la categoría: " . $stmt->error);
         return true;
     }
