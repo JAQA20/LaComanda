@@ -42,6 +42,10 @@ try {
             throw new Exception("El archivo debe ser una imagen válida (JPG, PNG, WebP).");
         }
 
+        if ($file['size'] > 20971520) { // 20 MB
+            throw new Exception("La imagen es demasiado grande. El tamaño máximo permitido es 20 MB.");
+        }
+
         $uploadDir = __DIR__ . "/../public/img/productos/";
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);

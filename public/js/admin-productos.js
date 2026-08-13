@@ -17,6 +17,21 @@ $(document).ready(function () {
     });
   }
 
+  // Validar tamaño de archivo (máximo 20 MB) al seleccionar la imagen
+  $(document).on("change", 'input[type="file"]', function () {
+    const file = this.files[0];
+    if (file && file.size > 20 * 1024 * 1024) { // 20 MB en bytes
+      Swal.fire({
+        title: "Archivo demasiado grande",
+        text: "La imagen pesa más de 20 MB. Por favor, selecciona una imagen más pequeña para que el sistema pueda procesarla sin problemas.",
+        icon: "error",
+        confirmButtonText: "Entendido",
+      });
+      // Limpiar el input para evitar que se envíe el formulario
+      this.value = "";
+    }
+  });
+
   $(document).on("submit", ".form-eliminar-producto", function (e) {
     e.preventDefault();
     const form = this;
