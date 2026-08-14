@@ -225,6 +225,9 @@ class Productos
         $stmt->bind_param("i", $id);
 
         if (!$stmt->execute()) {
+            if ($conexion->errno === 1451) {
+                throw new Exception("No puedes eliminar este producto porque ya tiene órdenes asociadas. En su lugar, edítalo y desmarca la casilla 'Activo'.");
+            }
             throw new Exception("No se pudo eliminar el producto: " . $stmt->error);
         }
 
