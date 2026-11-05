@@ -100,6 +100,7 @@ $nombre   = trim($_POST["nombre"] ?? "");
 $apellido = trim($_POST["apellido"] ?? "");
 $email    = trim($_POST["email"] ?? "");
 $rol_id   = (int)($_POST["rol_id"] ?? 0);
+$can_view_logs = isset($_POST["can_view_logs"]) ? (int)$_POST["can_view_logs"] : 0;
 
 $password  = $_POST["password"] ?? "";
 $password2 = $_POST["password2"] ?? "";
@@ -125,7 +126,7 @@ try {
     $rolCambiado = $usuarioAntiguo && ((int)$usuarioAntiguo['rol_id'] !== $rol_id);
     $passwordCambiado = $passToUpdate !== null;
 
-    Usuarios::actualizar($id, $nombre, $apellido, $email, $rol_id, $passToUpdate);
+    Usuarios::actualizar($id, $nombre, $apellido, $email, $rol_id, $passToUpdate, $can_view_logs);
 
     // If the logged in user changes their own role or password, log them out
     if (isset($_SESSION['usuario_id']) && (int)$_SESSION['usuario_id'] === $id && ($rolCambiado || $passwordCambiado)) {

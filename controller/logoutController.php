@@ -3,6 +3,11 @@ session_start();
 require_once __DIR__ . "/../model/SesionesActivas.php";
 require_once __DIR__ . "/../config/rutas.php";
 
+require_once __DIR__ . "/../model/Logs.php";
+if (isset($_SESSION['usuario_id'])) {
+    Logs::addLog("Usuario (ID: {$_SESSION['usuario_id']}) ha cerrado sesión.", 'info', $_SESSION['usuario_id']);
+}
+
 SesionesActivas::cerrarSesionActual();
 session_unset();
 session_destroy();

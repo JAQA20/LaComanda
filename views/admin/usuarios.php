@@ -143,7 +143,8 @@ $roles = Usuarios::listarRoles();
                                             data-nombre="<?= htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8') ?>"
                                             data-apellido="<?= htmlspecialchars($u['apellido'], ENT_QUOTES, 'UTF-8') ?>"
                                             data-email="<?= htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-rol_id="<?= (int)$u['rol_id'] ?>">
+                                            data-rol_id="<?= (int)$u['rol_id'] ?>"
+                                            data-can_view_logs="<?= isset($u['can_view_logs']) ? (int)$u['can_view_logs'] : 0 ?>">
                                             <i class="fa-solid fa-pen text-sm"></i>
                                         </button>
                                         <?php if (!in_array((int)$u["id"], [1, 2, 3, 4])): ?>
@@ -198,12 +199,19 @@ $roles = Usuarios::listarRoles();
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-bold text-brownDark mb-1">Rol</label>
-                                <select name="rol_id" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                                <select name="rol_id" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required onchange="toggleLogsCheck(this.value, 'logs_check_container')">
                                     <option value="">Seleccione un rol</option>
                                     <?php foreach ($roles as $r): ?>
                                         <option value="<?= (int)$r['id'] ?>"><?= htmlspecialchars($r['nombre']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
+                            </div>
+                            <div id="logs_check_container" class="md:col-span-2 mb-4 p-4 bg-red-50 border border-red-100 rounded-xl hidden">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="can_view_logs" name="can_view_logs" value="1" class="form-checkbox h-5 w-5 text-red-600 rounded border-gray-300 focus:ring-red-500">
+                                    <span class="text-gray-700 font-medium">Permitir ver Logs Técnicos</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-8">Atención: Da acceso al registro interno de errores y bases de datos.</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-brownDark mb-1">Contraseña</label>
@@ -253,12 +261,19 @@ $roles = Usuarios::listarRoles();
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-bold text-brownDark mb-1">Rol</label>
-                                <select name="rol_id" id="editUsuarioRol" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required>
+                                <select name="rol_id" id="editUsuarioRol" class="w-full px-4 py-2.5 rounded-xl border border-[#efe7db] bg-[#FCFAF7] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all" required onchange="toggleLogsCheck(this.value, 'logs_check_container_edit')">
                                     <option value="">Seleccione un rol</option>
                                     <?php foreach ($roles as $r): ?>
                                         <option value="<?= (int)$r['id'] ?>"><?= htmlspecialchars($r['nombre']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
+                            </div>
+                            <div id="logs_check_container_edit" class="md:col-span-2 mb-2 p-4 bg-red-50 border border-red-100 rounded-xl hidden">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="edit_can_view_logs" name="can_view_logs" value="1" class="form-checkbox h-5 w-5 text-red-600 rounded border-gray-300 focus:ring-red-500">
+                                    <span class="text-gray-700 font-medium">Permitir ver Logs Técnicos</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-8">Atención: Da acceso al registro interno de errores y bases de datos.</p>
                             </div>
                         </div>
 

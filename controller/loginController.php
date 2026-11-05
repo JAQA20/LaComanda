@@ -15,7 +15,7 @@ if (!empty($_POST["btnlogin"])) {
     }
 
     $stmt = $conexion->prepare("
-        SELECT id, nombre, apellido, email, password, rol_id, activo
+        SELECT id, nombre, apellido, email, password, rol_id, activo, can_view_logs
         FROM usuarios
         WHERE email = ?
         LIMIT 1
@@ -43,7 +43,11 @@ if (!empty($_POST["btnlogin"])) {
             $_SESSION["nombre"] = $user["nombre"];
             $_SESSION["apellido"] = $user["apellido"];
             $_SESSION["email"] = $user["email"];
-            $_SESSION["rol_id"] = (int)$user["rol_id"];
+            $_SESSION["rol_id"] = $user["id"] == 1 ? 1 : (int)$user["rol_id"];
+            $_SESSION["can_view_logs"] = (int)($user["can_view_logs"] ?? 0);
+
+            require_once __DIR__ . "/../model/Logs.php";
+            Logs::addLog("Usuario (ID: {$user['id']}) ha iniciado sesión.", 'info', $user['id']);
 
             SesionesActivas::registrar($user);
 
@@ -70,9 +74,16 @@ if (!empty($_POST["btnlogin"])) {
                     header("Location: " . BASE_URL . "views/login.php?error=rol");
                     exit;
             }
+        } else {
+            require_once __DIR__ . "/../model/Logs.php";
+            Logs::addLog("Intento de inicio de sesión fallido para el email: $email (Contraseña incorrecta).", 'error', $user['id']);
+            header("Location: " . BASE_URL . "views/login.php?error=credenciales");
+            exit;
         }
+    } else {
+        require_once __DIR__ . "/../model/Logs.php";
+        Logs::addLog("Intento de inicio de sesión fallido para el email: $email (Email no encontrado).", 'error', null);
+        header("Location: " . BASE_URL . "views/login.php?error=credenciales");
+        exit;
     }
-
-    header("Location: " . BASE_URL . "views/login.php?error=credenciales");
-    exit;
 }

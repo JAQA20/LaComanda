@@ -211,6 +211,11 @@ class OrdenesSync
             $stmtMesa->execute();
 
             $conexion->commit();
+            
+            require_once __DIR__ . "/Logs.php";
+            $currentUserId = $_SESSION['usuario_id'] ?? $usuarioId ?? null;
+            Logs::addLog("Orden #$numeroOrden creada exitosamente para la mesa #$mesaNumero.", 'success', $currentUserId);
+            
             return $numeroOrden;
         } catch (Throwable $e) {
             $conexion->rollback();
@@ -574,6 +579,14 @@ class OrdenesSync
                 $stmtMesa = $conexion->prepare("UPDATE mesas SET estado = 'disponible' WHERE id = ?");
                 $stmtMesa->bind_param("i", $mesaId);
                 $stmtMesa->execute();
+                
+                require_once __DIR__ . "/Logs.php";
+                $currentUserId = $_SESSION['usuario_id'] ?? $usuarioId ?? null;
+                Logs::addLog("Orden de mesa $mesaNumero ($area) marcada como completamente entregada.", 'success', $currentUserId);
+            } else {
+                require_once __DIR__ . "/Logs.php";
+                $currentUserId = $_SESSION['usuario_id'] ?? $usuarioId ?? null;
+                Logs::addLog("Orden de mesa $mesaNumero: suborden $area entregada parcialmente.", 'success', $currentUserId);
             }
 
             $conexion->commit();

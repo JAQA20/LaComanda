@@ -341,6 +341,7 @@ CREATE TABLE `usuarios` (
   `apellido` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `can_view_logs` tinyint(1) NOT NULL DEFAULT '0',
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rol_id` int NOT NULL,
   `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -353,29 +354,18 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'Admin','admin','admin@proyecto.com',1,'$2y$10$GKsD.e.cZoSYxMDBbMBHFOgo.Y30c/q2EZ2dIsawRMwe/JVp5NrJy',1,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (2,'Mesero','mesero','mesero@proyecto.com',1,'$2y$10$SoHgtdyHv03k8vJGiG8bAe/y58gdq0Jok0F4ODrULH4ZCRdv87UJe',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (3,'Cocina','cocina','cocina@proyecto.com',1,'$2y$10$5mBtWhzM51hYAcjUFNPC6.am2VvqLeu4h78Q3iJJIY.NRyiVTmo1G',3,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (4,'Barista','barista','barista@lacomanda.com',1,'$2y$10$esYITJaGc.AvG18WlMi8ROwwiB/64QRH8ieUl9.wlgYNdnYX1OtLC',4,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (5,'Carlos','Ramírez','carlos.ramirez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (6,'Ana','Gómez','ana.gomez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (7,'Luis','Fernández','luis.fernandez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (8,'María','Vargas','maria.vargas@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (9,'José','Soto','jose.soto@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (10,'Pedro','Mora','pedro.mora@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (11,'Laura','Jiménez','laura.jimenez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (12,'Andrés','Rojas','andres.rojas@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (13,'Paola','Castro','paola.castro@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (14,'Daniel','Alvarado','daniel.alvarado@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (15,'Sofía','Navarro','sofia.navarro@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (16,'Kevin','Chaves','kevin.chaves@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (17,'Valeria','Cordero','valeria.cordero@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (18,'Ricardo','Pérez','ricardo.perez@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (19,'Natalia','Salas','natalia.salas@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (20,'Esteban','León','esteban.leon@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (21,'Mónica','Araya','monica.araya@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (22,'Fernando','Solís','fernando.solis@lacomanda.com',1,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
-INSERT INTO `usuarios` VALUES (23,'Javier','Quiros','jaquirs10@gmail.com',1,'$2y$10$cgWVe/yj/4ALg8p7nBSUjesAj9Q2aghNKd6tqTVMuvzLIppB5r8q2',1,'2026-08-10 23:36:57');
+INSERT INTO `usuarios` VALUES (1,'Admin','admin','admin@lacomanda.com',1,1,'$2y$10$GKsD.e.cZoSYxMDBbMBHFOgo.Y30c/q2EZ2dIsawRMwe/JVp5NrJy',1,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (2,'Mesero','mesero','mesero@lacomanda.com',1,0,'$2y$10$SoHgtdyHv03k8vJGiG8bAe/y58gdq0Jok0F4ODrULH4ZCRdv87UJe',2,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (3,'Cocina','cocina','cocina@lacomanda.com',1,0,'$2y$10$5mBtWhzM51hYAcjUFNPC6.am2VvqLeu4h78Q3iJJIY.NRyiVTmo1G',3,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (4,'Barista','barista','barista@lacomanda.com',1,0,'$2y$10$esYITJaGc.AvG18WlMi8ROwwiB/64QRH8ieUl9.wlgYNdnYX1OtLC',4,'2026-08-10 23:33:18');
+INSERT INTO `usuarios` VALUES (5,'Carlos','Ramírez','carlos.ramirez@lacomanda.com',1,0,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO  VALUES (17,'Valeria','Cordero','valeria.cordero@lacomanda.com',1,0,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
+INSERT INTO  VALUES (18,'Ricardo','Pérez','ricardo.perez@lacomanda.com',1,0,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO  VALUES (19,'Natalia','Salas','natalia.salas@lacomanda.com',1,0,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO  VALUES (20,'Esteban','León','esteban.leon@lacomanda.com',1,0,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',4,'2026-08-10 23:33:18');
+INSERT INTO  VALUES (21,'Mónica','Araya','monica.araya@lacomanda.com',1,0,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',2,'2026-08-10 23:33:18');
+INSERT INTO  VALUES (22,'Fernando','Solís','fernando.solis@lacomanda.com',1,0,'$2y$10$8s2g8uK6qH6y0vK6zJ6r0eQ0X9Ckz3VZKk1E3M0YQ1E9J6mZb0F0a',3,'2026-08-10 23:33:18');
+INSERT INTO  VALUES (23,'Javier','Quiros','jaquirs10@gmail.com',1,0,'$2y$10$cgWVe/yj/4ALg8p7nBSUjesAj9Q2aghNKd6tqTVMuvzLIppB5r8q2',1,'2026-08-10 23:36:57');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `vw_detalle_preparacion`;
@@ -426,3 +416,21 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+
+DROP TABLE IF EXISTS ;
+CREATE TABLE  (
+  uid=501(jaqa) gid=20(staff) groups=20(staff),12(everyone),61(localaccounts),79(_appserverusr),80(admin),81(_appserveradm),701(com.apple.sharepoint.group.1),33(_appstore),98(_lpadmin),100(_lpoperator),204(_developer),250(_analyticsusers),395(com.apple.access_ftp),398(com.apple.access_screensharing),399(com.apple.access_ssh),400(com.apple.access_remote_ae),702(com.apple.sharepoint.group.2) int NOT NULL AUTO_INCREMENT,
+   text NOT NULL,
+   int DEFAULT NULL,
+   timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (uid=501(jaqa) gid=20(staff) groups=20(staff),12(everyone),61(localaccounts),79(_appserverusr),80(admin),81(_appserveradm),701(com.apple.sharepoint.group.1),33(_appstore),98(_lpadmin),100(_lpoperator),204(_developer),250(_analyticsusers),395(com.apple.access_ftp),398(com.apple.access_screensharing),399(com.apple.access_ssh),400(com.apple.access_remote_ae),702(com.apple.sharepoint.group.2))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `system_logs`;
+CREATE TABLE `system_logs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `error_message` text NOT NULL,
+  `type` varchar(20) NOT NULL DEFAULT 'error',
+  `user_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

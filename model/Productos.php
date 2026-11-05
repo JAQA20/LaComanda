@@ -171,7 +171,13 @@ class Productos
             throw new Exception("No se pudo crear el producto: " . $stmt->error);
         }
 
-        return $stmt->insert_id;
+        
+        require_once __DIR__ . "/Logs.php";
+        $currentUserId = $_SESSION['usuario_id'] ?? null;
+        $newId = $stmt->insert_id;
+        Logs::addLog("Producto ID $newId creado exitosamente.", 'success', $currentUserId);
+
+        return $newId;
     }
 
     public static function actualizar($id, $categoria_id, $nombre, $precio, $imagen, $activo)
@@ -209,6 +215,10 @@ class Productos
             throw new Exception("No se pudo actualizar el producto: " . $stmt->error);
         }
 
+        require_once __DIR__ . "/Logs.php";
+        $currentUserId = $_SESSION['usuario_id'] ?? null;
+        Logs::addLog("Producto ID $id actualizado exitosamente.", 'success', $currentUserId);
+
         return true;
     }
 
@@ -228,12 +238,21 @@ class Productos
             if ($conexion->errno === 1451) {
                 throw new Exception("No puedes eliminar este producto porque ya tiene órdenes asociadas. En su lugar, edítalo y desmarca la casilla 'Activo'.");
             }
-            throw new Exception("No se pudo eliminar el producto: " . $stmt->error);
+            
+            require_once __DIR__ . "/Logs.php";
+            $userId = $_SESSION['usuario_id'] ?? null;
+            Logs::addLog("Error al eliminar producto ID $id: " . $stmt->error, 'error', $userId);
+            
+            throw new Exception("Ocurrió un error técnico al intentar eliminar el producto. El incidente ha sido registrado.");
         }
 
         if ($stmt->affected_rows === 0) {
             throw new Exception("No se encontró el producto para eliminar.");
         }
+
+        require_once __DIR__ . "/Logs.php";
+        $userId = $_SESSION['usuario_id'] ?? null;
+        Logs::addLog("Producto ID $id eliminado correctamente del sistema.", 'success', $userId);
 
         return true;
     }

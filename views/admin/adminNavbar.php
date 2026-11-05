@@ -88,8 +88,18 @@ $rutaActual = $_SERVER["REQUEST_URI"];
             <a class="text-beige text-decoration-none hover-mint font-medium transition-all duration-200 <?= isActive('/views/admin/ordenesAdmin.php', $rutaActual) ?>"
                 href="<?= BASE_URL ?>views/admin/ordenesAdmin.php">
                 Historial de ordenes
-
             </a>
+
+            <?php 
+            $isMainAdmin = (isset($_SESSION['usuario_id']) && $_SESSION['usuario_id'] == 1);
+            $isAuthorizedAdmin = (isset($_SESSION['rol_id']) && $_SESSION['rol_id'] == 1 && isset($_SESSION['can_view_logs']) && $_SESSION['can_view_logs'] == 1);
+            if ($isMainAdmin || $isAuthorizedAdmin): 
+            ?>
+            <a class="text-red-400 text-decoration-none hover:text-red-300 font-medium transition-all duration-200 <?= isActive('/views/admin/logs.php', $rutaActual) ?>"
+                href="<?= BASE_URL ?>views/admin/logs.php">
+                <i class="fa-solid fa-bug mr-1"></i> Logs
+            </a>
+            <?php endif; ?>
 
             <div class="dropdown">
                 <button class="btn dropdown-toggle hover-mint" type="button" data-bs-toggle="dropdown" aria-expanded="false">

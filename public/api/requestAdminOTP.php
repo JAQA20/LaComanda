@@ -60,14 +60,14 @@ try {
     $message .= "Si no solicitaste este código, ignora este mensaje.\n";
 
     // Obtener la URL base desde la ruta o el env
+    $baseUrl = 'https://lacomanda.qzz.io';
     $appUrl = getenv('APP_URL');
     if (empty($appUrl) || strpos($appUrl, 'localhost') !== false || strpos($appUrl, '127.0.0.1') !== false) {
-        // En localhost Mailtrap no puede descargar la imagen local, usamos un logo genérico
-        $logoUrl = 'https://ui-avatars.com/api/?name=La+Comanda&background=70A38F&color=fff&size=120&font-size=0.33';
+        $domainUrl = $baseUrl;
     } else {
-        $appUrl = rtrim($appUrl, '/');
-        $logoUrl = $appUrl . '/public/img/logotipo1.PNG';
+        $domainUrl = rtrim($appUrl, '/');
     }
+    $logoUrl = $domainUrl . '/public/img/logotipo1.PNG';
 
     $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
     $safeLogoUrl = htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8');

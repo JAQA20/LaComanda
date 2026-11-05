@@ -145,7 +145,13 @@ class Categorias
         if (!$stmt) throw new Exception("Error prepare crear: " . $cn->error);
         $stmt->bind_param("ssssii", $nombre, $slug, $icono, $area, $orden, $activo);
         if (!$stmt->execute()) throw new Exception("No se pudo crear la categoría: " . $stmt->error);
-        return $stmt->insert_id;
+        
+        require_once __DIR__ . "/Logs.php";
+        $currentUserId = $_SESSION['usuario_id'] ?? null;
+        $newId = $stmt->insert_id;
+        Logs::addLog("Categoría ID $newId ($nombre) creada exitosamente.", 'success', $currentUserId);
+        
+        return $newId;
     }
 
     public static function actualizar(int $id, string $nombre, string $slug, string $icono, string $area, int $orden, int $activo)
@@ -169,6 +175,11 @@ class Categorias
         if (!$stmt) throw new Exception("Error prepare actualizar: " . $cn->error);
         $stmt->bind_param("ssssiii", $nombre, $slug, $icono, $area, $orden, $activo, $id);
         if (!$stmt->execute()) throw new Exception("No se pudo actualizar la categoría: " . $stmt->error);
+        
+        require_once __DIR__ . "/Logs.php";
+        $currentUserId = $_SESSION['usuario_id'] ?? null;
+        Logs::addLog("Categoría ID $id actualizada exitosamente.", 'success', $currentUserId);
+        
         return true;
     }
 
@@ -191,6 +202,11 @@ class Categorias
         $stmt->bind_param("i", $id);
         if (!$stmt->execute()) throw new Exception("No se pudo eliminar la categoría: " . $stmt->error);
         if ($stmt->affected_rows === 0) throw new Exception('No se encontró la categoría para eliminar.');
+        
+        require_once __DIR__ . "/Logs.php";
+        $currentUserId = $_SESSION['usuario_id'] ?? null;
+        Logs::addLog("Categoría ID $id eliminada exitosamente.", 'success', $currentUserId);
+        
         return true;
     }
 }

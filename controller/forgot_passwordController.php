@@ -75,21 +75,17 @@ try {
     $stmtInsert->bind_param("is", $uid, $tokenStored);
     $stmtInsert->execute();
 
-    $baseUrl = 'https://lacomanda-cafeteriatoscana.up.railway.app';
+    $baseUrl = 'https://lacomanda.qzz.io';
     
     $appUrl = rtrim((string)app_env('APP_URL', ''), '/');
-    if ($appUrl !== '') {
-        $resetLink = $appUrl . '/views/resetPassword.php?token=' . urlencode($tokenPlain);
+    if ($appUrl !== '' && strpos($appUrl, 'localhost') === false && strpos($appUrl, '127.0.0.1') === false) {
+        $domainUrl = $appUrl;
     } else {
-        $resetLink = $baseUrl . '/views/resetPassword.php?token=' . urlencode($tokenPlain);
+        $domainUrl = $baseUrl;
     }
 
-    if (empty($appUrl) || strpos($appUrl, 'localhost') !== false || strpos($appUrl, '127.0.0.1') !== false) {
-        // En localhost Mailtrap no puede descargar la imagen local, usamos un logo genérico bonito
-        $logoUrl = 'https://ui-avatars.com/api/?name=La+Comanda&background=70A38F&color=fff&size=120&font-size=0.33';
-    } else {
-        $logoUrl = $appUrl . '/public/img/logotipo1.PNG';
-    }
+    $resetLink = $domainUrl . '/views/resetPassword.php?token=' . urlencode($tokenPlain);
+    $logoUrl = $domainUrl . '/public/img/logotipo1.PNG';
 
     $subject = "Recuperar contraseña - La Comanda";
     $name = trim(($usuario['nombre'] ?? 'usuario'));

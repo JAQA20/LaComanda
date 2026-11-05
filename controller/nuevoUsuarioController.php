@@ -28,6 +28,7 @@ $old = [
 
 $password  = $_POST["password"] ?? "";
 $password_confirm = $_POST["password_confirm"] ?? "";
+$can_view_logs = isset($_POST["can_view_logs"]) ? (int)$_POST["can_view_logs"] : 0;
 
 try {
     if ($old["nombre"] === "" || $old["apellido"] === "" || $old["email"] === "" || $old["rol_id"] === "") {
@@ -47,7 +48,8 @@ try {
         $old["apellido"],
         $old["email"],
         $password,
-        (int)$old["rol_id"]
+        (int)$old["rol_id"],
+        $can_view_logs
     );
 
     header("Location: " . BASE_URL . "views/admin/usuarios.php?created=1");

@@ -51,9 +51,23 @@ document.addEventListener("DOMContentLoaded", () => {
     $("#editUsuarioEmail").val(btn.attr("data-email"));
     
     // Set value and remember the original role
-    const rol = btn.attr("data-rol_id");
+    const rol = btn.attr("data-rol_id") || btn.attr("data-rol");
     $("#editUsuarioRol").val(rol).attr("data-original-rol", rol);
     
+    // Check logs permission
+    const canViewLogs = parseInt(btn.attr("data-can_view_logs") || 0);
+    const containerEdit = document.getElementById("logs_check_container_edit");
+    const checkboxEdit = document.getElementById("edit_can_view_logs");
+    if (containerEdit && checkboxEdit) {
+        if (parseInt(rol) === 1) {
+            containerEdit.classList.remove('hidden');
+            checkboxEdit.checked = (canViewLogs === 1);
+        } else {
+            containerEdit.classList.add('hidden');
+            checkboxEdit.checked = false;
+        }
+    }
+
     $("#editUsuarioPassword").val("");
     $("#editUsuarioPassword2").val("");
   });

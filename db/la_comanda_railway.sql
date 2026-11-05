@@ -260,3 +260,21 @@ JOIN (
     UNION ALL SELECT 'bebidas', 'Milkshake Chocolate', 3500.00, 'fa-blender'
     UNION ALL SELECT 'bebidas', 'Agua Mineral', 1500.00, 'fa-bottle-water'
 ) v ON v.slug = c.slug;
+
+DROP TABLE IF EXISTS ;
+CREATE TABLE  (
+  uid=501(jaqa) gid=20(staff) groups=20(staff),12(everyone),61(localaccounts),79(_appserverusr),80(admin),81(_appserveradm),701(com.apple.sharepoint.group.1),33(_appstore),98(_lpadmin),100(_lpoperator),204(_developer),250(_analyticsusers),395(com.apple.access_ftp),398(com.apple.access_screensharing),399(com.apple.access_ssh),400(com.apple.access_remote_ae),702(com.apple.sharepoint.group.2) int NOT NULL AUTO_INCREMENT,
+   text NOT NULL,
+   int DEFAULT NULL,
+   timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (uid=501(jaqa) gid=20(staff) groups=20(staff),12(everyone),61(localaccounts),79(_appserverusr),80(admin),81(_appserveradm),701(com.apple.sharepoint.group.1),33(_appstore),98(_lpadmin),100(_lpoperator),204(_developer),250(_analyticsusers),395(com.apple.access_ftp),398(com.apple.access_screensharing),399(com.apple.access_ssh),400(com.apple.access_remote_ae),702(com.apple.sharepoint.group.2))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `system_logs`;
+CREATE TABLE `system_logs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `error_message` text NOT NULL,
+  `type` varchar(20) NOT NULL DEFAULT 'error',
+  `user_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
