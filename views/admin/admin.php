@@ -291,7 +291,21 @@ verificarRol([1]); // solo Admin
                         },
                         options: {
                             responsive: true,
-                            maintainAspectRatio: false
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0,
+                                        stepSize: 1,
+                                        callback: function(value) {
+                                            if (Number.isInteger(value)) {
+                                                return value;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     });
 
